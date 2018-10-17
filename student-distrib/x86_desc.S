@@ -9,7 +9,7 @@
 .globl ldt_size, tss_size
 .globl gdt_desc, ldt_desc, tss_desc
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
-.globl gdt_ptr
+.globl gdt_ptr, gdt_ld
 .globl idt_desc_ptr, idt
 
 .align 4
@@ -33,6 +33,14 @@ _tss:
     .byte 0
     .endr
 tss_bottom:
+
+
+# ADDED BY ISAAC
+.word 0 # Padding
+gdt_ld: #struct that contains the size and start address for the gdt
+    .word gdt_bottom - gdt - 1  # Size
+    .long gdt #start addr
+    # Refer to typedef struct x86_desc { in x86_desc.h
 
     .align  16
 gdt:
