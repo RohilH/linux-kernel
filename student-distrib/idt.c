@@ -6,19 +6,39 @@
 #include "idt.h"
 
 void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
-  lidt(idt_desc_ptr);
   int x;
-  for (x = 0; x<NUM_VEC; x++) {
-    idt[x].offset_15_00 = 0;
-    idt[x].seg_selector = 0;
+  lidt(idt_desc_ptr);
+  uint32_t address = idt_desc_ptr.addr;
+  for (x = 0; x<0x1F; x++) {
+    idt[x].dpl          = 0;
+    idt[x].present      = 1;
+    idt[x].seg_selector = KERNEL_CS;
+    idt[x].size         = 1;
+
+
+  }
+    //uint16_t highSixteenAddress = (address >> 16) && 0x0000FFFF;
+    //uint16_t lowSixteenAddress = address && 0x0000FFFF;
+    //idt[x].offset_15_00 = lowSixteenAddress;
+
     idt[x].reserved4    = 0;
     idt[x].reserved3    = 0;
     idt[x].reserved2    = 0;
     idt[x].reserved1    = 0;
-    idt[x].size         = 0;
     idt[x].reserved0    = 0;
-    idt[x].dpl          = 0;
-    idt[x].present      = 0;
-    idt[x].offset_31_16 = 0;
-  }
+    //idt[x].offset_31_16 = highSixteenAddress;
+}
+
+
+SET_IDT_ENTRY(idt[0], divideByZero);
+
+// asm
+divideByZero:
+Push registers
+call divideByZeroHandler
+pop registers
+
+void divideByZeroHandler() {
+  cli();
+  printf("Exception Tried to Divide By Zero");
 }
