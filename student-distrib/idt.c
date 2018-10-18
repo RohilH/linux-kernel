@@ -14,117 +14,79 @@ void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
     idt[x].present      = 1;
     idt[x].seg_selector = KERNEL_CS;
     idt[x].size         = 1;
-
-    //uint16_t highSixteenAddress = (address >> 16) && 0x0000FFFF;
-    //uint16_t lowSixteenAddress = address && 0x0000FFFF;
-    //idt[x].offset_15_00 = lowSixteenAddress;
-
     idt[x].reserved4    = 0;
     idt[x].reserved3    = 0;
     idt[x].reserved2    = 0;
     idt[x].reserved1    = 0;
     idt[x].reserved0    = 0;
-    //idt[x].offset_31_16 = highSixteenAddress;
-    SET_IDT_ENTRY(idt[x], interruptHandler); //for the first entry set it's string to divideByZero
+    SET_IDT_ENTRY(idt[x], interruptHandler[x]);
     }
     lidt(idt_desc_ptr); // load this after it has been propagated
 }
-//all but sys call, would have a descriptor privelege level of 0
 
+void DIVISION_ERROR_HANDLER() {
 
+}
+void SINGLE_STEP_INTERRUPT_HANDLER() {
 
+}
+void NMI_HANDLER() {
 
-void printException(int interruptNumber) {
-  switch(interruptNumber) {
-    case DIVISION_ERROR:
-      printf("");
-      break;
+}
+void BREAK_POINT_HANDLER() {
 
-    case SINGLE_STEP_INTERRUPT:
-      printf("");
-      break;
+}
+void OVERFLOW_HANDLER() {
 
-    case NMI:
-      printf("");
-      break;
+}
+void BOUNDS_HANDLER() {
 
-    case BREAK_POINT:
-      printf("");
-      break;
+}
+void INVALID_OPCODE_HANDLER() {
 
-    case OVERFLOW:
-      printf("");
-      break;
+}
+void COPROCESSOR_NOT_AVAILABLE_HANDLER() {
 
-    case BOUNDS:
-      printf("");
-      break;
+}
+void DOUBLE_FAULT_HANDLER() {
 
-    case INVALID_OPCODE:
-      printf("");
-      break;
+}
+void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
 
-    case COPROCESSOR_NOT_AVAILABLE:
-      printf("");
-      break;
+}
+void INVALID_TSS_HANDLER() {
 
-    case DOUBLE_FAULT:
-      printf("");
-      break;
+}
+void SEGMENT_NOT_PRESENT_HANDLER() {
 
-    case COPROCESSOR_SEGMENT_OVERRUN:
-      printf("");
-      break;
+}
+void STACK_FAULT_HANDLER() {
 
-    case INVALID_TSS:
-      printf("");
-      break;
+}
+void GENERAL_PROTECTION_FAULT_HANDLER() {
 
-    case SEGMENT_NOT_PRESENT:
-      printf("");
-      break;
+}
+void PAGE_FAULT_HANDLER() {
 
-    case STACK_FAULT:
-      printf("");
-      break;
+}
+void RESERVED_HANDLER() {
 
-    case GENERAL_PROTECTION_FAULT:
-      printf("");
-      break;
+}
+void MATH_FAULT_HANDLER() {
 
-    case PAGE_FAULT:
-      printf("");
-      break;
+}
+void ALIGNMENT_CHECK_HANDLER() {
 
-    case RESERVED:
-      printf("");
-      break;
+}
+void MACHINE_CHECK_HANDLER() {
 
-    case MATH_FAULT:
-      printf("");
-      break;
+}
+void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
 
-    case ALIGNMENT_CHECK:
-      printf("");
-      break;
+}
+void VIRTUALIZATION_EXCEPTION_HANDLER() {
 
-    case MACHINE_CHECK:
-      printf("");
-      break;
+}
+void CONTROL_PROTECTION_EXCEPTION_HANDLER() {
 
-    case SIMD_FLOATING_POINT_EXCEPTION:
-      printf("");
-      break;
-
-    case VIRTUALIZATION_EXCEPTION:
-      printf("");
-      break;
-
-    case CONTROL_PROTECTION_EXCEPTION:
-      printf("");
-      break;
-
-    default:
-      break;
-  }
 }
