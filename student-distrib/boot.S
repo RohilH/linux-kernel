@@ -28,7 +28,6 @@ continue:
     # ADDED LINE by Isaac
 
     lgdt gdt_desc_ptr
-
     # Explanation: We call this on our struct which
     # we declared in x86_desc.S which contains the size of the GDT and the base address
     # lgdt loads the gdt see https://wiki.osdev.org/LGDT
