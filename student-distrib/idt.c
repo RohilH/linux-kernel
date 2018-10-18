@@ -10,15 +10,15 @@
 void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
   int x;
   for (x = 0; x < 32; x++) {
-    idt[x].dpl          = 0;
     idt[x].present      = 1;
-    idt[x].seg_selector = KERNEL_CS;
-    idt[x].size         = 1;
-    idt[x].reserved4    = 0;
-    idt[x].reserved3    = 0;
-    idt[x].reserved2    = 0;
-    idt[x].reserved1    = 0;
+    idt[x].dpl          = 0;
     idt[x].reserved0    = 0;
+    idt[x].size         = 1;
+    idt[x].reserved1    = 0;
+    idt[x].reserved2    = 0;
+    idt[x].reserved3    = 0;
+    idt[x].reserved4    = 0;
+    idt[x].seg_selector = KERNEL_CS;
     if (x > 21)
       SET_IDT_ENTRY(idt[x], interruptHandler[15]);
     else
