@@ -37,94 +37,94 @@ void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
 void printException(int interruptNumber) {
   switch(interruptNumber) {
     case DIVISION_ERROR:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case SINGLE_STEP_INTERRUPT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case NMI:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case BREAK_POINT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case OVERFLOW:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case BOUNDS:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case INVALID_OPCODE:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case COPROCESSOR_NOT_AVAILABLE:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case DOUBLE_FAULT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case COPROCESSOR_SEGMENT_OVERRUN:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case INVALID_TSS:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case SEGMENT_NOT_PRESENT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case STACK_FAULT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case GENERAL_PROTECTION_FAULT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case PAGE_FAULT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case RESERVED:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case MATH_FAULT:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case ALIGNMENT_CHECK:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case MACHINE_CHECK:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case SIMD_FLOATING_POINT_EXCEPTION:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case VIRTUALIZATION_EXCEPTION:
-    printf("");
-    break;
+      printf("");
+      break;
 
     case CONTROL_PROTECTION_EXCEPTION:
-    printf("");
-    break;
+      printf("");
+      break;
 
     default:
-    break;
+      break;
   }
 }
