@@ -6,9 +6,9 @@
 #include "idt.h"
 
 void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
-  idt_load();
+  lidt(idt_desc_ptr);
   int x;
-  for (int x = 0; x<NUM_VEC; x++) {
+  for (x = 0; x<NUM_VEC; x++) {
     idt[x].offset_15_00 = 0;
     idt[x].seg_selector = 0;
     idt[x].reserved4    = 0;

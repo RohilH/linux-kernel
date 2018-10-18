@@ -16,9 +16,6 @@
 # Entrypoint to the kernel
 .globl start, _start
 
-# load idt
-.globl idt_load
-
 .align 4
 start:
 _start:
@@ -66,7 +63,3 @@ keep_going:
 halt:
     hlt
     jmp     halt
-
-idt_load:
-  lidt idt_desc_ptr
-  ret
