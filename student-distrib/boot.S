@@ -16,6 +16,9 @@
 # Entrypoint to the kernel
 .globl start, _start
 
+# load idt
+.globl idt_load
+
 .align 4
 start:
 _start:
@@ -28,6 +31,7 @@ continue:
     # ADDED LINE by Isaac
 
     lgdt gdt_desc_ptr
+
     # Explanation: We call this on our struct which
     # we declared in x86_desc.S which contains the size of the GDT and the base address
     # lgdt loads the gdt see https://wiki.osdev.org/LGDT
@@ -62,3 +66,7 @@ keep_going:
 halt:
     hlt
     jmp     halt
+
+idt_load:
+  lidt idt_desc_ptr
+  ret
