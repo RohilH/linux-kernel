@@ -30,15 +30,16 @@ void propagateIDTEntry(x86_desc_t idt_desc_ptr) {
 }
 
 
-SET_IDT_ENTRY(idt[0], divideByZero);
+SET_IDT_ENTRY(idt[0], divideByZero); //for the first entry set it's string to divideByZero
 
 // asm
-divideByZero:
-Push registers
-call divideByZeroHandler
-pop registers
+divideByZero: //divideByZero label, this will have the address that's put into the offset
+Push registers //caller save
+call divideByZeroHandler //call the
+pop registers //pop from caller save
 
 void divideByZeroHandler() {
-  cli();
+  cli(); //should we use cli()?
   printf("Exception Tried to Divide By Zero");
+  sti();
 }
