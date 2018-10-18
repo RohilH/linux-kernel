@@ -1,10 +1,9 @@
+/*
 # idtAssembly.S - Save and restore all registers, call appropriate handler
 # vim:ts=4 noexpandtab
 
 #define ASM     1
 #include "idtAssembly.h"
-
-.text
 
 interruptHandler:
   movl %esp, %ebp
@@ -17,3 +16,5 @@ interruptHandler:
   popa
   leave
   ret
+
+  */

@@ -1,3 +1,4 @@
+/*
 #ifndef _IDTASSEMBLY
 #define _IDTASSEMBLY
 
@@ -9,3 +10,5 @@ extern void interruptHandler();
 
 #endif
 #endif
+
+*/
