@@ -6,6 +6,7 @@
 #define _IDT_H
 
 #include "x86_desc.h"
+#include "idtAssembly.h"
 
 #define DIVISION_ERROR 0
 #define SINGLE_STEP_INTERRUPT 1
@@ -30,8 +31,7 @@
 #define VIRTUALIZATION_EXCEPTION 20
 #define CONTROL_PROTECTION_EXCEPTION 21
 
-
 void propagateIDTEntry(x86_desc_t idt_desc_ptr);
-
+extern void printException(int interruptNumber);
 
 #endif /* _IDT_H */
