@@ -9,78 +9,86 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
+/* macro used to write a byte to a port */
+#define OUTB(val, port)                                 \
+do {                                                    \
+    asm volatile("                                    \n\
+        outb %b1, (%w0)                               \n\
+        "                                               \
+        : /* no outputs */                              \
+        : "d"((port)), "a"((val))                       \
+        : "memory", "cc"                                \
+    );                                                  \
+} while (0)
+
+//TAKEN FROM OSDEV
+static inline uint8_t INB(uint16_t port)
+{
+    uint8_t ret;
+    asm volatile ( "inb %1, %0"
+                   : "=a"(ret)
+                   : "Nd"(port) );
+    return ret;
+}
 
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
-  //
-  // unsigned long flags;
-  //
-	// /* initialize the controller */
-	// raw_spin_lock_irqsave(&i8259_lock, flags);
-  //
-	// /* Mask all first */
-	// OUTB(0xff, 0xA1);
-	// OUTB(0xff, 0x21);
+
+  master_mask = MASK_LOW8;
+  slave_mask = MASK_LOW8;
+
+	 OUTB(slave_mask, SLAVE_8259_PORT_DATA);
+	 OUTB(master_mask, MASTER_8259_PORT_DATA);
   //
 	// /* init master interrupt controller */
-	// OUTB(0x11, 0x20); /* Start init sequence */
-	// OUTB(0x00, 0x21); /* Vector base */
-	// OUTB(0x04, 0x21); /* edge triggered, Cascade (slave) on IRQ2 */
-	// OUTB(0x01, 0x21); /* Select 8086 mode */
+	 OUTB(ICW1, MASTER_8259_PORT); /* Start init sequence */
+	 OUTB(ICW2_MASTER, MASTER_8259_PORT_DATA); /* Vector base */
+	 OUTB(ICW3_MASTER, MASTER_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
+	 OUTB(ICW4, MASTER_8259_PORT_DATA); /* Select 8086 mode */
   //
 	// /* init slave interrupt controller */
-	// OUTB(0x11, 0xA0); /* Start init sequence */
-	// OUTB(0x08, 0xA1); /* Vector base */
-	// OUTB(0x02, 0xA1); /* edge triggered, Cascade (slave) on IRQ2 */
-	// OUTB(0x01, 0xA1); /* Select 8086 mode */
-  //
-	// /* That thing is slow */
-	// udelay(100);
-  //
-	// /* always read ISR */
-	// OUTB(0x0B, 0x20);
-	// OUTB(0x0B, 0xA0);
-  //
-	// /* Unmask the internal cascade */
-	// cached_21 &= ~(1 << 2);
-  //
-	// /* Set interrupt masks */
-	// OUTB(cached_A1, 0xA1);
-	// OUTB(cached_21, 0x21);
-  //
-	// raw_spin_unlock_irqrestore(&i8259_lock, flags);
-  //
-	// /* create a legacy host */
-	// i8259_host = irq_domain_add_legacy_isa(node, &i8259_host_ops, NULL);
-	// if (i8259_host == NULL) {
-	// 	printk(KERN_ERR "i8259: failed to allocate irq host !\n");
-	// 	return;
-	// }
-  //
-	// /* reserve our resources */
-	// /* mXXX should we continue doing that ? it seems to cause problems
-	//  * with further requesting of PCI IO resources for that range...
-	//  * need to look into it.
-	//  */
-	// request_resource(&ioport_resource, &pic1_iores);
-	// request_resource(&ioport_resource, &pic2_iores);
-	// request_resource(&ioport_resource, &pic_edgectrl_iores);
-  //
-	// if (intack_addr != 0)
-	// 	pci_intack = ioremap(intack_addr, 1);
-  //
-	// printk(KERN_INFO "i8259 legacy interrupt controller initialized\n");
+	 OUTB(ICW1, SLAVE_8259_PORT); /* Start init sequence */
+	 OUTB(ICW2_SLAVE, SLAVE_8259_PORT_DATA); /* Vector base */
+	 OUTB(ICW3_SLAVE, SLAVE_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
+	 OUTB(ICW4, SLAVE_8259_PORT_DATA); /* Select 8086 mode */
 }
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
+  uint8_t x;
+  if(irq >= 8) {
+    x = INB(SLAVE_8259_PORT_DATA);
+    x = x & ~(0x1 << (irq_num - 8));
+    OUTB(x,MASTER_8259_PORT_DATA);
+  }
+  else {
+    x = INB(MASTER_8259_PORT_DATA);
+    x = x & ~(0x1 << (irq_num));
+    OUTB(x, MASTER_8259_PORT_DATA);
+  }
 }
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
+  uint8_t x;
+  if(irq >= 8) {
+    x = INB(SLAVE_8259_PORT_DATA);
+    x = x | (0x1 << (irq_num - 8));
+    OUTB(x,MASTER_8259_PORT_DATA);
+  }
+  else {
+    x = INB(MASTER_8259_PORT_DATA);
+    x = x | (0x1 << (irq_num));
+    OUTB(x, MASTER_8259_PORT_DATA);
+  }
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
+  if(irq_num >= 8) {
+    uint32_t slaveIrqNum = irq_num - 8;
+    OUTB(EOI | slaveIrqNum, SLAVE_8259_PORT);
+  }
+  OUTB(EOI | irq_num, MASTER_8259_PORT);
 }
