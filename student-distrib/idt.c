@@ -5,9 +5,10 @@
 #include "x86_desc.h"
 #include "idt.h"
 #include "lib.h"
+#include "keyboard.h"
 //extern void //     popAll();
 //extern void //   pushAll();
-static void DIVISION_ERROR_HANDLER();
+
 
 void IDT_Initializer() {
 
@@ -62,10 +63,11 @@ void IDT_Initializer() {
     idt[x].reserved4    = 0;
     idt[x].seg_selector = KERNEL_CS;
   }
+  SET_IDT_ENTRY(idt[33], KEYBOARD_HANDLER);
 }
 
 
-static void DIVISION_ERROR_HANDLER() {
+void DIVISION_ERROR_HANDLER() {
   asm("pusha");
   printf("DIVISION_ERROR Occured\n");
   asm("popa");

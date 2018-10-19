@@ -7,6 +7,7 @@
 
 #include "x86_desc.h"
 
+void DIVISION_ERROR_HANDLER();
 void RESERVED_HANDLER();
 void NMI_HANDLER();
 void BREAK_POINT_HANDLER();
