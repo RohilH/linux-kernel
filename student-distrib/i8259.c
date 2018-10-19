@@ -9,17 +9,6 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-// /* macro used to write a byte to a port */
-// #define OUTB(port, val)                                 \
-// do {                                                    \
-//     asm volatile("                                    \n\
-//         OUTB %b1, (%w0)                               \n\
-//         "                                               \
-//         : /* no outputs */                              \
-//         : "d"((port)), "a"((val))                       \
-//         : "memory", "cc"                                \
-//     );                                                  \
-// } while (0)
 
 
 /* Initialize the 8259 PIC */
@@ -70,7 +59,7 @@ void i8259_init(void) {
 	// }
   //
 	// /* reserve our resources */
-	// /* XXX should we continue doing that ? it seems to cause problems
+	// /* mXXX should we continue doing that ? it seems to cause problems
 	//  * with further requesting of PCI IO resources for that range...
 	//  * need to look into it.
 	//  */
