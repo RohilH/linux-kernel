@@ -6,8 +6,8 @@
 #include "idt.h"
 #include "lib.h"
 
-extern void popAll();
-extern void pushAll();
+//extern void //     popAll();
+//extern void //   pushAll();
 
 void IDT_Initializer() {
 
@@ -66,115 +66,115 @@ void IDT_Initializer() {
 
 
 void DIVISION_ERROR_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("DIVISION_ERROR Occured");
-  popAll();
+  //     popAll();
 }
 
 void RESERVED_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("RESERVED Occured");
-  popAll();
+  //     popAll();
 }
 
 void NMI_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("NMI Occured");
-  popAll();
+  //     popAll();
 }
 
 void BREAK_POINT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("BREAK_POINT Occured");
-  popAll();
+  //     popAll();
 }
 
 void OVERFLOW_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("OVERFLOW Occured");
-  popAll();
+  //     popAll();
 }
 
 void BOUNDS_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("BOUNDS Occured");
-  popAll();
+  //     popAll();
 }
 
 void INVALID_OPCODE_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("INVALID_OPCODE Occured");
-  popAll();
+  //     popAll();
 }
 
 void DEVICE_NOT_AVAILABLE_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("DEVICE_NOT_AVAILABLE Occured");
-  popAll();
+  //     popAll();
 }
 
 void DOUBLE_FAULT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("DOUBLE_FAULT Occured");
-  popAll();
+  //     popAll();
 }
 
 void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("COPROCESSOR_SEGMENT_OVERRUN Occured");
-  popAll();
+  //     popAll();
 }
 
 void INVALID_TSS_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("INVALID_TSS Occured");
-  popAll();
+  //     popAll();
 }
 
 void SEGMENT_NOT_PRESENT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("SEGMENT_NOT_PRESENT Occured");
-  popAll();
+  //     popAll();
 }
 
 void STACK_SEGMENT_FAULT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("STACK_SEGMENT_FAULT Occured");
-  popAll();
+  //     popAll();
 }
 
 void GENERAL_PROTECTION_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("GENERAL_PROTECTION Occured");
-  popAll();
+  //     popAll();
 }
 
 void PAGE_FAULT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("PAGE_FAULT Occured");
-  popAll();
+  //     popAll();
 }
 
 void MATH_FPU_FAULT_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("MATH_FAULT Occured");
-  popAll();
+  //     popAll();
 }
 
 void ALIGNMENT_CHECK_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("ALIGNMENT_CHECK Occured");
-  popAll();
+  //     popAll();
 }
 
 void MACHINE_CHECK_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("MACHINE_CHECK Occured");
-  popAll();
+  //     popAll();
 }
 
 void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
-  pushAll();
+  //   pushAll();
   printf("SIMD_FLOATING_POINT_EXCEPTION Occured");
-  popAll();
+  //     popAll();
 }
