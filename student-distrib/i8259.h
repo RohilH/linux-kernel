@@ -11,8 +11,8 @@
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT      0x20
 #define MASTER_8259_PORT_DATA 0x21
-#define SLAVE_8259_PORT       0x28
-#define SLAVE_8259_PORT_DATA  0x29
+#define SLAVE_8259_PORT       0xA0
+#define SLAVE_8259_PORT_DATA  0xA1
 #define MASK_LOW8             0xFF
 
 /* Initialization control words to init each PIC.
