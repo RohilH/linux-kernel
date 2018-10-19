@@ -1,4 +1,4 @@
-#include "keyboard.h"
+#include "rtc.h"
 #include "i8259.h"
 // #include "x86_desc.h"
 // #include "idt.h"
@@ -30,11 +30,11 @@ static char scanCodeToChar[60] = { ' ', ' ', '1', '2', '3', '4', '5', '6', '7', 
 //
 
 
-void KEYBOARD_INIT() {
-  enable_irq(1);
+void RTC_INIT() {
+  enable_irq(2);
 }
 
-void KEYBOARD_HANDLER() {
+void RTC_HANDLER() {
   asm("pusha");
   uint32_t prevScanCode = 0;
   while(1) {
