@@ -46,8 +46,11 @@ void KEYBOARD_HANDLER() {
       // else
       //   printf("                  ");
     }
+    if (scanCodeToChar[scanCode] == '`')
+      break;
     prevScanCode = scanCode;
   }
+  send_eoi(1);
   asm("popa");
   // disable_irq(1);
 }
