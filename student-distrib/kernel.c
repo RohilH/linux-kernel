@@ -140,7 +140,7 @@ void entry(unsigned long magic, unsigned long addr) {
     IDT_Initializer();
 
     /* Init the PIC */
-  //i8259_init();
+    i8259_init();
 
 
 

@@ -5,9 +5,9 @@
 #include "x86_desc.h"
 #include "idt.h"
 #include "lib.h"
-
 //extern void //     popAll();
 //extern void //   pushAll();
+static void DIVISION_ERROR_HANDLER();
 
 void IDT_Initializer() {
 
@@ -65,116 +65,116 @@ void IDT_Initializer() {
 }
 
 
-void DIVISION_ERROR_HANDLER() {
-  //   pushAll();
-  printf("DIVISION_ERROR Occured");
-  //     popAll();
+static void DIVISION_ERROR_HANDLER() {
+  asm("pusha");
+  printf("DIVISION_ERROR Occured\n");
+  asm("popa");
 }
 
 void RESERVED_HANDLER() {
-  //   pushAll();
-  printf("RESERVED Occured");
-  //     popAll();
+  asm("pusha");
+  printf("RESERVED Occured\n");
+  asm("popa");
 }
 
 void NMI_HANDLER() {
-  //   pushAll();
-  printf("NMI Occured");
-  //     popAll();
+  asm("pusha");
+  printf("NMI Occured\n");
+  asm("popa");
 }
 
 void BREAK_POINT_HANDLER() {
-  //   pushAll();
-  printf("BREAK_POINT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("BREAK_POINT Occured\n");
+  asm("popa");
 }
 
 void OVERFLOW_HANDLER() {
-  //   pushAll();
-  printf("OVERFLOW Occured");
-  //     popAll();
+  asm("pusha");
+  printf("OVERFLOW Occured\n");
+  asm("popa");
 }
 
 void BOUNDS_HANDLER() {
-  //   pushAll();
-  printf("BOUNDS Occured");
-  //     popAll();
+  asm("pusha");
+  printf("BOUNDS Occured\n");
+  asm("popa");
 }
 
 void INVALID_OPCODE_HANDLER() {
-  //   pushAll();
-  printf("INVALID_OPCODE Occured");
-  //     popAll();
+  asm("pusha");
+  printf("INVALID_OPCODE Occured\n");
+  asm("popa");
 }
 
 void DEVICE_NOT_AVAILABLE_HANDLER() {
-  //   pushAll();
-  printf("DEVICE_NOT_AVAILABLE Occured");
-  //     popAll();
+  asm("pusha");
+  printf("DEVICE_NOT_AVAILABLE Occured\n");
+  asm("popa");
 }
 
 void DOUBLE_FAULT_HANDLER() {
-  //   pushAll();
-  printf("DOUBLE_FAULT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("DOUBLE_FAULT Occured\n");
+  asm("popa");
 }
 
 void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
-  //   pushAll();
-  printf("COPROCESSOR_SEGMENT_OVERRUN Occured");
-  //     popAll();
+  asm("pusha");
+  printf("COPROCESSOR_SEGMENT_OVERRUN Occured\n");
+  asm("popa");
 }
 
 void INVALID_TSS_HANDLER() {
-  //   pushAll();
-  printf("INVALID_TSS Occured");
-  //     popAll();
+  asm("pusha");
+  printf("INVALID_TSS Occured\n");
+  asm("popa");
 }
 
 void SEGMENT_NOT_PRESENT_HANDLER() {
-  //   pushAll();
-  printf("SEGMENT_NOT_PRESENT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("SEGMENT_NOT_PRESENT Occured\n");
+  asm("popa");
 }
 
 void STACK_SEGMENT_FAULT_HANDLER() {
-  //   pushAll();
-  printf("STACK_SEGMENT_FAULT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("STACK_SEGMENT_FAULT Occured\n");
+  asm("popa");
 }
 
 void GENERAL_PROTECTION_HANDLER() {
-  //   pushAll();
-  printf("GENERAL_PROTECTION Occured");
-  //     popAll();
+  asm("pusha");
+  printf("GENERAL_PROTECTION Occured\n");
+  asm("popa");
 }
 
 void PAGE_FAULT_HANDLER() {
-  //   pushAll();
-  printf("PAGE_FAULT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("PAGE_FAULT Occured\n");
+  asm("popa");
 }
 
 void MATH_FPU_FAULT_HANDLER() {
-  //   pushAll();
-  printf("MATH_FAULT Occured");
-  //     popAll();
+  asm("pusha");
+  printf("MATH_FAULT Occured\n");
+  asm("popa");
 }
 
 void ALIGNMENT_CHECK_HANDLER() {
-  //   pushAll();
-  printf("ALIGNMENT_CHECK Occured");
-  //     popAll();
+  asm("pusha");
+  printf("ALIGNMENT_CHECK Occured\n");
+  asm("popa");
 }
 
 void MACHINE_CHECK_HANDLER() {
-  //   pushAll();
-  printf("MACHINE_CHECK Occured");
-  //     popAll();
+  asm("pusha");
+  printf("MACHINE_CHECK Occured\n");
+  asm("popa");
 }
 
 void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
-  //   pushAll();
-  printf("SIMD_FLOATING_POINT_EXCEPTION Occured");
-  //     popAll();
+  asm("pusha");
+  printf("SIMD_FLOATING_POINT_EXCEPTION Occured\n");
+  asm("popa");
 }
