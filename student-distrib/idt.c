@@ -6,6 +6,7 @@
 #include "idt.h"
 #include "lib.h"
 #include "keyboard.h"
+#include "rtc.h"
 //extern void //     popAll();
 //extern void //   pushAll();
 
@@ -64,6 +65,8 @@ void IDT_Initializer() {
     idt[x].seg_selector = KERNEL_CS;
   }
   SET_IDT_ENTRY(idt[33], KEYBOARD_HANDLER);
+  SET_IDT_ENTRY(idt[40], RTC_HANDLER);
+
 }
 
 
