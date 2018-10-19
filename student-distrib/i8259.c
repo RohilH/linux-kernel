@@ -52,12 +52,15 @@ void i8259_init(void) {
 	 OUTB(ICW2_SLAVE, SLAVE_8259_PORT_DATA); /* Vector base */
 	 OUTB(ICW3_SLAVE, SLAVE_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
 	 OUTB(ICW4, SLAVE_8259_PORT_DATA); /* Select 8086 mode */
+
+   OUTB(slave_mask, SLAVE_8259_PORT_DATA);
+   OUTB(master_mask, MASTER_8259_PORT_DATA);
 }
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq >= 8) {
+  if(irq_num >= 8) {
     x = INB(SLAVE_8259_PORT_DATA);
     x = x & ~(0x1 << (irq_num - 8));
     OUTB(x,MASTER_8259_PORT_DATA);
@@ -72,7 +75,7 @@ void enable_irq(uint32_t irq_num) {
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq >= 8) {
+  if(irq_num >= 8) {
     x = INB(SLAVE_8259_PORT_DATA);
     x = x | (0x1 << (irq_num - 8));
     OUTB(x,MASTER_8259_PORT_DATA);

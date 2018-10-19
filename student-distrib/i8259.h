@@ -10,9 +10,9 @@
 
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT      0x20
-#define SLAVE_8259_PORT       0xA0
 #define MASTER_8259_PORT_DATA 0x21
-#define SLAVE_8259_PORT_DATA  0xA1
+#define SLAVE_8259_PORT       0x28
+#define SLAVE_8259_PORT_DATA  0x29
 #define MASK_LOW8             0xFF
 
 /* Initialization control words to init each PIC.
@@ -28,7 +28,7 @@
 /* End-of-interrupt byte.  This gets OR'd with
  * the interrupt number and sent out to the PIC
  * to declare the interrupt finished */
-#define EOI                 0x60
+#define EOI                 0x20
 
 /* Externally-visible functions */
 

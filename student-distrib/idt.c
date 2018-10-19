@@ -69,12 +69,14 @@ static void DIVISION_ERROR_HANDLER() {
   asm("pusha");
   printf("DIVISION_ERROR Occured\n");
   asm("popa");
+  while(1);
 }
 
 void RESERVED_HANDLER() {
   asm("pusha");
   printf("RESERVED Occured\n");
   asm("popa");
+  while(1);
 }
 
 void NMI_HANDLER() {
