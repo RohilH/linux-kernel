@@ -59,7 +59,7 @@ void IDT_Initializer() {
   }
 
   SET_IDT_ENTRY(idt[33], KEYBOARD_HANDLER);
-  // SET_IDT_ENTRY(idt[40], RTC_HANDLER);
+  SET_IDT_ENTRY(idt[40], RTC_HANDLER);
 
 }
 

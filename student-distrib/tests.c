@@ -34,13 +34,6 @@ int idt_test(){
 	TEST_HEADER;
 
 	int i;
-	int * lowInvalidAddr = 0x0;
-	int * validAddr = 0x000B8040;
-	int * highInvalidAddr = 0x00800010;
-	// x = 0x400000
-	printf("Valid Address: %d\n", *validAddr);
-	printf("Invalid High Address: %d\n", *highInvalidAddr);
-
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
@@ -55,14 +48,19 @@ int idt_test(){
 }
 
 // add more tests here
-// void test_exceptions() {
+
+// void test_idt() {
 // 	int x = 14132/0;
 // }
 
-// void test_rtc() {
-// 	RTC_INIT();
-// }
-
+void test_page() {
+	// int * lowInvalidAddr = 0x0;
+	int * validAddr = 0x000B8040;
+	int * highInvalidAddr = 0x00800010;
+	// x = 0x400000
+	printf("Valid Address: %d\n", *validAddr);
+	printf("Invalid High Address: %d\n", *highInvalidAddr);
+}
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -74,5 +72,6 @@ int idt_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	// test_rtc();
+	// test_idt();
+	test_page();
 }

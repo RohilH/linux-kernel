@@ -37,7 +37,6 @@ void i8259_init(void) {
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
-  uint8_t x;
   if(irq_num >= 8 && irq_num < 16) {
     slave_mask = slave_mask & ~(0x1 << (irq_num - 8));
     outb(slave_mask,SLAVE_8259_PORT_DATA);
@@ -49,7 +48,6 @@ void enable_irq(uint32_t irq_num) {
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
-  uint8_t x;
   if(irq_num >= 8 && irq_num < 16) {
     slave_mask = slave_mask | (0x1 << (irq_num - 8));
     outb(slave_mask,SLAVE_8259_PORT_DATA);
