@@ -26,25 +26,36 @@ static inline uint8_t INB(uint16_t port)
 }
 
 void RTC_INIT() {
-  OUTB(0x70, 0x8B);
-  uint8_t prev = INB(0x71);
-  OUTB(0x70, 0x8B);
-  OUTB(0x71, prev | 0x40);
+  // SRC: https://wiki.osdev.org/RTC
+  // cli();
+  disable_irq(8); // Disable interrupts
+  OUTB(0x70, 0x8A);	// select Status Register A, and disable NMI (by setting the 0x80 bit)
+  OUTB(0x71, 0x20);	// write to CMOS/RTC RAM
 
-  OUTB(0x70, 0x8A);
-  uint8_t rate = 0x0F;
-  prev = INB(0x71);
-  prev = (prev) | rate;
-  OUTB(0x70, 0x8A);
-  OUTB(0x71, prev);
-  enable_irq(8);
+  OUTB(0x70, 0x8B); // select register B, and disable NMI
+  uint8_t prev = INB(0x71);	// read the current value of register B
+  OUTB(0x70, 0x8B); // set the index again (a read will reset the index to register D)
+  OUTB(0x71, prev | 0x40); // write the previous value ORed with 0x40. This turns on bit 6 of register B
+
+  uint8_t rate = 0x0F; // rate must be above 2 and not over 15
+  OUTB(0x70, 0x8A); // set index to register A, disable NMI
+  prev = INB(0x71); // get initial value of register A
+  OUTB(0x70, 0x8A); // reset index to A
+  OUTB(0x71, (prev & 0xF0) | rate); //write only our rate to A. Note, rate is the bottom 4 bits.
+
+  enable_irq(8); // Enable interrupts
+  // sti();
 }
 
 void RTC_HANDLER() {
   //OUTB(0x70, 0x0C);
   //INB(0x71);
   printf("RTC INTERRUPT");
-  //send_eoi(8);
-  while(1);
 
+  // send_eoi(8);
+  // while(1);
+
+  // Attach this code to the bottom of your IRQ handler to be sure you get another interrupt
+  OUTB(0x70, 0x0C);	// select register C
+  INB(0x71);		// just throw away contents
 }

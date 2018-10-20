@@ -34,7 +34,6 @@ int idt_test(){
 
 	int i;
 	int result = PASS;
-	// int x = 14132/0;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
 			(idt[i].offset_31_16 == NULL)){
@@ -46,6 +45,14 @@ int idt_test(){
 
 	return result;
 }
+
+// void test_exceptions() {
+// 	int x = 14132/0;
+// }
+
+// void test_rtc() {
+//
+// }
 
 // add more tests here
 
@@ -59,4 +66,5 @@ int idt_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
+	// test_rtc();
 }
