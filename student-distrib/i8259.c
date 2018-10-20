@@ -9,86 +9,61 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-/* macro used to write a byte to a port */
-#define OUTB(val, port)                                 \
-do {                                                    \
-    asm volatile("                                    \n\
-        outb %b1, (%w0)                               \n\
-        "                                               \
-        : /* no outputs */                              \
-        : "d"((port)), "a"((val))                       \
-        : "memory", "cc"                                \
-    );                                                  \
-} while (0)
-
-//TAKEN FROM OSDEV
-static inline uint8_t INB(uint16_t port)
-{
-    uint8_t ret;
-    asm volatile ( "inb %1, %0"
-                   : "=a"(ret)
-                   : "Nd"(port) );
-    return ret;
-}
-
-
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
   master_mask = MASK_LOW8;
   slave_mask = MASK_LOW8;
 
-   OUTB(slave_mask, SLAVE_8259_PORT_DATA);
-   OUTB(master_mask, MASTER_8259_PORT_DATA);
-  //
-	// /* init master interrupt controller */
-	 OUTB(ICW1, MASTER_8259_PORT); /* Start init sequence */
-	 OUTB(ICW2_MASTER, MASTER_8259_PORT_DATA); /* Vector base */
-	 OUTB(ICW3_MASTER, MASTER_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
-	 OUTB(ICW4, MASTER_8259_PORT_DATA); /* Select 8086 mode */
-  //
-	// /* init slave interrupt controller */
-	 OUTB(ICW1, SLAVE_8259_PORT); /* Start init sequence */
-	 OUTB(ICW2_SLAVE, SLAVE_8259_PORT_DATA); /* Vector base */
-	 OUTB(ICW3_SLAVE, SLAVE_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
-	 OUTB(ICW4, SLAVE_8259_PORT_DATA); /* Select 8086 mode */
+ outb(slave_mask, SLAVE_8259_PORT_DATA);
+ outb(master_mask, MASTER_8259_PORT_DATA);
 
-   OUTB(slave_mask, SLAVE_8259_PORT_DATA);
-   OUTB(master_mask, MASTER_8259_PORT_DATA);
+ /* init master interrupt controller */
+ outb(ICW1, MASTER_8259_PORT); /* Start init sequence */
+ outb(ICW2_MASTER, MASTER_8259_PORT_DATA); /* Vector base */
+ outb(ICW3_MASTER, MASTER_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
+ outb(ICW4, MASTER_8259_PORT_DATA); /* Select 8086 mode */
+
+ /* init slave interrupt controller */
+ outb(ICW1, SLAVE_8259_PORT); /* Start init sequence */
+ outb(ICW2_SLAVE, SLAVE_8259_PORT_DATA); /* Vector base */
+ outb(ICW3_SLAVE, SLAVE_8259_PORT_DATA); /* edge triggered, Cascade (slave) on IRQ2 */
+ outb(ICW4, SLAVE_8259_PORT_DATA); /* Select 8086 mode */
+
+ outb(slave_mask, SLAVE_8259_PORT_DATA);
+ outb(master_mask, MASTER_8259_PORT_DATA);
+
+ enable_irq(2);
 }
 
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq_num >= 8 || irq_num < 0) {
-    x = INB(SLAVE_8259_PORT_DATA);
-    x = x & ~(0x1 << (irq_num - 8));
-    OUTB(x,SLAVE_8259_PORT_DATA);
+  if(irq_num >= 8 && irq_num < 16) {
+    slave_mask = slave_mask & ~(0x1 << (irq_num - 8));
+    outb(slave_mask,SLAVE_8259_PORT_DATA);
   } else {
-    x = INB(MASTER_8259_PORT_DATA);
-    x = x & ~(0x1 << (irq_num));
-    OUTB(x, MASTER_8259_PORT_DATA);
+    master_mask = master_mask & ~(0x1 << (irq_num));
+    outb(master_mask, MASTER_8259_PORT_DATA);
   }
 }
 
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq_num >= 8 || irq_num < 0) {
-    x = INB(SLAVE_8259_PORT_DATA);
-    x = x | (0x1 << (irq_num - 8));
-    OUTB(x,SLAVE_8259_PORT_DATA);
+  if(irq_num >= 8 && irq_num < 16) {
+    slave_mask = slave_mask | (0x1 << (irq_num - 8));
+    outb(slave_mask,SLAVE_8259_PORT_DATA);
   } else {
-    x = INB(MASTER_8259_PORT_DATA);
-    x = x | (0x1 << (irq_num));
-    OUTB(x, MASTER_8259_PORT_DATA);
+    master_mask = master_mask | (0x1 << (irq_num));
+    outb(master_mask, MASTER_8259_PORT_DATA);
   }
 }
 
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
-  if(irq_num >= 8) {
-    uint32_t slaveIrqNum = irq_num - 8;
-    OUTB(EOI | slaveIrqNum, SLAVE_8259_PORT);
+  if(irq_num >= 8 && irq_num < 16) {
+    outb(EOI, SLAVE_8259_PORT);
+  } else {
+    outb(EOI, MASTER_8259_PORT);
   }
-  OUTB(EOI | irq_num, MASTER_8259_PORT);
 }
