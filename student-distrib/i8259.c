@@ -34,12 +34,11 @@ static inline uint8_t INB(uint16_t port)
 
 /* Initialize the 8259 PIC */
 void i8259_init(void) {
-
   master_mask = MASK_LOW8;
   slave_mask = MASK_LOW8;
 
-	 OUTB(slave_mask, SLAVE_8259_PORT_DATA);
-	 OUTB(master_mask, MASTER_8259_PORT_DATA);
+   OUTB(slave_mask, SLAVE_8259_PORT_DATA);
+   OUTB(master_mask, MASTER_8259_PORT_DATA);
   //
 	// /* init master interrupt controller */
 	 OUTB(ICW1, MASTER_8259_PORT); /* Start init sequence */
@@ -60,12 +59,11 @@ void i8259_init(void) {
 /* Enable (unmask) the specified IRQ */
 void enable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq_num >= 8) {
+  if(irq_num >= 8 || irq_num < 0) {
     x = INB(SLAVE_8259_PORT_DATA);
     x = x & ~(0x1 << (irq_num - 8));
-    OUTB(x,MASTER_8259_PORT_DATA);
-  }
-  else {
+    OUTB(x,SLAVE_8259_PORT_DATA);
+  } else {
     x = INB(MASTER_8259_PORT_DATA);
     x = x & ~(0x1 << (irq_num));
     OUTB(x, MASTER_8259_PORT_DATA);
@@ -75,12 +73,11 @@ void enable_irq(uint32_t irq_num) {
 /* Disable (mask) the specified IRQ */
 void disable_irq(uint32_t irq_num) {
   uint8_t x;
-  if(irq_num >= 8) {
+  if(irq_num >= 8 || irq_num < 0) {
     x = INB(SLAVE_8259_PORT_DATA);
     x = x | (0x1 << (irq_num - 8));
-    OUTB(x,MASTER_8259_PORT_DATA);
-  }
-  else {
+    OUTB(x,SLAVE_8259_PORT_DATA);
+  } else {
     x = INB(MASTER_8259_PORT_DATA);
     x = x | (0x1 << (irq_num));
     OUTB(x, MASTER_8259_PORT_DATA);

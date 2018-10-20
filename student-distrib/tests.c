@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "rtc.h"
 
 #define PASS 1
 #define FAIL 0
@@ -46,15 +47,15 @@ int idt_test(){
 	return result;
 }
 
+// add more tests here
 // void test_exceptions() {
 // 	int x = 14132/0;
 // }
 
 // void test_rtc() {
-//
+// 	RTC_INIT();
 // }
 
-// add more tests here
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -66,5 +67,5 @@ int idt_test(){
 void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
-	// test_rtc();
+	test_rtc();
 }
