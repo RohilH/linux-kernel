@@ -34,6 +34,13 @@ int idt_test(){
 	TEST_HEADER;
 
 	int i;
+	int * lowInvalidAddr = 0x0;
+	int * validAddr = 0x000B8040;
+	int * highInvalidAddr = 0x00800010;
+	// x = 0x400000
+	printf("Valid Address: %d\n", *validAddr);
+	printf("Invalid High Address: %d\n", *highInvalidAddr);
+
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&

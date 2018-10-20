@@ -11,6 +11,7 @@
 #include "idt.h"
 #include "keyboard.h"
 #include "rtc.h"
+#include "paging.h"
 
 
 #define RUN_TESTS
@@ -142,11 +143,18 @@ void entry(unsigned long magic, unsigned long addr) {
 
     IDT_Initializer();
 
+
     i8259_init();
 
     //RTC_INIT();
-    
+
     KEYBOARD_INIT();
+
+    PAGING_INIT();
+
+    // int * x = 0;
+    // int y = *x;
+    // int z = 5/0;
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
