@@ -49,18 +49,19 @@ int idt_test(){
 
 // add more tests here
 
-void test_idt() {
-	int x = 14132/0;
-	x++;
-}
+// void test_idt() {
+// 	int x = 14132/0;
+// 	x++;
+// }
 
 void test_page() {
-	// int * lowInvalidAddr = 0x0;
-	int * validAddr = 0x000B8040;
-	int * highInvalidAddr = 0x00800010;
+	int * lowInvalidAddr = 0x0;
+	// int * validAddr = 0x000B8040;
+	// int * highInvalidAddr = 0x00800010;
 	// x = 0x400000
-	printf("Valid Address: %d\n", *validAddr);
-	printf("Invalid High Address: %d\n", *highInvalidAddr);
+	printf("Invalid Low Address: %d\n", *lowInvalidAddr);
+	// printf("Valid Address: %d\n", *validAddr);
+	// printf("Invalid High Address: %d\n", *highInvalidAddr);
 }
 
 /* Checkpoint 2 tests */
