@@ -1,8 +1,9 @@
 #include "rtc.h"
 #include "i8259.h"
-// #include "x86_desc.h"
-// #include "idt.h"
 #include "lib.h"
+
+#define status_register_a 0x8A
+#define status_register_b 0x8B
 
 #define OUTB(port, val)                                 \
 do {                                                    \
@@ -42,17 +43,17 @@ void RTC_INIT() {
   OUTB(0x70, 0x8A); // reset index to A
   OUTB(0x71, (prev & 0xF0) | rate); //write only our rate to A. Note, rate is the bottom 4 bits.
 
-  enable_irq(8); // Enable RTC IRQ Line
+  enable_irq(8); // Enable RTC IRQ
   sti(); // Enable interrupts
 }
 
 void RTC_HANDLER() {
   printf("RTC INTERRUPT");
-
-  send_eoi(8);
-  // while(1);
-
-  // Attach this code to the bottom of your IRQ handler to be sure you get another interrupt
+  cli();
+  disable_irq(8);
+  send_eoi(8); // Send EOI to RTC IRQ
   OUTB(0x70, 0x0C);	// select register C
   INB(0x71);		// just throw away contents
+  enable_irq(8);
+  sti();
 }
