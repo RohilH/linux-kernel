@@ -49,9 +49,10 @@ int idt_test(){
 
 // add more tests here
 
-// void test_idt() {
-// 	int x = 14132/0;
-// }
+void test_idt() {
+	int x = 14132/0;
+	x++;
+}
 
 void test_page() {
 	// int * lowInvalidAddr = 0x0;

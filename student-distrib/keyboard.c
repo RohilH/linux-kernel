@@ -37,7 +37,7 @@ void KEYBOARD_INIT() {
   scanCode = 0;
   prevScanCode = 0;
   shift = 0, caps = 0, ctrl = 0, alt = 0;
-  // clear();
+  clear();
   sti();
 }
 

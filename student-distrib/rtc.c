@@ -30,9 +30,9 @@ void RTC_HANDLER() {
   printf("RTC INTERRUPT");
   // cli();
   disable_irq(8);
-  send_eoi(8); // Send EOI to RTC IRQ
   outb(0x70, 0x0C);	// select register C
   inb(0x71);		// just throw away contents
   enable_irq(8);
+  send_eoi(8); // Send EOI to RTC IRQ
   // sti();
 }

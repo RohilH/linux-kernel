@@ -140,16 +140,16 @@ void entry(unsigned long magic, unsigned long addr) {
         tss.esp0 = 0x800000;
         ltr(KERNEL_TSS);
     }
-
+    // Initialize IDT table
     IDT_Initializer();
-
+    // Initialize PIC
     i8259_init();
-
-    // RTC_INIT();
-
-    KEYBOARD_INIT();
-
+    // Intiailize paging
     PAGING_INIT();
+    // Initialize RTC
+    RTC_INIT();
+    // Initialize keyboard
+    KEYBOARD_INIT();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
