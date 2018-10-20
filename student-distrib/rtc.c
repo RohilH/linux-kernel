@@ -2,7 +2,7 @@
 #include "i8259.h"
 // #include "x86_desc.h"
 // #include "idt.h"
-// #include "lib.h"
+#include "lib.h"
 
 #define OUTB(port, val)                                 \
 do {                                                    \
@@ -27,8 +27,7 @@ static inline uint8_t INB(uint16_t port)
 
 void RTC_INIT() {
   // SRC: https://wiki.osdev.org/RTC
-  // cli();
-  disable_irq(8); // Disable interrupts
+  cli(); // Disable interrupts
   OUTB(0x70, 0x8A);	// select Status Register A, and disable NMI (by setting the 0x80 bit)
   OUTB(0x71, 0x20);	// write to CMOS/RTC RAM
 
@@ -43,16 +42,14 @@ void RTC_INIT() {
   OUTB(0x70, 0x8A); // reset index to A
   OUTB(0x71, (prev & 0xF0) | rate); //write only our rate to A. Note, rate is the bottom 4 bits.
 
-  enable_irq(8); // Enable interrupts
-  // sti();
+  enable_irq(8); // Enable RTC IRQ Line
+  sti(); // Enable interrupts
 }
 
 void RTC_HANDLER() {
-  //OUTB(0x70, 0x0C);
-  //INB(0x71);
   printf("RTC INTERRUPT");
 
-  // send_eoi(8);
+  send_eoi(8);
   // while(1);
 
   // Attach this code to the bottom of your IRQ handler to be sure you get another interrupt
