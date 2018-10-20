@@ -2,7 +2,7 @@
 #include "i8259.h"
 // #include "x86_desc.h"
 // #include "idt.h"
-// #include "lib.h"
+#include "lib.h"
 
 #define OUTB(port, val)                                 \
 do {                                                    \

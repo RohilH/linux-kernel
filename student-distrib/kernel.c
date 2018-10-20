@@ -142,9 +142,10 @@ void entry(unsigned long magic, unsigned long addr) {
 
     IDT_Initializer();
 
-    /* Init the PIC */
     i8259_init();
+
     //RTC_INIT();
+    
     KEYBOARD_INIT();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the

@@ -1,7 +1,5 @@
 #include "keyboard.h"
 #include "i8259.h"
-// #include "x86_desc.h"
-// #include "idt.h"
 #include "lib.h"
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
@@ -34,36 +32,36 @@ void KEYBOARD_INIT() {
 }
 
 void KEYBOARD_HANDLER() {
-    asm("pusha");
-    uint32_t prevScanCode = 0;
-    int shift = 0;
-    int caps = 0;
-    while(1) {
-      uint32_t scanCode = inb(0x60);
-      if (scanCode!=0 && scanCode<0x80) {
-        if (prevScanCode!=scanCode) {
-          if (shift==1)
-            printf("%c", scanCodeToChar[2][scanCode]);
-          else if (caps==1)
-            printf("%c", scanCodeToChar[1][scanCode]);
-          else
-            printf("%c", scanCodeToChar[0][scanCode]);
-        }
-      }
-      if (prevScanCode==0x3A && scanCode == 0xBA) {
-        if (caps==0) caps=1;
-        else caps=0;
-      }
-
-      if (scanCode==0x2A || scanCode==0x36) shift = 1;
-      if (scanCode==0xAA || scanCode==0xB6) shift = 0;
-      prevScanCode = scanCode;
-
-      if (scanCodeToChar[0][scanCode] == '`') {
-        clear();
-        break;
+  asm("pusha");
+  uint32_t prevScanCode = 0;
+  int shift = 0;
+  int caps = 0;
+  while(1) {
+    uint32_t scanCode = inb(0x60);
+    if (scanCode!=0 && scanCode<0x80) {
+      if (prevScanCode!=scanCode) {
+        if (shift==1)
+          printf("%c", scanCodeToChar[2][scanCode]);
+        else if (caps==1)
+          printf("%c", scanCodeToChar[1][scanCode]);
+        else
+          printf("%c", scanCodeToChar[0][scanCode]);
       }
     }
-    send_eoi(1);
-    asm("popa");
+    if (prevScanCode==0x3A && scanCode == 0xBA) {
+      if (caps==0) caps=1;
+      else caps=0;
+    }
+
+    if (scanCode==0x2A || scanCode==0x36) shift = 1;
+    if (scanCode==0xAA || scanCode==0xB6) shift = 0;
+    prevScanCode = scanCode;
+
+    if (scanCodeToChar[0][scanCode] == '`') {
+      clear();
+      break;
+    }
+  }
+  send_eoi(1);
+  asm("popa");
 }

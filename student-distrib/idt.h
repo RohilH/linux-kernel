@@ -1,7 +1,3 @@
-//////
-// SPACE FOR IDT. Here we will propagate the idt with the appropriate vectors
-//////
-
 #ifndef _IDT_H
 #define _IDT_H
 

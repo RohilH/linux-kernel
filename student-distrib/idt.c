@@ -1,15 +1,8 @@
-//////
-// SPACE FOR IDT. Here we will propagate the idt with the appropriate vectors
-//////
-
 #include "x86_desc.h"
 #include "idt.h"
 #include "lib.h"
 #include "keyboard.h"
 #include "rtc.h"
-//extern void //     popAll();
-//extern void //   pushAll();
-
 
 void IDT_Initializer() {
 
@@ -18,6 +11,7 @@ void IDT_Initializer() {
   //                                       DOUBLE_FAULT_HANDLER, COPROCESSOR_SEGMENT_OVERRUN_HANDLER, INVALID_TSS_HANDLER, SEGMENT_NOT_PRESENT_HANDLER,
   //                                       STACK_SEGMENT_FAULT_HANDLER, GENERAL_PROTECTION_HANDLER, PAGE_FAULT_HANDLER, MATH_FPU_FAULT_HANDLER,
   //                                       ALIGNMENT_CHECK_HANDLER, MACHINE_CHECK_HANDLER, SIMD_FLOATING_POINT_EXCEPTION_HANDLER, GENERIC_EXCEPTION_HANDLER };
+
   int x;
   for (x = 0; x < 32; x++) {
     idt[x].present      = 1;
@@ -30,7 +24,7 @@ void IDT_Initializer() {
     idt[x].reserved4    = 0;
     idt[x].seg_selector = KERNEL_CS;
   }
-  idt[15].present = 0;
+
   SET_IDT_ENTRY(idt[0], DIVISION_ERROR_HANDLER);
   SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
   SET_IDT_ENTRY(idt[2], NMI_HANDLER);
@@ -46,12 +40,11 @@ void IDT_Initializer() {
   SET_IDT_ENTRY(idt[12], STACK_SEGMENT_FAULT_HANDLER);
   SET_IDT_ENTRY(idt[13], GENERAL_PROTECTION_HANDLER);
   SET_IDT_ENTRY(idt[14], PAGE_FAULT_HANDLER);
-  //SET_IDT_ENTRY(idt[15], DIVISION_ERROR_HANDLER);
+  idt[15].present = 0;
   SET_IDT_ENTRY(idt[16], MATH_FPU_FAULT_HANDLER);
   SET_IDT_ENTRY(idt[17], ALIGNMENT_CHECK_HANDLER);
   SET_IDT_ENTRY(idt[18], MACHINE_CHECK_HANDLER);
   SET_IDT_ENTRY(idt[19], SIMD_FLOATING_POINT_EXCEPTION_HANDLER);
-
 
   for (x = 32; x < NUM_VEC; x++) {
     idt[x].present      = 1;
@@ -64,11 +57,11 @@ void IDT_Initializer() {
     idt[x].reserved4    = 0;
     idt[x].seg_selector = KERNEL_CS;
   }
+
   SET_IDT_ENTRY(idt[33], KEYBOARD_HANDLER);
-  SET_IDT_ENTRY(idt[40], RTC_HANDLER);
+  // SET_IDT_ENTRY(idt[40], RTC_HANDLER);
 
 }
-
 
 void DIVISION_ERROR_HANDLER() {
   asm("pusha");

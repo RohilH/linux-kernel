@@ -166,6 +166,7 @@ typedef union idt_desc_t {
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];
+
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
 

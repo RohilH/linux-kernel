@@ -24,15 +24,10 @@ _start:
     jmp     continue
 
 continue:
-    # Load the GDT
-    # ADDED LINE by Isaac
-
+    # load the global descriptor table
     lgdt gdt_desc_ptr
 
-    # Explanation: We call this on our struct which
-    # we declared in x86_desc.S which contains the size of the GDT and the base address
-    # lgdt loads the gdt see https://wiki.osdev.org/LGDT
-
+    # load the interrupt descriptor table
     lidt idt_desc_ptr
 
     # Load CS with the new descriptor value

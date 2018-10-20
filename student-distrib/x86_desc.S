@@ -34,13 +34,12 @@ _tss:
 tss_bottom:
 
 
-# ADDED BY ISAAC
 .align 4
-    .word 0  # Padding
-gdt_desc_ptr:  # struct that contains the size and start address for the gdt
+    .word 0                     # padding
+gdt_desc_ptr:                   # struct that contains the size and start address for the gdt
     .word gdt_bottom - gdt - 1  # size
-    .long gdt # start addr
-    # Refer to typedef struct x86_desc { in x86_desc.h
+    .long gdt                   # start addr
+
 
     .align  16
 gdt:
