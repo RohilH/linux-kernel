@@ -75,5 +75,5 @@ void launch_tests(){
 	TEST_OUTPUT("idt_test", idt_test());
 	// launch your tests here
 	// test_idt();
-	test_page();
+	// test_page();
 }

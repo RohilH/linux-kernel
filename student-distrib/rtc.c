@@ -2,17 +2,14 @@
 #include "i8259.h"
 #include "lib.h"
 
-#define status_register_a 0x8A
-#define status_register_b 0x8B
-
 void RTC_INIT() {
   // SRC: https://wiki.osdev.org/RTC
 
   // cli();
-  outb(0x8B, 0x70); // Status Register B / Disable NMI
-  char prev = inb(0x71);	// Register B value
-  outb(0x8B, 0x70); // Reset idx
-  outb(prev | 0x40, 0x71); // ORed with 0x40: Register B
+  outb(REG_B, IO_PORT1); // Status Register B / Disable NMI
+  char prev = inb(IO_PORT2);	// Register B value
+  outb(REG_B, IO_PORT1); // Reset idx
+  outb(prev | BIT_SIX_MASK, IO_PORT2); // ORed with 0x40: Register B
   // sti();
 
   // uint8_t rate = 0x0F; // rate must be above 2 and not over 15
@@ -21,16 +18,15 @@ void RTC_INIT() {
   // outb(0x71, (prev & 0xF0) | rate); //write only our rate to A. Note, rate is the bottom 4 bits.
   // outb(0x70, 0x8A); // reset index to A
 
-  enable_irq(8); // Enable RTC IRQ
+  enable_irq(IRQ_LINE_RTC); // Enable RTC IRQ
   // sti(); // Enable interrupts
 }
 
 void RTC_HANDLER() {
-  send_eoi(8); // Send EOI to RTC IRQ
+  send_eoi(IRQ_LINE_RTC); // Send EOI to RTC IRQ
   cli();
-  outb(0x0C, 0x70);	// select register C
-  inb(0x71);		// just throw away contents
+  outb(REG_C, IO_PORT1);
+  inb(IO_PORT2);
 
-  // test_interrupts();
   sti();
 }

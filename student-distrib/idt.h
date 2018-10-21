@@ -3,6 +3,7 @@
 
 #include "x86_desc.h"
 
+// Interrupt Handlers
 void DIVISION_ERROR_HANDLER();
 void RESERVED_HANDLER();
 void NMI_HANDLER();
@@ -24,6 +25,11 @@ void ALIGNMENT_CHECK_HANDLER();
 void MACHINE_CHECK_HANDLER();
 void SIMD_FLOATING_POINT_EXCEPTION_HANDLER();
 
+// Initialize IDT table
 void IDT_Initializer();
+
+#define NUM_EXCEPTIONS 32 // 32 Intel defined exceptions
+#define KEY_ADDR 33 // 0x21 (IRQ1)
+#define RTC_ADDR 40 // 0x28 (IRQ8)
 
 #endif /* _IDT_H */

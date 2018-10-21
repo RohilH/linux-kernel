@@ -4,6 +4,7 @@
 #include "keyboard.h"
 #include "rtc.h"
 
+// Populate and initialize the IDT table entry attributes
 void IDT_Initializer() {
 
   // void (*interruptHandler[23])(void) = {DIVISION_ERROR_HANDLER, RESERVED_HANDLER, NMI_HANDLER, BREAK_POINT_HANDLER,
@@ -12,8 +13,9 @@ void IDT_Initializer() {
   //                                       STACK_SEGMENT_FAULT_HANDLER, GENERAL_PROTECTION_HANDLER, PAGE_FAULT_HANDLER, MATH_FPU_FAULT_HANDLER,
   //                                       ALIGNMENT_CHECK_HANDLER, MACHINE_CHECK_HANDLER, SIMD_FLOATING_POINT_EXCEPTION_HANDLER, GENERIC_EXCEPTION_HANDLER };
 
+  // Initialize first 32 Intel defined exception attributes
   int x;
-  for (x = 0; x < 32; x++) {
+  for (x = 0; x < NUM_EXCEPTIONS; x++) {
     idt[x].present      = 1;
     idt[x].dpl          = 0;
     idt[x].size         = 1;
@@ -25,6 +27,7 @@ void IDT_Initializer() {
     idt[x].seg_selector = KERNEL_CS;
   }
 
+  // Manually set first 20 offset values with appropriate handler
   SET_IDT_ENTRY(idt[0], DIVISION_ERROR_HANDLER);
   SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
   SET_IDT_ENTRY(idt[2], NMI_HANDLER);
@@ -40,13 +43,13 @@ void IDT_Initializer() {
   SET_IDT_ENTRY(idt[12], STACK_SEGMENT_FAULT_HANDLER);
   SET_IDT_ENTRY(idt[13], GENERAL_PROTECTION_HANDLER);
   SET_IDT_ENTRY(idt[14], PAGE_FAULT_HANDLER);
-  idt[15].present = 0;
+  idt[15].present = 0; // Unused Interrupt
   SET_IDT_ENTRY(idt[16], MATH_FPU_FAULT_HANDLER);
   SET_IDT_ENTRY(idt[17], ALIGNMENT_CHECK_HANDLER);
   SET_IDT_ENTRY(idt[18], MACHINE_CHECK_HANDLER);
   SET_IDT_ENTRY(idt[19], SIMD_FLOATING_POINT_EXCEPTION_HANDLER);
 
-  for (x = 32; x < NUM_VEC; x++) {
+  for (x = NUM_EXCEPTIONS; x < NUM_VEC; x++) {
     idt[x].present      = 1;
     idt[x].dpl          = 0;
     idt[x].size         = 1;
@@ -58,10 +61,14 @@ void IDT_Initializer() {
     idt[x].seg_selector = KERNEL_CS;
   }
 
-  SET_IDT_ENTRY(idt[33], KEYBOARD_HANDLER);
-  SET_IDT_ENTRY(idt[40], RTC_HANDLER);
+  SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER); // Set keyboard handler
+  SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER); // Set RTC handler
 
 }
+
+///////////////////////////
+//////// Handlers /////////
+///////////////////////////
 
 void DIVISION_ERROR_HANDLER() {
   asm("pusha");
