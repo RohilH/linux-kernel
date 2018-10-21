@@ -28,7 +28,7 @@
 /* End-of-interrupt byte.  This gets OR'd with
  * the interrupt number and sent out to the PIC
  * to declare the interrupt finished */
-#define EOI                 0x20
+#define EOI                 0x60
 
 #define SLAVE_MIN 8
 #define SLAVE_MAX 15

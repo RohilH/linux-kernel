@@ -62,8 +62,12 @@ void disable_irq(uint32_t irq_num) {
 /* Send end-of-interrupt signal for the specified IRQ */
 void send_eoi(uint32_t irq_num) {
   // Send EOI to appropriate port based on irq_num
-  if(irq_num >= SLAVE_MIN && irq_num <= SLAVE_MAX)
-    outb(EOI, SLAVE_8259_PORT);
+  if(irq_num >= SLAVE_MIN && irq_num <= SLAVE_MAX) {
+    outb((EOI | (irq_num - SLAVE_MIN)), SLAVE_8259_PORT);
+    outb((EOI | ICW3_SLAVE), MASTER_8259_PORT);
+  }
   else
-    outb(EOI, MASTER_8259_PORT);
+    {
+      outb((EOI | irq_num), MASTER_8259_PORT);
+    }
 }

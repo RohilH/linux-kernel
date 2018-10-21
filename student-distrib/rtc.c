@@ -5,7 +5,7 @@
 void RTC_INIT() {
   // SRC: https://wiki.osdev.org/RTC
 
-  cli();
+  //cli();
   outb(REG_B, IO_PORT1); // Idx --> Reg B / NMI_HANDLER
   char prev = inb(IO_PORT2); // Obtain Reg A val
   outb(REG_B, IO_PORT1); // Reset idx
@@ -18,13 +18,17 @@ void RTC_INIT() {
   outb(REG_A, IO_PORT1); // Reset idx
   outb((prev & 0xF0) | rate, IO_PORT2);
 
-  sti(); // Enable interrupts
+//  sti(); // Enable interrupts
 }
 
 void RTC_HANDLER() {
-  disable_irq(IRQ_LINE_RTC);
+  //disable_irq(IRQ_LINE_RTC);
   send_eoi(IRQ_LINE_RTC); // Send EOI to RTC IRQ
+  cli();
   outb(REG_C, IO_PORT1);
   inb(IO_PORT2);
-  enable_irq(IRQ_LINE_RTC); // Enable RTC IRQ
+  test_interrupts();
+  sti();
+  return;
+//  enable_irq(IRQ_LINE_RTC); // Enable RTC IRQ
 }
