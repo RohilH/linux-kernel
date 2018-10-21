@@ -4,8 +4,6 @@
 #include "keyboard.h"
 #include "rtc.h"
 
-extern int DIVISION_ERROR_WRAPPER_HANDLER;
-
 // Populate and initialize the IDT table entry attributes
 void IDT_Initializer() {
 
@@ -30,26 +28,26 @@ void IDT_Initializer() {
   }
 
   // Manually set first 20 offset values with appropriate handler
-  SET_IDT_ENTRY(idt[0], &DIVISION_ERROR_WRAPPER_HANDLER);
-  // SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
-  // SET_IDT_ENTRY(idt[2], NMI_HANDLER);
-  // SET_IDT_ENTRY(idt[3], BREAK_POINT_HANDLER);
-  // SET_IDT_ENTRY(idt[4], OVERFLOW_HANDLER);
-  // SET_IDT_ENTRY(idt[5], BOUNDS_HANDLER);
-  // SET_IDT_ENTRY(idt[6], INVALID_OPCODE_HANDLER);
-  // SET_IDT_ENTRY(idt[7], DEVICE_NOT_AVAILABLE_HANDLER);
-  // SET_IDT_ENTRY(idt[8], DOUBLE_FAULT_HANDLER);
-  // SET_IDT_ENTRY(idt[9], COPROCESSOR_SEGMENT_OVERRUN_HANDLER);
-  // SET_IDT_ENTRY(idt[10], INVALID_TSS_HANDLER);
-  // SET_IDT_ENTRY(idt[11], SEGMENT_NOT_PRESENT_HANDLER);
-  // SET_IDT_ENTRY(idt[12], STACK_SEGMENT_FAULT_HANDLER);
-  // SET_IDT_ENTRY(idt[13], GENERAL_PROTECTION_HANDLER);
-  // SET_IDT_ENTRY(idt[14], PAGE_FAULT_HANDLER);
-  // idt[15].present = 0; // Unused Interrupt
-  // SET_IDT_ENTRY(idt[16], MATH_FPU_FAULT_HANDLER);
-  // SET_IDT_ENTRY(idt[17], ALIGNMENT_CHECK_HANDLER);
-  // SET_IDT_ENTRY(idt[18], MACHINE_CHECK_HANDLER);
-  // SET_IDT_ENTRY(idt[19], SIMD_FLOATING_POINT_EXCEPTION_HANDLER);
+  SET_IDT_ENTRY(idt[0], DIVISION_ERROR_HANDLER);
+  SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
+  SET_IDT_ENTRY(idt[2], NMI_HANDLER);
+  SET_IDT_ENTRY(idt[3], BREAK_POINT_HANDLER);
+  SET_IDT_ENTRY(idt[4], OVERFLOW_HANDLER);
+  SET_IDT_ENTRY(idt[5], BOUNDS_HANDLER);
+  SET_IDT_ENTRY(idt[6], INVALID_OPCODE_HANDLER);
+  SET_IDT_ENTRY(idt[7], DEVICE_NOT_AVAILABLE_HANDLER);
+  SET_IDT_ENTRY(idt[8], DOUBLE_FAULT_HANDLER);
+  SET_IDT_ENTRY(idt[9], COPROCESSOR_SEGMENT_OVERRUN_HANDLER);
+  SET_IDT_ENTRY(idt[10], INVALID_TSS_HANDLER);
+  SET_IDT_ENTRY(idt[11], SEGMENT_NOT_PRESENT_HANDLER);
+  SET_IDT_ENTRY(idt[12], STACK_SEGMENT_FAULT_HANDLER);
+  SET_IDT_ENTRY(idt[13], GENERAL_PROTECTION_HANDLER);
+  SET_IDT_ENTRY(idt[14], PAGE_FAULT_HANDLER);
+  idt[15].present = 0; // Unused Interrupt
+  SET_IDT_ENTRY(idt[16], MATH_FPU_FAULT_HANDLER);
+  SET_IDT_ENTRY(idt[17], ALIGNMENT_CHECK_HANDLER);
+  SET_IDT_ENTRY(idt[18], MACHINE_CHECK_HANDLER);
+  SET_IDT_ENTRY(idt[19], SIMD_FLOATING_POINT_EXCEPTION_HANDLER);
 
   for (x = NUM_EXCEPTIONS; x < NUM_VEC; x++) {
     idt[x].present      = 1;
@@ -66,4 +64,179 @@ void IDT_Initializer() {
   SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER); // Set keyboard handler
   SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER); // Set RTC handler
 
+}
+
+///////////////////////////
+//////// Handlers /////////
+///////////////////////////
+void DIVISION_ERROR_HANDLER() {
+  asm("pusha");
+  printf("DIVISION_ERROR Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void RESERVED_HANDLER() {
+  asm("pusha");
+  printf("RESERVED Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void NMI_HANDLER() {
+  asm("pusha");
+  printf("NMI Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void BREAK_POINT_HANDLER() {
+  asm("pusha");
+  printf("BREAK_POINT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void OVERFLOW_HANDLER() {
+  asm("pusha");
+  printf("OVERFLOW Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void BOUNDS_HANDLER() {
+  asm("pusha");
+  printf("BOUNDS Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void INVALID_OPCODE_HANDLER() {
+  asm("pusha");
+  printf("INVALID_OPCODE Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void DEVICE_NOT_AVAILABLE_HANDLER() {
+  asm("pusha");
+  printf("DEVICE_NOT_AVAILABLE Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void DOUBLE_FAULT_HANDLER() {
+  asm("pusha");
+  printf("DOUBLE_FAULT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
+  asm("pusha");
+  printf("COPROCESSOR_SEGMENT_OVERRUN Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void INVALID_TSS_HANDLER() {
+  asm("pusha");
+  printf("INVALID_TSS Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void SEGMENT_NOT_PRESENT_HANDLER() {
+  asm("pusha");
+  printf("SEGMENT_NOT_PRESENT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void STACK_SEGMENT_FAULT_HANDLER() {
+  asm("pusha");
+  printf("STACK_SEGMENT_FAULT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void GENERAL_PROTECTION_HANDLER() {
+  asm("pusha");
+  printf("GENERAL_PROTECTION Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void PAGE_FAULT_HANDLER() {
+  asm("pusha");
+  printf("PAGE_FAULT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void MATH_FPU_FAULT_HANDLER() {
+  asm("pusha");
+  printf("MATH_FAULT Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void ALIGNMENT_CHECK_HANDLER() {
+  asm("pusha");
+  printf("ALIGNMENT_CHECK Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void MACHINE_CHECK_HANDLER() {
+  asm("pusha");
+  printf("MACHINE_CHECK Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
+}
+void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
+  asm("pusha");
+  printf("SIMD_FLOATING_POINT_EXCEPTION Occured\n");
+  asm("popa");
+  // asm("iret");
+  cli();
+  while(1);
+  sti();
 }

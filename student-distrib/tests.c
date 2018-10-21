@@ -34,6 +34,7 @@ int idt_test(){
 	TEST_HEADER;
 
 	int i;
+	i = 1/0;
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
@@ -49,11 +50,6 @@ int idt_test(){
 
 // add more tests here
 
-// void test_idt() {
-// 	int x = 14132/0;
-// 	x++;
-// }
-
 void test_page() {
 	int * lowInvalidAddr = 0x0;
 	// int * validAddr = 0x000B8040;
@@ -64,6 +60,11 @@ void test_page() {
 	// printf("Invalid High Address: %d\n", *highInvalidAddr);
 }
 
+void test_keyboard() {
+	printf("print the follow characters: abc123yee");
+
+}
+
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -72,8 +73,9 @@ void test_page() {
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
+	//TEST_OUTPUT("idt_test", idt_test());
+	// test_interrupts();
+	//test_keyboard();
 	// launch your tests here
-	// test_idt();
 	// test_page();
 }
