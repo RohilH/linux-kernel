@@ -120,6 +120,8 @@ extern seg_desc_t ldt_desc_ptr;
 extern seg_desc_t gdt_ptr;
 extern uint32_t ldt;
 
+extern uint32_t gdt_size;
+
 extern uint32_t tss_size;
 extern seg_desc_t tss_desc_ptr;
 extern tss_t tss;
@@ -164,8 +166,12 @@ typedef union idt_desc_t {
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];
+
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
+
+/* The descriptor used to load the GDTR */
+extern x86_desc_t gdt_desc_ptr;
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \
