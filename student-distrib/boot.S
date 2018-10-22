@@ -24,7 +24,11 @@ _start:
     jmp     continue
 
 continue:
-    # Load the GDT
+    # load the global descriptor table
+    lgdt gdt_desc_ptr
+
+    # load the interrupt descriptor table
+    lidt idt_desc_ptr
 
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going

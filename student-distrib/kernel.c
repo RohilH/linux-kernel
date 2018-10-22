@@ -8,6 +8,11 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "idt.h"
+#include "keyboard.h"
+#include "rtc.h"
+#include "paging.h"
+
 
 #define RUN_TESTS
 
@@ -136,18 +141,17 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
-    /* Init the PIC */
-    i8259_init();
+    // printf("Enabling Interrupts\n");
+    IDT_Initializer(); // Initialize IDT table
+    i8259_init(); // Initialize devices, mem, filesystem, device ints on PIC
 
-    /* Initialize devices, memory, filesystem, enable device interrupts on the
-     * PIC, any other initialization stuff... */
+    sti();
 
-    /* Enable interrupts */
-    /* Do not enable the following until after you have set up your
-     * IDT correctly otherwise QEMU will triple fault and simple close
-     * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    KEYBOARD_INIT(); // Initialize keyboard
+    RTC_INIT(); // Initialize RTC
+    PAGING_INIT(); // Intialize paging
+
+   clear(); // Clear the screen
 
 #ifdef RUN_TESTS
     /* Run tests */

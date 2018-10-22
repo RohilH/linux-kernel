@@ -6,14 +6,13 @@
 
 .text
 
-.globl ldt_size, tss_size
+.globl ldt_size, tss_size, gdt_size
 .globl gdt_desc, ldt_desc, tss_desc
 .globl tss, tss_desc_ptr, ldt, ldt_desc_ptr
-.globl gdt_ptr
+.globl gdt_ptr, gdt_desc_ptr
 .globl idt_desc_ptr, idt
 
 .align 4
-
 
 tss_size:
     .long tss_bottom - tss - 1
@@ -33,6 +32,14 @@ _tss:
     .byte 0
     .endr
 tss_bottom:
+
+
+.align 4
+    .word 0                     # padding
+gdt_desc_ptr:                   # struct that contains the size and start address for the gdt
+    .word gdt_bottom - gdt - 1  # size
+    .long gdt                   # start addr
+
 
     .align  16
 gdt:
