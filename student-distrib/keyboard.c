@@ -50,6 +50,8 @@ void KEYBOARD_HANDLER() {
         printf("%c", scanCodeToChar[2][scanCode]); // Handle shift chars
       else if (caps)
         printf("%c", scanCodeToChar[1][scanCode]); // Handle caps chars
+      else if (ctrl && scanCode == 0x26) // Handle clear screen
+        clear();
       else
         printf("%c", scanCodeToChar[0][scanCode]); // Handle normal chars
     }
@@ -63,6 +65,14 @@ void KEYBOARD_HANDLER() {
   // Handle shift logic
   if (scanCode == 0x2A || scanCode == 0x36) shift = 1;
   if (scanCode == 0xAA || scanCode == 0xB6) shift = 0;
+
+
+  // Handle CTRL logic
+  if (scanCode == 0x1D) ctrl = 1;
+  if (scanCode == 0x9D) ctrl = 0;
+
+
+
   prevScanCode = scanCode; // Update previous scan code
 
   send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1

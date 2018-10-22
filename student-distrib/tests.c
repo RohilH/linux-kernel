@@ -52,13 +52,17 @@ int idt_test(){
 
 void test_page() {
 	// int * lowInvalidAddr = 0x0;
-	int * low2InvalidAddr = 0x000B7FF0;
-	int * videoMem = 0x000B8040;
+	// int * low2InvalidAddr = 0x000B7FF0;
+	int * videoMem = 0x000B8000;
+	int * videoMemInvalid = 0x000B8FFC;
+
 	// int * highInvalidAddr = 0x00800010;
 	// x = 0x400000
 	// printf("Invalid Low Address: %d\n", *lowInvalidAddr);
+
 	printf("Valid Address: %d\n", *videoMem);
-	printf("Invalid low 2 Address: %d\n", *low2InvalidAddr);
+	printf("invalid videoMem Address: %d\n", *videoMemInvalid);
+	// printf("Invalid low 2 Address: %d\n", *low2InvalidAddr);
 	// printf("Invalid High Address: %d\n", *highInvalidAddr);
 }
 

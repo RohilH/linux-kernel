@@ -27,7 +27,7 @@ void RTC_HANDLER() {
   cli();
   outb(REG_C, IO_PORT1);
   inb(IO_PORT2);
-  test_interrupts();
+  // test_interrupts();
   sti();
   return;
 //  enable_irq(IRQ_LINE_RTC); // Enable RTC IRQ
