@@ -32,9 +32,9 @@ static inline void assertion_failure(){
  */
 int idt_test(){
 	TEST_HEADER;
-
 	int i;
-	i = 1/0;
+
+
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
@@ -53,7 +53,7 @@ int idt_test(){
 void test_page() {
 	// int * lowInvalidAddr = 0x0;
 	// int * low2InvalidAddr = 0x000B7FF0;
-	int * videoMem = 0x000B8040;
+	int * videoMem = (int*) 0x000B8040;
 	// int * highInvalidAddr = 0x00800010;
 	// x = 0x400000
 	// printf("Invalid Low Address: %d\n", *lowInvalidAddr);
@@ -66,7 +66,12 @@ void test_keyboard() {
 	printf("print the follow characters: abc123yee");
 
 }
-
+void test_divide0() {
+	int i;
+	int k = 1;
+	int j = 1;
+	i = 1/(j - k);
+}
 // void test_handlers() {
 // 	printf("print the follow characters: abc123yee");
 //
@@ -85,4 +90,5 @@ void launch_tests(){
 	//test_keyboard();
 	// launch your tests here
 	test_page();
+	test_divide0();
 }
