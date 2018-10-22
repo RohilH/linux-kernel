@@ -6,7 +6,6 @@
 #define ReadWriteEnable 0x02
 #define UserPrivilege 0x04
 #define PageSize4MB 0x80
-#define KernelOffset 0x82
 #define pageSize 1024
 #define kernelStartAddr 0x00400000
 #define videoMemAddr 0x000B8000
