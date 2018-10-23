@@ -33,8 +33,10 @@ static inline void assertion_failure(){
 int idt_test(){
 	TEST_HEADER;
 
-	int i;
-	i = 1/0;
+	int i, j, k;
+	j = 1;
+	k = 1;
+	i = 1/(j - k);
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
@@ -53,8 +55,8 @@ int idt_test(){
 void test_page() {
 	// int * lowInvalidAddr = 0x0;
 	// int * low2InvalidAddr = 0x000B7FF0;
-	int * videoMem = 0x000B8000;
-	int * videoMemInvalid = 0x000B8FFC;
+	int * videoMem = (int*) 0x000B8000;
+	int * videoMemInvalid = (int*) 0x000B8FFC;
 
 	// int * highInvalidAddr = 0x00800010;
 	// x = 0x400000

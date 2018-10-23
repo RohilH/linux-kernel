@@ -6,7 +6,7 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+#define ATTRIB      0x1F
 
 static int screen_x;
 static int screen_y;
@@ -180,6 +180,26 @@ void putc(uint8_t c) {
     }
 }
 
+
+/* void putc(uint8_t c);
+ * Inputs: x and y position to switch cursor to
+ * Return Value: void
+ * Function: Update cursor pointer */
+void moveCursor(int xPos, int yPos) {
+    if (xPos > NUM_COLS)
+        screen_x = NUM_COLS;
+    else if (xPos < 0)
+        screen_x = 0;
+    else
+        screen_x = xPos;
+
+    if (yPos > NUM_ROWS)
+        screen_y = NUM_ROWS;
+    else if (xPos < 0)
+        screen_x = 0;
+    else
+        screen_y = yPos;
+}
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert
  *            int8_t* buf = allocated buffer to place string in
