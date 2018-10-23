@@ -65,7 +65,7 @@ void KEYBOARD_HANDLER() {
             }
             else if (ctrl && scanCode == 0x26) { // Handle clear screen
                 clear();
-                moveCursor(0,0);
+                moveScreenPos(0,0);
             }
             else {
                 putc(scanCodeToChar[0][scanCode]); // Handle normal chars
