@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "rtc.h"
+#include "terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -50,6 +51,16 @@ int idt_test(){
 
 // add more tests here
 
+void test_terminal() {
+	int bytes = 6;
+	int32_t fdd = 0;
+	char charBuffer[bytes];
+	int read = terminalRead(fdd, charBuffer, bytes);
+	printf("keyboard read: %s\n", *charBuffer);
+	printf("Read bytes: %d\n", read);
+}
+
+
 void test_page() {
 	// int * lowInvalidAddr = (int*) 0x0;
 	// int * low2InvalidAddr = (int*) 0x000B7FF0;
@@ -89,6 +100,7 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_page();
-	test_divide0();
+	test_terminal();
+	// test_page();
+	// test_divide0();
 }

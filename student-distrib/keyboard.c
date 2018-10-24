@@ -7,7 +7,7 @@ uint32_t prevScanCode; // Previous key pressed
 volatile int shift, caps, ctrl, alt; // Key flags
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
-#define BUFFSIZE 128
+
 volatile char charBuffer[BUFFSIZE];
 int buffIndex;
                                     // Neither caps lock or shift pressed
@@ -73,7 +73,7 @@ void KEYBOARD_HANDLER() {
             else if (caps) {
                 addCharToBuffer(scanCode, 1);
             }
-            else {
+            else if (scanCode < 0x3B){
                 addCharToBuffer(scanCode, 0);
             }
         }

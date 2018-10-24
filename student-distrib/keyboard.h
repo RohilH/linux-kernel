@@ -4,6 +4,9 @@
 #include "types.h"
 
 #define IRQ_LINE_KEYS 1
+#define BUFFSIZE 128
+
+extern volatile char charBuffer[BUFFSIZE];
 
 extern void KEYBOARD_INIT();
 extern void KEYBOARD_HANDLER();
