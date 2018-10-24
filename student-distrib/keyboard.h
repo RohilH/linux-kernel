@@ -9,4 +9,5 @@ extern void KEYBOARD_INIT();
 extern void KEYBOARD_HANDLER();
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType);
 void clearCharBuffer();
+void backspace();
 #endif

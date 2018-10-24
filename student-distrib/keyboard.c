@@ -4,11 +4,11 @@
 
 uint32_t scanCode; // Current key being pressed
 uint32_t prevScanCode; // Previous key pressed
-int shift, caps, ctrl, alt; // Key flags
+volatile int shift, caps, ctrl, alt; // Key flags
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
-#define buffSize 50
-volatile char charBuffer[buffSize];
+#define BUFFSIZE 128
+volatile char charBuffer[BUFFSIZE];
 int buffIndex;
                                     // Neither caps lock or shift pressed
 static char scanCodeToChar[4][60] = {{'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -57,20 +57,21 @@ void KEYBOARD_HANDLER() {
     scanCode = inb(0x60); // Obtain key scan code
     if (scanCode != 0 && scanCode < 0x80) { // Check validity
         if (prevScanCode != scanCode) { // Check spamming
-            if (caps && shift) {
+            if (ctrl && (scanCode == 0x26)) { // Handle clear screen
+                clear();
+                clearCharBuffer();
+            }
+            else if (scanCode == 0x0E) {
+                backspace();
+            }
+            else if (caps && shift) {
                 addCharToBuffer(scanCode, 3);
-                putc(scanCodeToChar[3][scanCode]); // Handle normal chars
             }
             else if (shift) {
                 addCharToBuffer(scanCode, 2);
             }
             else if (caps) {
                 addCharToBuffer(scanCode, 1);
-            }
-            else if (ctrl && scanCode == 0x26) { // Handle clear screen
-                clear();
-                clearCharBuffer();
-                // moveScreenPos(0,0);
             }
             else {
                 addCharToBuffer(scanCode, 0);
@@ -104,16 +105,23 @@ void KEYBOARD_HANDLER() {
 
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey];
-    if (buffIndex < buffSize) {
+    if (buffIndex < BUFFSIZE && charToAdd != '\0') {
         charBuffer[buffIndex] = charToAdd;
         buffIndex++;
         putc(charToAdd);
     }
 }
+void backspace() {
+    if (buffIndex > 0) {
+        buffIndex--;
+        charBuffer[buffIndex] = '\0';
+        removec();
+    }
+}
 
 void clearCharBuffer() {
     int i;
-    for (i = 0; i < buffSize; i++)
+    for (i = 0; i < BUFFSIZE; i++)
         charBuffer[i] = '\0';
     buffIndex = 0;
 }
