@@ -90,5 +90,5 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_page();
+	// test_page();
 }

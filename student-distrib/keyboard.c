@@ -7,7 +7,9 @@ uint32_t prevScanCode; // Previous key pressed
 int shift, caps, ctrl, alt; // Key flags
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
-
+#define buffSize 50
+volatile char charBuffer[buffSize];
+int buffIndex;
                                     // Neither caps lock or shift pressed
 static char scanCodeToChar[4][60] = {{'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
                                     '-', '=', ' ', '\0', 'q', 'w', 'e', 'r', 't', 'y', 'u',
@@ -44,6 +46,7 @@ void KEYBOARD_INIT() {
     enable_irq(IRQ_LINE_KEYS); // Enable keyboard IRQ line
     scanCode = 0, prevScanCode = 0; // Initialize all flags to zero
     shift = 0, caps = 0, ctrl = 0, alt = 0;
+    buffIndex = 0;
     sti();
 }
 
@@ -55,20 +58,22 @@ void KEYBOARD_HANDLER() {
     if (scanCode != 0 && scanCode < 0x80) { // Check validity
         if (prevScanCode != scanCode) { // Check spamming
             if (caps && shift) {
+                addCharToBuffer(scanCode, 3);
                 putc(scanCodeToChar[3][scanCode]); // Handle normal chars
             }
-            else if (shift)
-            putc(scanCodeToChar[2][scanCode]); // Handle shift chars
-
+            else if (shift) {
+                addCharToBuffer(scanCode, 2);
+            }
             else if (caps) {
-                putc(scanCodeToChar[1][scanCode]); // Handle caps chars
+                addCharToBuffer(scanCode, 1);
             }
             else if (ctrl && scanCode == 0x26) { // Handle clear screen
                 clear();
-                moveScreenPos(0,0);
+                clearCharBuffer();
+                // moveScreenPos(0,0);
             }
             else {
-                putc(scanCodeToChar[0][scanCode]); // Handle normal chars
+                addCharToBuffer(scanCode, 0);
             }
         }
     }
@@ -95,4 +100,20 @@ void KEYBOARD_HANDLER() {
 
     sti();
     asm("popa");
+}
+
+void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
+    char charToAdd = scanCodeToChar[charType][scanCodeKey];
+    if (buffIndex < buffSize) {
+        charBuffer[buffIndex] = charToAdd;
+        buffIndex++;
+        putc(charToAdd);
+    }
+}
+
+void clearCharBuffer() {
+    int i;
+    for (i = 0; i < buffSize; i++)
+        charBuffer[i] = '\0';
+    buffIndex = 0;
 }

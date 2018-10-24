@@ -22,6 +22,8 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    screen_x = 0;
+    screen_y = 0;
     updateCursor();
 }
 
@@ -168,19 +170,39 @@ int32_t puts(int8_t* s) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
+// void putc(uint8_t c) {
+//     if(c == '\n' || c == '\r') {
+//         screen_y++;
+//         screen_x = 0;
+//     } else {
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+//         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+//         screen_x++;
+//         screen_x %= NUM_COLS;
+//         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+//     }
+//     updateCursor();
+// }
+
 void putc(uint8_t c) {
     if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x = 0;
+        moveScreenPos(0, screen_y + 1);
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if (screen_x >= NUM_COLS) {
+        moveScreenPos(0, screen_y + 1);
+    }
+    if (screen_y >= NUM_ROWS) {
+        moveScreenPos(0, 0);
+    }
+    // screen_x %= NUM_COLS;
+    // screen_y %= NUM_ROWS;
     updateCursor();
 }
+
 
 
 /* void moveScreenPos(int xPos, int yPos);
@@ -188,18 +210,18 @@ void putc(uint8_t c) {
  * Return Value: void
  * Function: Update cursor pointer */
 void moveScreenPos(int xPos, int yPos) {
-    if (xPos > NUM_COLS)
-        screen_x = NUM_COLS;
-    else if (xPos < 0)
-        screen_x = 0;
-    else
+    // if (xPos > NUM_COLS)
+    //     screen_x = NUM_COLS;
+    // else if (xPos < 0)
+    //     screen_x = 0;
+    // else
         screen_x = xPos;
 
-    if (yPos > NUM_ROWS)
-        screen_y = NUM_ROWS;
-    else if (xPos < 0)
-        screen_x = 0;
-    else
+    // if (yPos > NUM_ROWS)
+    //     screen_y = NUM_ROWS;
+    // else if (xPos < 0)
+    //     screen_x = 0;
+    // else
         screen_y = yPos;
 }
 
