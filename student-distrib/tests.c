@@ -52,12 +52,34 @@ int idt_test(){
 // add more tests here
 
 void test_terminal() {
-	int bytes = 6;
+	int bytes = 12;
 	int32_t fdd = 0;
 	char charBuffer[bytes];
 	int read = terminalRead(fdd, charBuffer, bytes);
-	printf("keyboard read: %s\n", *charBuffer);
-	printf("Read bytes: %d\n", read);
+	terminalWrite(fdd, charBuffer, bytes);
+
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+	read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
 }
 
 

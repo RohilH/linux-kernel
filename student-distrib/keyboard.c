@@ -4,7 +4,7 @@
 
 uint32_t scanCode; // Current key being pressed
 uint32_t prevScanCode; // Previous key pressed
-volatile int shift, caps, ctrl, alt; // Key flags
+volatile int shift, caps, ctrl, alt, enterPressed; // Key flags
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
 
@@ -45,7 +45,7 @@ void KEYBOARD_INIT() {
     cli();
     enable_irq(IRQ_LINE_KEYS); // Enable keyboard IRQ line
     scanCode = 0, prevScanCode = 0; // Initialize all flags to zero
-    shift = 0, caps = 0, ctrl = 0, alt = 0;
+    shift = 0, caps = 0, ctrl = 0, alt = 0, enterPressed = 0;
     buffIndex = 0;
     sti();
 }
@@ -61,6 +61,10 @@ void KEYBOARD_HANDLER() {
                 clear();
                 clearCharBuffer();
             }
+            // else if (scanCode == 0x1C) {
+            //     enter = 1;
+            //     addCharToBuffer(scanCode, 0);
+            // }
             else if (scanCode == 0x0E) {
                 backspace();
             }
@@ -105,6 +109,7 @@ void KEYBOARD_HANDLER() {
 
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey];
+    if (charToAdd == '\n') enterPressed = 1;
     if (buffIndex < BUFFSIZE && charToAdd != '\0') {
         charBuffer[buffIndex] = charToAdd;
         buffIndex++;

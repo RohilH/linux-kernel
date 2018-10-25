@@ -7,6 +7,7 @@
 #define BUFFSIZE 128
 
 extern volatile char charBuffer[BUFFSIZE];
+extern volatile int enterPressed;
 
 extern void KEYBOARD_INIT();
 extern void KEYBOARD_HANDLER();
