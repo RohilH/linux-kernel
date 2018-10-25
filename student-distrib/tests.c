@@ -52,33 +52,17 @@ int idt_test(){
 // add more tests here
 
 void test_terminal() {
-	int bytes = 12;
+	int bytes = 1234;
 	int32_t fdd = 0;
 	char charBuffer[bytes];
 	int read = terminalRead(fdd, charBuffer, bytes);
 	terminalWrite(fdd, charBuffer, bytes);
 
+	while(1) {
+		read = terminalRead(fdd, charBuffer, bytes);
+		terminalWrite(fdd, charBuffer, bytes);
+	}
 
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
-
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
-
-
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
-
-
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
-
-
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
-
-	read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
 
 }
 

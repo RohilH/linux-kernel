@@ -220,7 +220,7 @@ void removec() {
 void moveScreenPos(int xPos, int yPos) {
     if (xPos >= NUM_COLS) {
         screen_x = 0;
-        screen_y++;
+        yPos++;
     }
     else {
         screen_x = xPos;

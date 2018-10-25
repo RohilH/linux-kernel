@@ -61,10 +61,9 @@ void KEYBOARD_HANDLER() {
                 clear();
                 clearCharBuffer();
             }
-            // else if (scanCode == 0x1C) {
-            //     enter = 1;
-            //     addCharToBuffer(scanCode, 0);
-            // }
+            else if (scanCode == 0x1C) {
+                enter();
+            }
             else if (scanCode == 0x0E) {
                 backspace();
             }
@@ -109,12 +108,15 @@ void KEYBOARD_HANDLER() {
 
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey];
-    if (charToAdd == '\n') enterPressed = 1;
     if (buffIndex < BUFFSIZE && charToAdd != '\0') {
         charBuffer[buffIndex] = charToAdd;
         buffIndex++;
         putc(charToAdd);
     }
+    // else if (charToAdd == '\n') {
+    //     putc(charToAdd);
+    //     enterPressed = 1;
+    // }
 }
 void backspace() {
     if (buffIndex > 0) {
@@ -122,6 +124,10 @@ void backspace() {
         charBuffer[buffIndex] = '\0';
         removec();
     }
+}
+
+void enter() {
+    enterPressed = 1;
 }
 
 void clearCharBuffer() {
