@@ -67,6 +67,10 @@ void test_terminal() {
 
 }
 
+void test_RTC() {
+	while(1)
+		RTC_READ();
+}
 
 void test_page() {
 	// int * lowInvalidAddr = (int*) 0x0;
@@ -87,42 +91,48 @@ void test_keyboard() {
 
 
 void test_fileSys() {
-	dentry_t testD;
-	uint8_t fileData[100000];
-	uint8_t  nameOfFile[10];
+	uint8_t buffer[1000000];
+	// dentry_t testD;
+	int numBytes = 1000000;
+	int i;
+	i = file_open("testprint");
+	if (i == -1) return;
+	file_read(2, buffer, numBytes);
+	terminalWrite(1, buffer, numBytes);
+	// uint8_t  nameOfFile[10];
 	// uint8_t * nameOfFile;
 	// char nameOfFile[100];
 	// printf("Page Faulting 0?");
 	// strncpy(nameOfFile, "verylargetextwithverylongname.txt", 100);
 
-	nameOfFile[0] = 'f';
-	nameOfFile[1] = 'r';
-	nameOfFile[2] = 'a';
-	nameOfFile[3] = 'm';
-	nameOfFile[4] = 'e';
-	nameOfFile[5] = '1';
-	nameOfFile[6] = '.';
-	nameOfFile[7] = 't';
-	nameOfFile[8] = 'x';
-	nameOfFile[9] = 't';
-
-	int i;
-	// printf("Page Faulting 1?");
-	i = read_dentry_by_name(nameOfFile, &testD);
-	// printf("Page Faulting 2?");
-
-	if (i == -1) {
-		printf("No file by that name");
-		return;
-	}
-	int bytesRead;
-	bytesRead = read_data(testD.inodeNum, 0, fileData, 100000);
-	printf("bytes read? %d\n", bytesRead);
-	// printf("Page Faulting 3?");
-
-	for (i = 0; i < bytesRead; i++) {
-		putc(fileData[i]);
-	}
+	// nameOfFile[0] = 'f';
+	// nameOfFile[1] = 'r';
+	// nameOfFile[2] = 'a';
+	// nameOfFile[3] = 'm';
+	// nameOfFile[4] = 'e';
+	// nameOfFile[5] = '1';
+	// nameOfFile[6] = '.';
+	// nameOfFile[7] = 't';
+	// nameOfFile[8] = 'x';
+	// nameOfFile[9] = 't';
+	//
+	// int i;
+	// // printf("Page Faulting 1?");
+	// i = read_dentry_by_name(nameOfFile, &testD);
+	// // printf("Page Faulting 2?");
+	//
+	// if (i == -1) {
+	// 	printf("No file by that name");
+	// 	return;
+	// }
+	// int bytesRead;
+	// bytesRead = read_data(testD.inodeNum, 0, fileData, 100000);
+	// printf("bytes read? %d\n", bytesRead);
+	// // printf("Page Faulting 3?");
+	//
+	// for (i = 0; i < bytesRead; i++) {
+	// 	putc(fileData[i]);
+	// }
 }
 
 void test_divide0() {
@@ -149,6 +159,7 @@ void launch_tests(){
 	//test_keyboard();
 	// launch your tests here
 	test_fileSys();
+	test_RTC();
 	// test_terminal();
 	// test_page();
 	// test_divide0();

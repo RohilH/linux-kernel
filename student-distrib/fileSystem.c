@@ -72,10 +72,32 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
   return bytesRead;
 }
-
+dentry_t testD;
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
+
+	// uint8_t fileData[10000];
+	// uint8_t  nameOfFile[10];
+    // int i;
+	// uint8_t * nameOfFile;
+    // printf("Page Faulting 1?");
+    // i = read_dentry_by_name(nameOfFile, &testD);
+    // printf("Page Faulting 2?");
+    // int i;
+    // if (i == -1) {
+    //     printf("No file by that name");
+    //     return;
+    // }
+    int bytesRead;
+    uint8_t* buffer = (uint8_t*) buf;
+    bytesRead = read_data(testD.inodeNum, 0, buffer, nBytes);
+    printf("Bytes read: %d\n", bytesRead);
+    // printf("Page Faulting 3?");
+    // terminalWrite()
+    // for (i = 0; i < bytesRead; i++) {
+    //     putc(buffer[i]);
+    // }
   // call read_data
-  return 0;
+  return bytesRead;
 }
 
 int32_t file_write (int32_t fd, const void* buf, int32_t nBytes) {
@@ -83,7 +105,13 @@ int32_t file_write (int32_t fd, const void* buf, int32_t nBytes) {
 }
 
 int32_t file_open (const uint8_t* fileName) {
-  return 0;
+    int i;
+    i = read_dentry_by_name(fileName, &testD);
+    if (i == -1) {
+        printf("No file by that name");
+        return -1;
+    }
+    return 0;
 }
 
 int32_t file_close (int32_t fd) {
