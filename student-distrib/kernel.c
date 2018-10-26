@@ -156,7 +156,7 @@ void entry(unsigned long magic, unsigned long addr) {
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging
 
-   // clear(); // Clear the screen
+    clear(); // Clear the screen
 
 #ifdef RUN_TESTS
     /* Run tests */

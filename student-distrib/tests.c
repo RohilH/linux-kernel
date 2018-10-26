@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "rtc.h"
 #include "terminal.h"
+#include "fileSystem.h"
 
 #define PASS 1
 #define FAIL 0
@@ -83,6 +84,47 @@ void test_keyboard() {
 	printf("print the follow characters: abc123yee");
 
 }
+
+
+void test_fileSys() {
+	dentry_t testD;
+	uint8_t fileData[100000];
+	uint8_t  nameOfFile[10];
+	// uint8_t * nameOfFile;
+	// char nameOfFile[100];
+	// printf("Page Faulting 0?");
+	// strncpy(nameOfFile, "verylargetextwithverylongname.txt", 100);
+
+	nameOfFile[0] = 'f';
+	nameOfFile[1] = 'r';
+	nameOfFile[2] = 'a';
+	nameOfFile[3] = 'm';
+	nameOfFile[4] = 'e';
+	nameOfFile[5] = '1';
+	nameOfFile[6] = '.';
+	nameOfFile[7] = 't';
+	nameOfFile[8] = 'x';
+	nameOfFile[9] = 't';
+
+	int i;
+	// printf("Page Faulting 1?");
+	i = read_dentry_by_name(nameOfFile, &testD);
+	// printf("Page Faulting 2?");
+
+	if (i == -1) {
+		printf("No file by that name");
+		return;
+	}
+	int bytesRead;
+	bytesRead = read_data(testD.inodeNum, 0, fileData, 100000);
+	printf("bytes read? %d\n", bytesRead);
+	// printf("Page Faulting 3?");
+
+	for (i = 0; i < bytesRead; i++) {
+		putc(fileData[i]);
+	}
+}
+
 void test_divide0() {
 	int i;
 	int k = 1;
@@ -106,7 +148,8 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_terminal();
+	test_fileSys();
+	// test_terminal();
 	// test_page();
 	// test_divide0();
 }

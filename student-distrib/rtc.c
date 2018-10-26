@@ -108,8 +108,8 @@ void RTC_HANDLER() {
   cli();
   outb(REG_C, IO_PORT1);
   inb(IO_PORT2);
-  RTC_CHANGE_FREQ(32);
-  test_interrupts();
+  // RTC_CHANGE_FREQ(32);
+  // test_interrupts();
   //interruptFlag = 1;
   sti();
   return;
