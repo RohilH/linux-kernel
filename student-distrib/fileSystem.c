@@ -52,7 +52,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     length = inodeBlockStart->length;
 
   int32_t bytesRead = 0;
-
   int i, currByte;
   int32_t dataBlockToRead = offset/INODESIZE;
   int32_t currDataBlock = inodeBlockStart->dataBlockNum[dataBlockToRead];
