@@ -68,12 +68,58 @@ void test_terminal() {
 }
 
 void test_RTC() {
-	uint8_t buffer[1];
+	int32_t buffer[1];
+	int32_t freqs[4] = {2, 32, 128, 1024};
 	int32_t numBytes = 1;
 	int32_t i;
-	for (i=0; i < 100; i++) {
+	int32_t x;
+
+	rtc_write(0, &freqs[0], 4);
+	while (i < 10) {
 		rtc_read(0, buffer, numBytes);
 		printf("1");
+		i++;
+	}
+	while(x < 10) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
+	rtc_write(0, &freqs[1], 4);
+	while (i < 40) {
+		rtc_read(0, buffer, numBytes);
+		printf("1");
+		i++;
+	}
+	while(x < 40) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
+	rtc_write(0, &freqs[2], 4);
+	while (i < 200) {
+		rtc_read(0, buffer, numBytes);
+		printf("1");
+		i++;
+	}
+	while(x < 200) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
+	rtc_write(0, &freqs[3], 4);
+	while (i < 1000) {
+		rtc_read(0, buffer, numBytes);
+		printf("1");
+		i++;
+	}
+	while(x < 1000) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
 	}
 }
 
