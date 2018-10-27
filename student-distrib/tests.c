@@ -214,7 +214,7 @@ void test_RTC_invalid_freq() {
 			removec();
 			x++;
 		}
-		rtc_write(0, &freqs[0], 4);
+		rtc_write(0, &freqs[1], 4);
 		while (i < 20) {
 			rtc_read(0, buffer, numBytes);
 			printf("b");
@@ -225,17 +225,7 @@ void test_RTC_invalid_freq() {
 			removec();
 			x++;
 		}
-		rtc_write(0, &freqs[0], 4);
-		while (i < 30) {
-			rtc_read(0, buffer, numBytes);
-			printf("c");
-			i++;
-		}
-		while(x < 30) {
-			rtc_read(0, buffer, numBytes);
-			removec();
-			x++;
-		}
+
 	}
 
 void test_page() {
@@ -285,10 +275,10 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	//test_fileSys();
+	// test_fileSys();
 	// test_dirRead();
-	 // test_RTC();
-	 test_RTC_invalid_freq();
+	// test_RTC();
+	test_RTC_invalid_freq();
 	// test_terminal();
 	// test_page();
 	// test_divide0();
