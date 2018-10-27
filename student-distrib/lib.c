@@ -6,7 +6,7 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+#define ATTRIB      0xB1
 
 static int screen_x;
 static int screen_y;
@@ -22,6 +22,10 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    moveScreenPos(0,0);
+    // screen_x = 0;
+    // screen_y = 0;
+    // updateCursor();
 }
 
 /* Standard printf().
@@ -169,15 +173,101 @@ int32_t puts(int8_t* s) {
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
     if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x = 0;
+        moveScreenPos(0, screen_y + 1);
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    // if (screen_x >= NUM_COLS) {
+    //     moveScreenPos(0, screen_y + 1);
+    // }
+    // if (screen_y >= NUM_ROWS) {
+    //     moveScreenPos(0, 0);
+    // }
+    moveScreenPos(screen_x, screen_y);
+
+    // screen_x %= NUM_COLS;
+    // screen_y %= NUM_ROWS;
+    // updateCursor();
+}
+
+/* void putc(uint8_t c);
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void removec() {
+    if (screen_x == 0 && screen_y == 0)
+        return;
+    else if (screen_x == 0) {
+        moveScreenPos(NUM_COLS - 1, screen_y - 1);
+    }
+    else {
+        moveScreenPos(screen_x - 1, screen_y);
+    }
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+
+}
+
+
+
+
+/* void moveScreenPos(int xPos, int yPos);
+ * Inputs: x and y position to switch cursor to
+ * Return Value: void
+ * Function: Update cursor pointer */
+void moveScreenPos(int xPos, int yPos) {
+    if (xPos >= NUM_COLS) {
+        screen_x = 0;
+        yPos++;
+    }
+    else {
+        screen_x = xPos;
+    }
+    if (yPos >= NUM_ROWS) {
+        vertScroll();
+        screen_y = NUM_ROWS - 1;
+    }
+    else {
+        screen_y = yPos;
+    }
+    updateCursor();
+}
+
+/* void vertScroll();
+ * Inputs: none
+ * Return Value: void
+ * Function: Scrolls down one row */
+void vertScroll() {
+    int x, y;
+    // shift all rows up one
+    for (y = 0; y < (NUM_ROWS - 1); y++) {
+        for (x = 0; x < NUM_COLS; x++) {
+            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1)) = *(uint8_t *)(video_mem + ((NUM_COLS * (y + 1) + x) << 1));
+            *(uint8_t *)(video_mem + ((NUM_COLS * y + x) << 1) + 1) = *(uint8_t *)(video_mem + ((NUM_COLS * (y + 1) + x) << 1) + 1);
+        }
+    }
+
+    // clear last row
+    for (x = 0; x < NUM_COLS; x++) {
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB;
+    }
+}
+
+/* void updateCursor(int xPos, int yPos);
+ * Inputs: x and y position to switch cursor to
+ * Return Value: void
+ * Function: Update cursor pointer */
+void updateCursor() {
+    uint16_t pos = screen_y * NUM_COLS + screen_x;
+
+    outb(0x0F, 0x3D4);
+    outb((uint8_t) (pos & 0xFF) ,0x3D5);
+
+    outb(0x0E, 0x3D4);
+    outb((uint8_t) ((pos >> 8) & 0xFF) ,0x3D5);
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

@@ -4,15 +4,14 @@
 #include "keyboard.h"
 #include "rtc.h"
 
-// Populate and initialize the IDT table entry attributes
+/*
+ * IDT_Initializer
+ *     DESCRIPTION: Populate and initialize the IDT table entry attributes
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void IDT_Initializer() {
-
-  // void (*interruptHandler[23])(void) = {DIVISION_ERROR_HANDLER, RESERVED_HANDLER, NMI_HANDLER, BREAK_POINT_HANDLER,
-  //                                       OVERFLOW_HANDLER, BOUNDS_HANDLER, INVALID_OPCODE_HANDLER, DEVICE_NOT_AVAILABLE_HANDLER,
-  //                                       DOUBLE_FAULT_HANDLER, COPROCESSOR_SEGMENT_OVERRUN_HANDLER, INVALID_TSS_HANDLER, SEGMENT_NOT_PRESENT_HANDLER,
-  //                                       STACK_SEGMENT_FAULT_HANDLER, GENERAL_PROTECTION_HANDLER, PAGE_FAULT_HANDLER, MATH_FPU_FAULT_HANDLER,
-  //                                       ALIGNMENT_CHECK_HANDLER, MACHINE_CHECK_HANDLER, SIMD_FLOATING_POINT_EXCEPTION_HANDLER, GENERIC_EXCEPTION_HANDLER };
-
   // Initialize first 32 Intel defined exception attributes
   int x;
   for (x = 0; x < NUM_EXCEPTIONS; x++) {
@@ -49,6 +48,7 @@ void IDT_Initializer() {
   SET_IDT_ENTRY(idt[18], MACHINE_CHECK_HANDLER);
   SET_IDT_ENTRY(idt[19], SIMD_FLOATING_POINT_EXCEPTION_HANDLER);
 
+  // Initialize the remaining interrupts
   for (x = NUM_EXCEPTIONS; x < NUM_VEC; x++) {
     idt[x].present      = 1;
     idt[x].dpl          = 0;
@@ -61,14 +61,14 @@ void IDT_Initializer() {
     idt[x].seg_selector = KERNEL_CS;
   }
 
-  SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER); // Set keyboard handler
-  SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER); // Set RTC handler
+  // Set Keyboard handler
+  SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER);
+  // Set RTC handler
+  SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER);
 
 }
 
-///////////////////////////
-//////// Handlers /////////
-///////////////////////////
+// Handlers
 void DIVISION_ERROR_HANDLER() {
   asm("pusha");
   printf("DIVISION_ERROR Occured\n");

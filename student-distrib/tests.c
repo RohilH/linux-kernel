@@ -2,6 +2,8 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "rtc.h"
+#include "terminal.h"
+#include "fileSystem.h"
 
 #define PASS 1
 #define FAIL 0
@@ -50,38 +52,222 @@ int idt_test(){
 
 // add more tests here
 
+void test_terminal() {
+	int bytes = 1234;
+	int32_t fdd = 0;
+	char charBuffer[bytes];
+	int read = terminalRead(fdd, charBuffer, bytes);
+	terminalWrite(fdd, charBuffer, bytes);
+
+	while(1) {
+		read = terminalRead(fdd, charBuffer, bytes);
+		terminalWrite(fdd, charBuffer, bytes);
+	}
+
+
+}
+
+void test_RTC() {
+		int32_t buffer[1];
+		int32_t freqs[10] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+		int32_t numBytes = 1;
+		int32_t i;
+		int32_t x;
+
+		rtc_write(0, &freqs[0], 4);
+		while (i < 10) {
+			rtc_read(0, buffer, numBytes);
+			printf("a");
+			i++;
+		}
+		while(x < 10) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[1], 4);
+		while (i < 25) {
+			rtc_read(0, buffer, numBytes);
+			printf("b");
+			i++;
+		}
+		while(x < 25) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[2], 4);
+		while (i < 40) {
+			rtc_read(0, buffer, numBytes);
+			printf("c");
+			i++;
+		}
+		while(x < 40) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[3], 4);
+		while (i < 60) {
+			rtc_read(0, buffer, numBytes);
+			printf("d");
+			i++;
+		}
+		while(x < 60) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+
+		rtc_write(0, &freqs[4], 4);
+		while (i < 85) {
+			rtc_read(0, buffer, numBytes);
+			printf("e");
+			i++;
+		}
+		while(x < 85) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[5], 4);
+		while (i < 120) {
+			rtc_read(0, buffer, numBytes);
+			printf("f");
+			i++;
+		}
+		while(x < 120) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[6], 4);
+		while (i < 200) {
+			rtc_read(0, buffer, numBytes);
+			printf("g");
+			i++;
+		}
+		while(x < 200) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[7], 4);
+		while (i < 350) {
+			rtc_read(0, buffer, numBytes);
+			printf("h");
+			i++;
+		}
+		while(x < 350) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[8], 4);
+		while (i < 600) {
+			rtc_read(0, buffer, numBytes);
+			printf("i");
+			i++;
+		}
+		while(x < 600) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[9], 4);
+		while (i < 1000) {
+			rtc_read(0, buffer, numBytes);
+			printf("j");
+			i++;
+		}
+		while(x < 1000) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+}
+
+void test_RTC_invalid_freq() {
+		int32_t buffer[1];
+		int32_t freqs[2] = {1023, 2048};
+		int32_t numBytes = 1;
+		int32_t i;
+		int32_t x;
+
+		rtc_write(0, &freqs[0], 4);
+		while (i < 10) {
+			rtc_read(0, buffer, numBytes);
+			printf("a");
+			i++;
+		}
+		while(x < 10) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+		rtc_write(0, &freqs[1], 4);
+		while (i < 20) {
+			rtc_read(0, buffer, numBytes);
+			printf("b");
+			i++;
+		}
+		while(x < 20) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+	}
+
 void test_page() {
 	// int * lowInvalidAddr = (int*) 0x0;
 	// int * low2InvalidAddr = (int*) 0x000B7FF0;
 	int * videoMem = (int*) 0x000B8040;
-	// int * highInvalidAddr = (int*) 0x00800010;
+	int * highInvalidAddr = (int*) 0x00800010;
 	// x = 0x400000
 	// printf("Invalid Low Address: %d\n", *lowInvalidAddr);
 	printf("Valid Address: %d\n", *videoMem);
 	// printf("Invalid low 2 Address: %d\n", *low2InvalidAddr);
-	// printf("Invalid High Address: %d\n", *highInvalidAddr);
+	printf("Invalid High Address: %d\n", *highInvalidAddr);
 }
 
 void test_keyboard() {
 	printf("print the follow characters: abc123yee");
 
 }
+
+void test_dirRead() {
+	int32_t fileNames[42];
+	dir_read(2, fileNames, 32);
+	// terminalWrite(1, fileNames, 32);
+}
+void test_fileSys() {
+	uint8_t buffer[1000000];
+	// dentry_t testD;
+	int32_t numBytes = 1000000;
+	int32_t i;
+	int read_bytes;
+	i = file_open((uint8_t*)"frame0.txt");
+	if (i == -1) return;
+	read_bytes = file_read(2, buffer, numBytes);
+	terminalWrite(1, buffer, read_bytes);
+}
+
 void test_divide0() {
 	int i;
 	int k = 1;
 	int j = 1;
 	i = 1/(j - k);
 }
-// void test_handlers() {
-// 	printf("print the follow characters: abc123yee");
-//
-// }
-
-/* Checkpoint 2 tests */
-/* Checkpoint 3 tests */
-/* Checkpoint 4 tests */
-/* Checkpoint 5 tests */
-
 
 /* Test suite entry point */
 void launch_tests(){
@@ -89,6 +275,11 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_page();
-	test_divide0();
+	// test_fileSys();
+	// test_dirRead();
+	// test_RTC();
+	test_RTC_invalid_freq();
+	// test_terminal();
+	// test_page();
+	// test_divide0();
 }

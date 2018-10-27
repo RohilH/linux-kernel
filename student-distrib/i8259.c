@@ -9,7 +9,13 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-/* Initialize the 8259 PIC */
+/*
+ * i8259_init
+ *     DESCRIPTION: Initialize the master and slave PICs
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void i8259_init(void) {
   master_mask = MASK_LOW8;
   slave_mask = MASK_LOW8;
@@ -35,7 +41,13 @@ void i8259_init(void) {
   enable_irq(IRQ_LINE_PIC); // Enable handling of IRQ line 2
 }
 
-/* Enable (unmask) the specified IRQ */
+/*
+ * enable_irq
+ *     DESCRIPTION: Enable the specified IRQ
+ *     INPUTS: irq_num
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void enable_irq(uint32_t irq_num) {
   // Check if IRQ for slave
   if(irq_num >= SLAVE_MIN && irq_num <= SLAVE_MAX) { // IRQ corresponds to slave
@@ -47,7 +59,13 @@ void enable_irq(uint32_t irq_num) {
   }
 }
 
-/* Disable (mask) the specified IRQ */
+/*
+ * disable_irq
+ *     DESCRIPTION: Disable the specified IRQ
+ *     INPUTS: irq_num
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void disable_irq(uint32_t irq_num) {
   // Check if IRQ for slave
   if(irq_num >= SLAVE_MIN && irq_num <= SLAVE_MAX) { // IRQ corresponds to slave
@@ -59,7 +77,13 @@ void disable_irq(uint32_t irq_num) {
   }
 }
 
-/* Send end-of-interrupt signal for the specified IRQ */
+/*
+ * send_eoi
+ *     DESCRIPTION: Send end-of-interrupt signal for the specified IRQ
+ *     INPUTS: irq_num
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void send_eoi(uint32_t irq_num) {
   // Send EOI to appropriate port based on irq_num
   if(irq_num >= SLAVE_MIN && irq_num <= SLAVE_MAX) {
