@@ -2,7 +2,6 @@
 #define _IDT_H
 
 #include "x86_desc.h"
-#include "interrupt_wrapper.h"
 
 // Interrupt Handlers
 void DIVISION_ERROR_HANDLER();

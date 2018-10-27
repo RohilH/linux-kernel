@@ -9,6 +9,8 @@
 extern volatile char charBuffer[BUFFSIZE];
 extern volatile int enterPressed;
 
+
+// see function descriptions in keyboard.c
 extern void KEYBOARD_INIT();
 extern void KEYBOARD_HANDLER();
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType);

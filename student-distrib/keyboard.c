@@ -39,17 +39,31 @@ static char scanCodeToChar[4][60] = {{'\0', '\0', '1', '2', '3', '4', '5', '6', 
                                     'z', 'x', 'c', 'v', 'b', 'n', 'm', '<', '>', '?', '\0',
                                     '*', '\0', ' ', '\0'}};
 
-
-// Initialize keyboard IRQ and flags
+/*
+ * KEYBOARD_INIT
+ *     DESCRIPTION: Initialize keyboard IRQ and flags
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void KEYBOARD_INIT() {
     cli();
     enable_irq(IRQ_LINE_KEYS); // Enable keyboard IRQ line
-    scanCode = 0, prevScanCode = 0; // Initialize all flags to zero
+
+    // Initialize all vars to zero
+    scanCode = 0, prevScanCode = 0;
     shift = 0, caps = 0, ctrl = 0, alt = 0, enterPressed = 0;
     buffIndex = 0;
     sti();
 }
 
+/*
+ * KEYBOARD_HANDLER
+ *     DESCRIPTION: Handles keyboard press
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void KEYBOARD_HANDLER() {
     asm("pusha");
     cli();
@@ -61,22 +75,22 @@ void KEYBOARD_HANDLER() {
                 clear();
                 clearCharBuffer();
             }
-            else if (scanCode == 0x1C) {
+            else if (scanCode == 0x1C) { // Handle enter
                 enter();
             }
-            else if (scanCode == 0x0E) {
+            else if (scanCode == 0x0E) { // Handle backspace
                 backspace();
             }
-            else if (caps && shift) {
+            else if (caps && shift) { // Handle caps and shift
                 addCharToBuffer(scanCode, 3);
             }
-            else if (shift) {
+            else if (shift) { // Handle shift only
                 addCharToBuffer(scanCode, 2);
             }
-            else if (caps) {
+            else if (caps) { // Handle caps only
                 addCharToBuffer(scanCode, 1);
             }
-            else if (scanCode < 0x3B){
+            else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
             }
         }
@@ -106,6 +120,13 @@ void KEYBOARD_HANDLER() {
     asm("popa");
 }
 
+/*
+ * addCharToBuffer
+ *     DESCRIPTION: Handles printing character to screen
+ *     INPUTS: scanCodeKey (scan code of key pressed), charType (determines which char to print)
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey];
     if (buffIndex < BUFFSIZE && charToAdd != '\0') {
@@ -113,12 +134,15 @@ void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
         buffIndex++;
         putc(charToAdd);
     }
-    // else if (charToAdd == '\n') {
-    //     putc(charToAdd);
-    //     enterPressed = 1;
-    // }
 }
 
+/*
+ * backspace
+ *     DESCRIPTION: Handles removing character from key buffer and screen
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void backspace() {
     if (buffIndex > 0) {
         buffIndex--;
@@ -127,10 +151,24 @@ void backspace() {
     }
 }
 
+/*
+ * enter
+ *     DESCRIPTION: Handles enter being pressed for terminal read
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void enter() {
     enterPressed = 1;
 }
 
+/*
+ * clearCharBuffer
+ *     DESCRIPTION: Handles clearing characters from key buffer
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void clearCharBuffer() {
     int i;
     for (i = 0; i < BUFFSIZE; i++)
