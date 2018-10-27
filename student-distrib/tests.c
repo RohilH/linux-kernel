@@ -68,60 +68,175 @@ void test_terminal() {
 }
 
 void test_RTC() {
-	int32_t buffer[1];
-	int32_t freqs[4] = {2, 32, 128, 1024};
-	int32_t numBytes = 1;
-	int32_t i;
-	int32_t x;
+		int32_t buffer[1];
+		int32_t freqs[10] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+		int32_t numBytes = 1;
+		int32_t i;
+		int32_t x;
 
-	rtc_write(0, &freqs[0], 4);
-	while (i < 10) {
-		rtc_read(0, buffer, numBytes);
-		printf("1");
-		i++;
-	}
-	while(x < 10) {
-		rtc_read(0, buffer, numBytes);
-		removec();
-		x++;
-	}
+		rtc_write(0, &freqs[0], 4);
+		while (i < 10) {
+			rtc_read(0, buffer, numBytes);
+			printf("a");
+			i++;
+		}
+		while(x < 10) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
 
-	rtc_write(0, &freqs[1], 4);
-	while (i < 40) {
-		rtc_read(0, buffer, numBytes);
-		printf("1");
-		i++;
-	}
-	while(x < 40) {
-		rtc_read(0, buffer, numBytes);
-		removec();
-		x++;
-	}
+		rtc_write(0, &freqs[1], 4);
+		while (i < 25) {
+			rtc_read(0, buffer, numBytes);
+			printf("b");
+			i++;
+		}
+		while(x < 25) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
 
-	rtc_write(0, &freqs[2], 4);
-	while (i < 200) {
-		rtc_read(0, buffer, numBytes);
-		printf("1");
-		i++;
-	}
-	while(x < 200) {
-		rtc_read(0, buffer, numBytes);
-		removec();
-		x++;
-	}
+		rtc_write(0, &freqs[2], 4);
+		while (i < 40) {
+			rtc_read(0, buffer, numBytes);
+			printf("c");
+			i++;
+		}
+		while(x < 40) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
 
-	rtc_write(0, &freqs[3], 4);
-	while (i < 1000) {
-		rtc_read(0, buffer, numBytes);
-		printf("1");
-		i++;
-	}
-	while(x < 1000) {
-		rtc_read(0, buffer, numBytes);
-		removec();
-		x++;
-	}
+		rtc_write(0, &freqs[3], 4);
+		while (i < 60) {
+			rtc_read(0, buffer, numBytes);
+			printf("d");
+			i++;
+		}
+		while(x < 60) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+
+		rtc_write(0, &freqs[4], 4);
+		while (i < 85) {
+			rtc_read(0, buffer, numBytes);
+			printf("e");
+			i++;
+		}
+		while(x < 85) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[5], 4);
+		while (i < 120) {
+			rtc_read(0, buffer, numBytes);
+			printf("f");
+			i++;
+		}
+		while(x < 120) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[6], 4);
+		while (i < 200) {
+			rtc_read(0, buffer, numBytes);
+			printf("g");
+			i++;
+		}
+		while(x < 200) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[7], 4);
+		while (i < 350) {
+			rtc_read(0, buffer, numBytes);
+			printf("h");
+			i++;
+		}
+		while(x < 350) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[8], 4);
+		while (i < 600) {
+			rtc_read(0, buffer, numBytes);
+			printf("i");
+			i++;
+		}
+		while(x < 600) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+
+		rtc_write(0, &freqs[9], 4);
+		while (i < 1000) {
+			rtc_read(0, buffer, numBytes);
+			printf("j");
+			i++;
+		}
+		while(x < 1000) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
 }
+
+void test_RTC_invalid_freq() {
+		int32_t buffer[1];
+		int32_t freqs[2] = {1023, 2048};
+		int32_t numBytes = 1;
+		int32_t i;
+		int32_t x;
+
+		rtc_write(0, &freqs[0], 4);
+		while (i < 10) {
+			rtc_read(0, buffer, numBytes);
+			printf("a");
+			i++;
+		}
+		while(x < 10) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+		rtc_write(0, &freqs[0], 4);
+		while (i < 20) {
+			rtc_read(0, buffer, numBytes);
+			printf("b");
+			i++;
+		}
+		while(x < 20) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+		rtc_write(0, &freqs[0], 4);
+		while (i < 30) {
+			rtc_read(0, buffer, numBytes);
+			printf("c");
+			i++;
+		}
+		while(x < 30) {
+			rtc_read(0, buffer, numBytes);
+			removec();
+			x++;
+		}
+	}
 
 void test_page() {
 	// int * lowInvalidAddr = (int*) 0x0;
@@ -170,9 +285,10 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_fileSys();
+	//test_fileSys();
 	// test_dirRead();
-	// test_RTC();
+	 // test_RTC();
+	 test_RTC_invalid_freq();
 	// test_terminal();
 	// test_page();
 	// test_divide0();
