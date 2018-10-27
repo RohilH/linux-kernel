@@ -3,9 +3,10 @@
 
 #include "types.h"
 
-#define inodeSize 4096
-#define bootBlockSize 4096
-#define dataBlockSize 4096
+#define FILENAMESIZE  32
+#define INODESIZE     4096
+#define BOOTBLOCKSIZE 4096
+#define DATABLOCKSIZE 4096
 
 typedef struct dentry {
     int8_t fileName[32];

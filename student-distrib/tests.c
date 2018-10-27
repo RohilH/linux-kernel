@@ -68,8 +68,13 @@ void test_terminal() {
 }
 
 void test_RTC() {
-	while(1)
-		RTC_READ();
+	uint8_t buffer[1];
+	int32_t numBytes = 1;
+	int32_t i;
+	for (i=0; i < 100; i++) {
+		rtc_read(0, buffer, numBytes);
+		printf("1");
+	}
 }
 
 void test_page() {
@@ -93,8 +98,8 @@ void test_keyboard() {
 void test_fileSys() {
 	uint8_t buffer[1000000];
 	// dentry_t testD;
-	int numBytes = 1000000;
-	int i;
+	int32_t numBytes = 1000000;
+	int32_t i;
 	i = file_open("testprint");
 	if (i == -1) return;
 	file_read(2, buffer, numBytes);
@@ -158,7 +163,7 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	test_fileSys();
+	// test_fileSys();
 	test_RTC();
 	// test_terminal();
 	// test_page();

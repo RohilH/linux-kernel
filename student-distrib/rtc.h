@@ -14,13 +14,12 @@
 
 extern void RTC_INIT();
 extern void RTC_HANDLER();
-int RTC_OPEN();
-int RTC_READ();
-int RTC_WRITE(int32_t fd, const void* buf, int32_t nbytes);
-int RTC_CLOSE();
-int RTC_CHANGE_FREQ(int32_t inputFreq);
-uint8_t translateFrequency(int32_t inputFreq);
 
-
+int32_t rtc_read(int32_t fd, void* buf, int32_t nBytes);
+int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes);
+int32_t rtc_open(const uint8_t* fileName);
+int32_t rtc_close(int32_t fd);
+int32_t rtc_changeFreq(int32_t inputFreq);
+uint8_t rtc_translateFrequency(int32_t inputFreq);
 
 #endif

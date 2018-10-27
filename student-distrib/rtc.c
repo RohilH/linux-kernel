@@ -23,15 +23,15 @@ void RTC_INIT() {
 //  sti(); // Enable interrupts
 }
 
-int RTC_OPEN() {
-  int x = RTC_CHANGE_FREQ(2);
+int32_t rtc_open(const uint8_t* fileName) {
+  int x = rtc_changeFreq(2);
   if ( x != 0 ) {
     return -1;
   }
   return 0;
 }
 
-int RTC_READ() {
+int32_t rtc_read(int32_t fd, void* buf, int32_t nBytes) {
   disable_irq(1);
   interruptFlag = 0;
   while(interruptFlag == 0) {
@@ -41,31 +41,31 @@ int RTC_READ() {
   return 0;
 }
 
-int RTC_WRITE(int32_t fd, const void* buf, int32_t nbytes) {
-  if(nbytes != 4) {
+int32_t rtc_write(int32_t fd, const void* buf, int32_t nBytes) {
+  if(nBytes != 4) {
     return -1;
   }
-  int x = RTC_CHANGE_FREQ(*(int32_t*)buf);
+  int x = rtc_changeFreq(*(int32_t*)buf);
   if ( x != 0 ) {
     return -1;
   }
-  return nbytes;
+  return nBytes;
 }
 
-int RTC_CLOSE() {
-  int x = RTC_CHANGE_FREQ(2);
+int32_t rtc_close(int32_t fd) {
+  int x = rtc_changeFreq(2);
   if ( x != 0 ) {
     return -1;
   }
   return 0;
 }
 
-int RTC_CHANGE_FREQ(int32_t inputFreq) {
+int32_t rtc_changeFreq(int32_t inputFreq) {
   char prev;
   outb(REG_A, IO_PORT1); // Idx --> Reg B / NMI_HANDLER
   prev = inb(IO_PORT2); // Obtain Reg A val
 
-  uint8_t rate = translateFrequency(inputFreq); // Translate the input frequency to 8 bits
+  uint8_t rate = rtc_translateFrequency(inputFreq); // Translate the input frequency to 8 bits
   if(rate == 0x00) {
     return -1;
   }
@@ -75,7 +75,7 @@ int RTC_CHANGE_FREQ(int32_t inputFreq) {
   return 0;
 }
 
-uint8_t translateFrequency(int32_t inputFreq) {
+uint8_t rtc_translateFrequency(int32_t inputFreq) {
   switch(inputFreq) {
       case 2  :
         return 0x0F;
@@ -108,9 +108,9 @@ void RTC_HANDLER() {
   cli();
   outb(REG_C, IO_PORT1);
   inb(IO_PORT2);
-  RTC_CHANGE_FREQ(32);
+  rtc_changeFreq(64);
   interruptFlag = 1;
-  test_interrupts();
+  // test_interrupts();
   sti();
   return;
 }

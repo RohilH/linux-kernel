@@ -15,7 +15,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
     // get the correct dentry for the respective index
     dentry_t direntry = bootBlockStart->direntries[i];
     // check if the file name given matches
-    if (!(strncmp((int8_t*) fname, direntry.fileName, 32))) {
+    if (!(strncmp((int8_t*) fname, direntry.fileName, FILENAMESIZE))) {
       // populate the dentry parameter with file name, file type, and inode number
       return read_dentry_by_index(i, dentry);
     }
@@ -32,7 +32,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
   dentry_t* direntry = &(bootBlockStart->direntries[index]);
 
   // copy the file name, file type, and inode number to the given dentry
-  (void)strncpy((int8_t*)dentry->fileName, (int8_t*)direntry->fileName, 32);
+  (void)strncpy((int8_t*)dentry->fileName, (int8_t*)direntry->fileName, FILENAMESIZE);
   dentry->fileType = direntry->fileType;
   dentry->inodeNum = direntry->inodeNum;
 
@@ -54,18 +54,18 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
   int32_t bytesRead = 0;
 
   int i, currByte;
-  int32_t dataBlockToRead = offset/4096;
+  int32_t dataBlockToRead = offset/INODESIZE;
   int32_t currDataBlock = inodeBlockStart->dataBlockNum[dataBlockToRead];
   uint8_t * dataBlockAdr = (uint8_t*)(bootBlockStart + 1 + numInodes + currDataBlock);
 
   for (i = offset; i < length; i++) {
       currByte = i;
-      if (currByte == dataBlockSize) {
+      if (currByte == DATABLOCKSIZE) {
           dataBlockToRead++;
           currDataBlock = inodeBlockStart->dataBlockNum[dataBlockToRead];
           dataBlockAdr = (uint8_t*)(bootBlockStart + 1 + numInodes + currDataBlock);
       }
-      currByte = i % dataBlockSize;
+      currByte = i % DATABLOCKSIZE;
       buf[i - offset] = dataBlockAdr[currByte];
       bytesRead++;
   }
@@ -74,29 +74,10 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 }
 dentry_t testD;
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
-
-	// uint8_t fileData[10000];
-	// uint8_t  nameOfFile[10];
-    // int i;
-	// uint8_t * nameOfFile;
-    // printf("Page Faulting 1?");
-    // i = read_dentry_by_name(nameOfFile, &testD);
-    // printf("Page Faulting 2?");
-    // int i;
-    // if (i == -1) {
-    //     printf("No file by that name");
-    //     return;
-    // }
-    int bytesRead;
-    uint8_t* buffer = (uint8_t*) buf;
-    bytesRead = read_data(testD.inodeNum, 0, buffer, nBytes);
-    printf("Bytes read: %d\n", bytesRead);
-    // printf("Page Faulting 3?");
-    // terminalWrite()
-    // for (i = 0; i < bytesRead; i++) {
-    //     putc(buffer[i]);
-    // }
-  // call read_data
+  int bytesRead;
+  uint8_t* buffer = (uint8_t*) buf;
+  bytesRead = read_data(testD.inodeNum, 0, buffer, nBytes);
+  printf("Bytes read: %d\n", bytesRead);
   return bytesRead;
 }
 
