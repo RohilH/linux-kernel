@@ -72,34 +72,55 @@ void test_RTC() {
 	int32_t freqs[4] = {2, 32, 128, 1024};
 	int32_t numBytes = 1;
 	int32_t i;
+	int32_t x;
+
 	rtc_write(0, &freqs[0], 4);
 	while (i < 10) {
 		rtc_read(0, buffer, numBytes);
 		printf("1");
 		i++;
 	}
-	clear();
+	while(x < 10) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
 	rtc_write(0, &freqs[1], 4);
 	while (i < 40) {
 		rtc_read(0, buffer, numBytes);
 		printf("1");
 		i++;
 	}
-	clear();
+	while(x < 40) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
 	rtc_write(0, &freqs[2], 4);
 	while (i < 200) {
 		rtc_read(0, buffer, numBytes);
 		printf("1");
 		i++;
 	}
-	clear();
+	while(x < 200) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+
 	rtc_write(0, &freqs[3], 4);
 	while (i < 1000) {
 		rtc_read(0, buffer, numBytes);
 		printf("1");
 		i++;
 	}
-	clear();
+	while(x < 1000) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
 }
 
 void test_page() {
