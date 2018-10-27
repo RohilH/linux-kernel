@@ -100,6 +100,31 @@ int32_t file_close (int32_t fd) {
 }
 
 int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
+  int numOfDirectories = bootBlockStart->dirCount;
+  int i, j;
+  int8_t filename[33];
+  for (i = 0; i < numOfDirectories; i++) {
+    dentry_t direntry;
+
+    read_dentry_by_index (i, &direntry);
+    for (j = 0; j < 32; j++)
+      filename[j] = direntry.fileName[j];
+    filename[32] = '\0';
+    inode_t* inodeBlockStart = (inode_t*)(bootBlockStart + 1 + direntry.inodeNum);
+    // get the correct dentry for the given index
+    printf("File Name:  %s, File Type: %d, Bytes Read: %d\n", filename, direntry.fileType, inodeBlockStart->length);
+
+    // (void)strncpy(filenames[i], (int8_t*)direntry->fileName, 32);
+    // filenames[i] = currFile;
+  }
+  // return 0;
+
+  // copy the file name, file type, and inode number to the given dentry
+  // (void)strncpy((int8_t*)dentry->fileName, (int8_t*)direntry->fileName, FILENAMESIZE);
+  // dentry->fileType = direntry->fileType;
+  // dentry->inodeNum = direntry->inodeNum;
+
+  // return 0;
   // read filenames
   return 0;
 }

@@ -94,50 +94,21 @@ void test_keyboard() {
 
 }
 
-
+void test_dirRead() {
+	int32_t fileNames[42];
+	dir_read(2, fileNames, 32);
+	// terminalWrite(1, fileNames, 32);
+}
 void test_fileSys() {
 	uint8_t buffer[1000000];
 	// dentry_t testD;
 	int32_t numBytes = 1000000;
 	int32_t i;
-	i = file_open("testprint");
+	int read_bytes;
+	i = file_open((uint8_t*)"frame0.txt");
 	if (i == -1) return;
-	file_read(2, buffer, numBytes);
-	terminalWrite(1, buffer, numBytes);
-	// uint8_t  nameOfFile[10];
-	// uint8_t * nameOfFile;
-	// char nameOfFile[100];
-	// printf("Page Faulting 0?");
-	// strncpy(nameOfFile, "verylargetextwithverylongname.txt", 100);
-
-	// nameOfFile[0] = 'f';
-	// nameOfFile[1] = 'r';
-	// nameOfFile[2] = 'a';
-	// nameOfFile[3] = 'm';
-	// nameOfFile[4] = 'e';
-	// nameOfFile[5] = '1';
-	// nameOfFile[6] = '.';
-	// nameOfFile[7] = 't';
-	// nameOfFile[8] = 'x';
-	// nameOfFile[9] = 't';
-	//
-	// int i;
-	// // printf("Page Faulting 1?");
-	// i = read_dentry_by_name(nameOfFile, &testD);
-	// // printf("Page Faulting 2?");
-	//
-	// if (i == -1) {
-	// 	printf("No file by that name");
-	// 	return;
-	// }
-	// int bytesRead;
-	// bytesRead = read_data(testD.inodeNum, 0, fileData, 100000);
-	// printf("bytes read? %d\n", bytesRead);
-	// // printf("Page Faulting 3?");
-	//
-	// for (i = 0; i < bytesRead; i++) {
-	// 	putc(fileData[i]);
-	// }
+	read_bytes = file_read(2, buffer, numBytes);
+	terminalWrite(1, buffer, read_bytes);
 }
 
 void test_divide0() {
@@ -146,16 +117,6 @@ void test_divide0() {
 	int j = 1;
 	i = 1/(j - k);
 }
-// void test_handlers() {
-// 	printf("print the follow characters: abc123yee");
-//
-// }
-
-/* Checkpoint 2 tests */
-/* Checkpoint 3 tests */
-/* Checkpoint 4 tests */
-/* Checkpoint 5 tests */
-
 
 /* Test suite entry point */
 void launch_tests(){
@@ -163,8 +124,9 @@ void launch_tests(){
 	// test_interrupts();
 	//test_keyboard();
 	// launch your tests here
-	// test_fileSys();
-	test_RTC();
+	test_fileSys();
+	// test_dirRead();
+	// test_RTC();
 	// test_terminal();
 	// test_page();
 	// test_divide0();

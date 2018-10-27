@@ -24,8 +24,12 @@ int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
 }
 int32_t terminalWrite (int32_t fd, const void* buf, int32_t nbytes) {
     int32_t ret;
+    int i;
     char * buffer = (char*) buf;
-    ret = printf((char*) buffer);
+    for (i = 0; i < nbytes; i++) {
+      putc(buffer[i]);
+    }
+    // ret = printf((char*) buffer);
     char enterChar = '\n';
     putc(enterChar);
     return ret;
