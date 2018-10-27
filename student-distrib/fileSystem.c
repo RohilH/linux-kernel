@@ -48,29 +48,34 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
   // get the starting address of the inode block and number of data blocks
   inode_t* inodeBlockStart = (inode_t*)(bootBlockStart + 1 + inode);
 
+  // check if length bytes is within max inode length
   if (length > inodeBlockStart->length)
     length = inodeBlockStart->length;
 
   int32_t bytesRead = 0;
   int i, currByte;
+  // get current data block
   int32_t dataBlockToRead = offset/INODESIZE;
   int32_t currDataBlock = inodeBlockStart->dataBlockNum[dataBlockToRead];
   uint8_t * dataBlockAdr = (uint8_t*)(bootBlockStart + 1 + numInodes + currDataBlock);
 
+  // loop through bytes to put into buffer
   for (i = offset; i < length; i++) {
       currByte = i;
+      // check if reached end of data block
       if (currByte == DATABLOCKSIZE) {
           dataBlockToRead++;
           currDataBlock = inodeBlockStart->dataBlockNum[dataBlockToRead];
           dataBlockAdr = (uint8_t*)(bootBlockStart + 1 + numInodes + currDataBlock);
       }
+      // put bytes into buffer
       currByte = i % DATABLOCKSIZE;
       buf[i - offset] = dataBlockAdr[currByte];
       bytesRead++;
   }
-
   return bytesRead;
 }
+
 dentry_t testD;
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   int bytesRead;

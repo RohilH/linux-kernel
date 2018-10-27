@@ -118,6 +118,7 @@ void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     //     enterPressed = 1;
     // }
 }
+
 void backspace() {
     if (buffIndex > 0) {
         buffIndex--;
