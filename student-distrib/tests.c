@@ -53,7 +53,7 @@ int idt_test(){
 // add more tests here
 
 void test_terminal() {
-	int bytes = 1234;
+	int bytes = 128;
 	int32_t fdd = 0;
 	char charBuffer[bytes];
 	int read = terminalRead(fdd, charBuffer, bytes);
@@ -256,7 +256,8 @@ void test_fileSys() {
 	int32_t numBytes = 1000000;
 	int32_t i;
 	int read_bytes;
-	i = file_open((uint8_t*)"frame0.txt");
+	// replace with different file names
+	i = file_open((uint8_t*)"counter");
 	if (i == -1) return;
 	read_bytes = file_read(2, buffer, numBytes);
 	terminalWrite(1, buffer, read_bytes);
@@ -271,15 +272,16 @@ void test_divide0() {
 
 /* Test suite entry point */
 void launch_tests(){
-	// TEST_OUTPUT("idt_test", idt_test());
+	// Checkpoint 1 Tests
 	// test_interrupts();
-	//test_keyboard();
-	// launch your tests here
+	// test_keyboard();
+	// test_page();
+	// test_divide0();
+
+	// Checkpoint 2 Tests
 	// test_fileSys();
 	// test_dirRead();
 	// test_RTC();
-	test_RTC_invalid_freq();
-	// test_terminal();
-	// test_page();
-	// test_divide0();
+	// test_RTC_invalid_freq();
+	test_terminal();
 }

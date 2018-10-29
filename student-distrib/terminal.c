@@ -10,24 +10,18 @@
  *     RETURN VALUE: number of bytes read
  */
 int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
-    // printf("gets to beginning of read");
     int i = 0;
     char * buffer = (char*) buf;
-    // printf("gets to derefencing buffer");
-    while(enterPressed != 1);
+    while(enterPressed != 1); // wait until enter is pressed by keyboard
     enterPressed = 0;
-    // if (nbytes > 128)
-    //     return -1;
     for (i = 0; i < nbytes && i < BUFFSIZE; i++) {
-        // if (charBuffer[i] == '\n')
-        //     break;
-        buffer[i] = charBuffer[i];
+        buffer[i] = charBuffer[i]; // copy charBuffer into buffer
     }
-    buffer[i] = '\0'; // null terminated string
-    char enterChar = '\n';
+    buffer[i] = '\0'; // end with null terminated string
+    char enterChar = '\n'; // new line
     putc(enterChar);
-    clearCharBuffer();
-    return i;
+    clearCharBuffer(); // clear char buffer
+    return i; // return bytes read
 }
 
 /*
@@ -38,16 +32,14 @@ int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
  *     RETURN VALUE: number of bytes read
  */
 int32_t terminalWrite (int32_t fd, const void* buf, int32_t nbytes) {
-    int32_t ret;
     int i;
     char * buffer = (char*) buf;
     for (i = 0; i < nbytes; i++) {
-      putc(buffer[i]);
+      putc(buffer[i]); // print buffer
     }
-    // ret = printf((char*) buffer);
     char enterChar = '\n';
-    putc(enterChar);
-    return ret;
+    putc(enterChar); // new line
+    return i;
 }
 
 /*
