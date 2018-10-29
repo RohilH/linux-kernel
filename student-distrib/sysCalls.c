@@ -41,11 +41,28 @@ int32_t execute(const uint8_t * command) {
 }
 
 int32_t read(int32_t fd, void* buf, int32_t nBytes) {
-  return 0;
+    if (fd < 0 || fd > numProcesses)
+        return -1;
+    if (buf == NULL)
+        return -1;
+
+    if (pcb_instance->fileArray[fd].flags == 0) // file not in use
+        return -1;
+
+    return pcb_instance->fileArray[fd].fileOpsTablePtr.read(fd, buf, numBytes);
 }
 
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
-  return 0;
+    if (fd < 0 || fd > numProcesses)
+        return -1;
+
+    if (buf == NULL)
+        return -1;
+
+    if (pcb_instance->fileArray[fd].flags == 0) // file not in use
+        return -1;
+
+    return pcb_instance->fileArray[fd].fileOpsTablePtr.write(fd, buf, numBytes);
 }
 
 int32_t open(const uint8_t* fileName) {
@@ -53,7 +70,7 @@ int32_t open(const uint8_t* fileName) {
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
     int i;
     for (i = 2; i < numProcesses; i++) {
-        // if ((pcb_instance->fileArray[i]).flags == )
+        if ((pcb_instance->fileArray[i]).flags == )
     }
     return 0;
 }
