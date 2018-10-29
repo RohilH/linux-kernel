@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "lib.h"
 #include "keyboard.h"
+#include "interruptHandler.h"
 #include "rtc.h"
 
 /*
@@ -65,6 +66,8 @@ void IDT_Initializer() {
   SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER);
   // Set RTC handler
   SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER);
+  // Set System Calls Handler
+  // SET_IDT_ENTRY(idt[SYSCALL_ADDR], syscall_handler);
 
 }
 

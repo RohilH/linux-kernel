@@ -1,5 +1,6 @@
 #include "sysCalls.h"
 #include "lib.h"
+#include "fileSystem.h"
 
 int32_t halt(uint8_t status) {
   return 0;
@@ -17,8 +18,11 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
   return 0;
 }
 
-int32_t open(const uint8_t filename) {
-  return 0;
+int32_t open(const uint8_t* fileName) {
+    dentry_t* dentry;
+    if (read_dentry_by_name(fileName, dentry) == -1) return -1;
+
+    return 0;
 }
 
 int32_t close(int32_t fd) {
