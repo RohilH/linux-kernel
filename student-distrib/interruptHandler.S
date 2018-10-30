@@ -4,7 +4,7 @@
 .globl syscall_handler
 
 syscall_jumptable:
-    .long 0x0, halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
+    .long halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
 
 syscall_handler:
     cli
