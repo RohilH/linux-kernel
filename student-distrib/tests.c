@@ -53,7 +53,7 @@ int idt_test(){
 // add more tests here
 
 void test_terminal() {
-	int bytes = 1234;
+	int bytes = 128;
 	int32_t fdd = 0;
 	char charBuffer[bytes];
 	int read = terminal_read(fdd, charBuffer, bytes);
