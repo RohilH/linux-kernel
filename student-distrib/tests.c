@@ -4,6 +4,8 @@
 #include "rtc.h"
 #include "terminal.h"
 #include "fileSystem.h"
+#include "sysCalls.h"
+
 
 #define PASS 1
 #define FAIL 0
@@ -51,6 +53,21 @@ int idt_test(){
 }
 
 // add more tests here
+
+void test_WORC() { // Work open read close
+	int bytes = 93;
+	char charBuffer[bytes];
+	int32_t fdd = open((uint8_t*)"frame0.txt");
+	int readdata = read(fdd, charBuffer, bytes);
+	write(1, charBuffer, bytes); // write to terminal
+
+	printf("\nDoes it continue? \n");
+	readdata = read(fdd, charBuffer, 2*bytes);
+	write(1, charBuffer, bytes); // write to terminal
+	close(fdd);
+}
+
+
 
 void test_terminal() {
 	int bytes = 128;
@@ -278,8 +295,9 @@ void launch_tests(){
 	// test_fileSys();
 	// test_dirRead();
 	// test_RTC();
-	test_RTC_invalid_freq();
+	// test_RTC_invalid_freq();
 	// test_terminal();
 	// test_page();
 	// test_divide0();
+	test_WORC();
 }

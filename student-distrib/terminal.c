@@ -68,6 +68,6 @@ int32_t terminal_open (const uint8_t* filename) {
  *     OUTPUTS: none
  *     RETURN VALUE: 0
  */
-int32_t terminal_close (const uint8_t* fd) {
+int32_t terminal_close (int32_t fd) {
     return 0;
 }

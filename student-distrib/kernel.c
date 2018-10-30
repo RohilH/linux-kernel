@@ -13,6 +13,7 @@
 #include "rtc.h"
 #include "paging.h"
 #include "fileSystem.h"
+#include "sysCalls.h"
 
 
 #define RUN_TESTS
@@ -155,6 +156,7 @@ void entry(unsigned long magic, unsigned long addr) {
     KEYBOARD_INIT(); // Initialize keyboard
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging
+    initPCB();
 
     clear(); // Clear the screen
 

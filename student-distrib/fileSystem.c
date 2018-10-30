@@ -1,5 +1,6 @@
 #include "fileSystem.h"
 #include "lib.h"
+#include "sysCalls.h"
 
 bootBlock_t* bootBlockStart;
 
@@ -23,8 +24,8 @@ void fsInit (uint32_t startAddr) {
  *     OUTPUTS: none
  *     RETURN VALUE: 0 if found, -1 if not found
  */
-int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {\
-  // check if filename is less than 32 bits 
+int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
+  // check if filename is less than 32 bits
   if (strlen((int8_t*)fname) > 32) return -1;
   // loops through all the dentries in the boot block
   uint32_t i;
@@ -115,14 +116,17 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *     OUTPUTS: none
  *     RETURN VALUE: number of bytes read
  */
-dentry_t testD;
+// dentry_t testD;
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
+  printf("File Pos: %d\n", pcb_instance.fileArray[fd].filePosition);
+  uint32_t offset = pcb_instance.fileArray[fd].filePosition;
 
   // read file data and store in buf
-  bytesRead = read_data(testD.inodeNum, 0, buffer, nBytes);
+  bytesRead = read_data(pcb_instance.fileArray[fd].inodeNum, offset, buffer, nBytes);
   printf("Bytes read: %d\n", bytesRead);
+  pcb_instance.fileArray[fd].filePosition += bytesRead;
   return bytesRead;
 }
 
@@ -145,13 +149,13 @@ int32_t file_write (int32_t fd, const void* buf, int32_t nBytes) {
  *     RETURN VALUE: 0 if file found, -1 otherwise
  */
 int32_t file_open (const uint8_t* fileName) {
-    int i;
-    // opens file and stores dentry in global var (for now; will change for syscalls)
-    i = read_dentry_by_name(fileName, &testD);
-    if (i == -1) {
-        printf("No file by that name");
-        return -1;
-    }
+    // int i;
+    // // opens file and stores dentry in global var (for now; will change for syscalls)
+    // i = read_dentry_by_name(fileName, &testD);
+    // if (i == -1) {
+    //     printf("No file by that name");
+    //     return -1;
+    // }
     return 0;
 }
 
