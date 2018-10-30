@@ -10,6 +10,7 @@ volatile int shift, caps, ctrl, alt, enterPressed; // Key flags
 
 volatile char charBuffer[BUFFSIZE];
 int buffIndex;
+                                    // 60 keys for 4 different situations listed above each array
                                     // Neither caps lock or shift pressed
 static char scanCodeToChar[4][60] = {{'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
                                     '-', '=', ' ', '\0', 'q', 'w', 'e', 'r', 't', 'y', 'u',
@@ -69,16 +70,16 @@ void KEYBOARD_HANDLER() {
     cli();
 
     scanCode = inb(0x60); // Obtain key scan code
-    if (scanCode != 0 && scanCode < 0x80) { // Check validity
+    if (scanCode != 0 && scanCode < KEY_PRESSED) { // Check validity
         if (prevScanCode != scanCode) { // Check spamming
-            if (ctrl && (scanCode == 0x26)) { // Handle clear screen
+            if (ctrl && (scanCode == L_PRESSED)) { // Handle clear screen
                 clear();
                 clearCharBuffer();
             }
-            else if (scanCode == 0x1C) { // Handle enter
+            else if (scanCode == ENTER_PRESSED) { // Handle enter
                 enter();
             }
-            else if (scanCode == 0x0E) { // Handle backspace
+            else if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
                 backspace();
             }
             else if (caps && shift) { // Handle caps and shift
@@ -96,19 +97,19 @@ void KEYBOARD_HANDLER() {
         }
     }
     // Handle alternating caps logic
-    if (prevScanCode == 0x3A && scanCode == 0xBA) {
+    if (prevScanCode == CAPS_PRESSED && scanCode == CAPS_RELEASED) {
         // caps = (caps == 0) ? 1 : 0;
         if (caps == 0) caps = 1;
         else caps = 0;
     }
     // Handle shift logic
-    if (scanCode == 0x2A || scanCode == 0x36) shift = 1;
-    if (scanCode == 0xAA || scanCode == 0xB6) shift = 0;
+    if (scanCode == LSHIFT_PRESSED || scanCode == RSHIFT_PRESSED) shift = 1;
+    if (scanCode == LSHIFT_RELEASED || scanCode == RSHIFT_RELEASED) shift = 0;
 
 
     // Handle CTRL logic
-    if (scanCode == 0x1D) ctrl = 1;
-    if (scanCode == 0x9D) ctrl = 0;
+    if (scanCode == CRTL_PRESSED) ctrl = 1;
+    if (scanCode == CRTL_RELEASED) ctrl = 0;
 
 
 

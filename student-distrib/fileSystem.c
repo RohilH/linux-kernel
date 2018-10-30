@@ -23,7 +23,9 @@ void fsInit (uint32_t startAddr) {
  *     OUTPUTS: none
  *     RETURN VALUE: 0 if found, -1 if not found
  */
-int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
+int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {\
+  // check if filename is less than 32 bits 
+  if (strlen((int8_t*)fname) > 32) return -1;
   // loops through all the dentries in the boot block
   uint32_t i;
   for (i = 0; i < bootBlockStart->dirCount; i++) {
