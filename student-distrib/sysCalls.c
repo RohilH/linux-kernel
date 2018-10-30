@@ -28,7 +28,7 @@ int32_t initPCB() {
     emptyFD.fileOpsTablePtr = blankTable;
 
     for (i = 2; i < numProcesses; i++) {
-        pcb_instance->fileArray[i] = emptyFDs;
+        pcb_instance->fileArray[i] = emptyFD;
     }
     return 0;
 }
@@ -49,7 +49,7 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     if (pcb_instance->fileArray[fd].flags == 0) // file not in use
         return -1;
 
-    return pcb_instance->fileArray[fd].fileOpsTablePtr.read(fd, buf, numBytes);
+    return pcb_instance->fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
 }
 
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
@@ -62,7 +62,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     if (pcb_instance->fileArray[fd].flags == 0) // file not in use
         return -1;
 
-    return pcb_instance->fileArray[fd].fileOpsTablePtr.write(fd, buf, numBytes);
+    return pcb_instance->fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
 }
 
 int32_t open(const uint8_t* fileName) {
@@ -70,13 +70,48 @@ int32_t open(const uint8_t* fileName) {
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
     int i;
     for (i = 2; i < numProcesses; i++) {
-        if ((pcb_instance->fileArray[i]).flags == )
+        if ((pcb_instance->fileArray[i]).flags == 0) {
+            pcb_instance->fileArray[i].flags = 1;
+            pcb_instance->fileArray[i].filePosition = 0;
+            break;
+        }
     }
-    return 0;
+    if (i == 7) // if PCB is full
+        return -1;
+
+    if (dentry.fileType == 0) { // RTC
+        if (rtc_open(fileName) == -1) { // failed rtc open
+            return -1;
+        }
+        pcb_instance->fileArray[i].fileOpsTablePtr = RTCTable;
+        pcb_instance->fileArray[i].inodeNum = NULL;
+    }
+    else if (dentry.fileType == 1) { // Directory
+        if (dir_open(fileName) == -1) { // failed rtc open
+            return -1;
+        }
+        pcb_instance->fileArray[i].fileOpsTablePtr = dirTable;
+        pcb_instance->fileArray[i].inodeNum = NULL;
+    }
+    else if (dentry.fileType == 2) { // File
+        if (file_open(fileName) == -1) { // failed rtc open
+            return -1;
+        }
+        pcb_instance->fileArray[i].fileOpsTablePtr = fileTable;
+        pcb_instance->fileArray[i].inodeNum = dentry.inodeNum;
+    }
+    return i;
 }
 
 int32_t close(int32_t fd) {
-  return 0;
+    if (fd < 0 || fd > numProcesses)
+        return -1;
+
+    if (pcb_instance->fileArray[fd].flags == 0) // file not in use
+        return -1;
+
+    pcb_instance->fileArray[fd].flags = 1; // set to in use
+    return pcb_instance->fileArray[fd].fileOpsTablePtr.close(fd);
 }
 
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {

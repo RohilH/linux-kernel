@@ -9,7 +9,7 @@
  *     OUTPUTS: none
  *     RETURN VALUE: number of bytes read
  */
-int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
+int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     // printf("gets to beginning of read");
     int i = 0;
     char * buffer = (char*) buf;
@@ -37,7 +37,7 @@ int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
  *     OUTPUTS: none
  *     RETURN VALUE: number of bytes read
  */
-int32_t terminalWrite (int32_t fd, const void* buf, int32_t nbytes) {
+int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     int32_t ret;
     int i;
     char * buffer = (char*) buf;
@@ -57,7 +57,7 @@ int32_t terminalWrite (int32_t fd, const void* buf, int32_t nbytes) {
  *     OUTPUTS: none
  *     RETURN VALUE: 0
  */
-int32_t terminalOpen (const uint8_t* filename) {
+int32_t terminal_open (const uint8_t* filename) {
     return 0;
 }
 
@@ -68,6 +68,6 @@ int32_t terminalOpen (const uint8_t* filename) {
  *     OUTPUTS: none
  *     RETURN VALUE: 0
  */
-int32_t terminalClose (const uint8_t* fd) {
+int32_t terminal_close (const uint8_t* fd) {
     return 0;
 }

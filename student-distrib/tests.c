@@ -56,12 +56,12 @@ void test_terminal() {
 	int bytes = 1234;
 	int32_t fdd = 0;
 	char charBuffer[bytes];
-	int read = terminalRead(fdd, charBuffer, bytes);
-	terminalWrite(fdd, charBuffer, bytes);
+	int read = terminal_read(fdd, charBuffer, bytes);
+	terminal_write(fdd, charBuffer, bytes);
 
 	while(1) {
-		read = terminalRead(fdd, charBuffer, bytes);
-		terminalWrite(fdd, charBuffer, bytes);
+		read = terminal_read(fdd, charBuffer, bytes);
+		terminal_write(fdd, charBuffer, bytes);
 	}
 
 
@@ -259,7 +259,7 @@ void test_fileSys() {
 	i = file_open((uint8_t*)"frame0.txt");
 	if (i == -1) return;
 	read_bytes = file_read(2, buffer, numBytes);
-	terminalWrite(1, buffer, read_bytes);
+	terminal_write(1, buffer, read_bytes);
 }
 
 void test_divide0() {
