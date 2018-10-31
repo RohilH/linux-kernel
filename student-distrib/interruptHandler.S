@@ -5,6 +5,9 @@
 .globl rtc_asmlinkage
 .globl syscall_handler
 
+.data
+SAVE_EAX:
+
 keyboard_asmlinkage:
     pushal
     pushfl
@@ -49,6 +52,7 @@ syscall_handler:
     # jump to the system call number designated by eax
     sti
     call *syscall_jumptable(, %eax, 4)
+    movl %eax, SAVE_EAX
     cli
     jmp done
 
@@ -63,6 +67,8 @@ done:
     popl %edi
     popl %esi
     popl %ebp
+
+    movl $SAVE_EAX, %eax
 
     # pop all registers and flags
     popfl
