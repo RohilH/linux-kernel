@@ -7,9 +7,9 @@
 #include "terminal.h"
 #include "fileSystem.h"
 
-#define numProcesses 8
+#define numFiles 8
 #define maxFileNameSize 32
-
+#define VirtualStartAddress 0x08000000
 typedef struct fileOpsTable_t {
     int32_t (*open) (const uint8_t* fileName);
     int32_t (*read) (int32_t fd, void* buf, int32_t nBytes);
@@ -26,12 +26,16 @@ typedef struct fileDescriptor_t {
 
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
+    struct pcb_t* childPtr;
+    struct pcb_t* parentPtr;
 } pcb_t;
 
 
-pcb_t pcb_instance;
-
+pcb_t pcb_instance[8];
+int currProcessIndex;
 int32_t initPCB();
+
+int32_t startNewPCB();
 
 int32_t halt(uint8_t status);
 

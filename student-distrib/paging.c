@@ -16,10 +16,10 @@ void PAGING_INIT() {
     pageDirectory[i] = 0;
     pageTable[i] = 0;
   }
-  
+
   // first 4 MB ReadWriteEnable + PresentEnable
   pageDirectory[0] = ((uint32_t) pageTable) + UserPrivilege + ReadWriteEnable + PresentEnable;
-  pageDirectory[1] = kernelStartAddr + PageSize4MB + ReadWriteEnable + PresentEnable;
+  pageDirectory[1] = kernelStartAddr + PageSize4MBEnable + ReadWriteEnable + PresentEnable;
   pageTable[videoMemIndex] = videoMemAddr + UserPrivilege + ReadWriteEnable + PresentEnable;
 
   // got from osdev
@@ -36,4 +36,9 @@ void PAGING_INIT() {
     : "r" (pageDirectory)
     : "eax"
   );
+}
+
+void getNewPage(uint32_t virtualAddress, uint32_t physicalAddress) {
+    uint32_t pageDirIndex = virtualAddress/PageSize4MB;
+    pageDirectory[pageDirIndex] = physicalAddress + PageSize4MBEnable + UserPrivilege + ReadWriteEnable + PresentEnable;
 }
