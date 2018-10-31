@@ -274,7 +274,7 @@ void test_WORC() { // Work open read close
 	write(1, charBuffer, bytes); // write to terminal
 
 	printf("\nDoes it continue? \n");
-	readdata = read(fdd, charBuffer, 2*bytes);
+	readdata = read(fdd, charBuffer, bytes);
 	write(1, charBuffer, bytes); // write to terminal
 	close(fdd);
 }
@@ -290,10 +290,10 @@ void launch_tests(){
 	/* Checkpoint 2 tests */
 	// test_fileSys();
 	// test_dirRead();
-	test_RTC();
+	// test_RTC();
 	// test_RTC_invalid_freq();
 	// test_terminal();
 
 	/* Checkpoint 3 tests */
-	// test_WORC();
+	test_WORC();
 }

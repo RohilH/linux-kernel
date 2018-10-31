@@ -8,6 +8,7 @@
 #include "fileSystem.h"
 
 #define numProcesses 8
+#define maxFileNameSize 32
 
 typedef struct fileOpsTable_t {
     int32_t (*open) (const uint8_t* fileName);

@@ -37,7 +37,68 @@ int32_t halt(uint8_t status) {
 }
 
 int32_t execute(const uint8_t * command) {
-  return 0;
+    cli();
+
+    /* NOTE: STEP 1: Parse command for file name and argument */
+
+    int fileNameStart = 0, fileNameEnd = 0;
+    while (command[fileNameStart] == ' ') // remove extra spaces
+        fileNameStart++;
+    fileNameEnd = fileNameStart;
+    while (command[fileNameEnd] != ' ') // get filename string
+        fileNameEnd++;
+
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+        printf("Command could not be executed: file name too long.");
+        sti();
+        return -1;
+    }
+
+    uint8_t filename[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
+    for (i = fileNameStart; i < fileNameEnd; i++) {
+        filename[i - fileNameStart] = command[i];
+    }
+    filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+
+    fileNameEnd++;
+    fileNameStart = fileNameEnd;
+    while (command[fileNameStart] == ' ') // remove extra spaces
+        fileNameStart++;
+    fileNameEnd = fileNameStart;
+    while (command[fileNameEnd] != ' ') // get argument string
+        fileNameEnd++;
+
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+        printf("Command could not be executed: argument length too long.");
+        sti();
+        return -1;
+    }
+
+    uint8_t argToPass[maxFileSize]; // INVALID: MUST BE STATIC NUM
+    for (i = fileNameStart; i < fileNameEnd; i++) {
+        argToPass[i - fileNameStart] = command[i];
+    }
+    argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+
+    /* NOTE: STEP 2: Check for valid executable */
+    dentry_t dentry;
+    if (read_dentry_by_name(filename, dentry) != 0) {
+        printf("Couldn't find file.");
+        sti();
+        return -1;
+    }
+    // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers
+    uint8_t tempBuffer[4];
+    read_data (dentry.inodeNum, 0, tempBuffer, 4);
+    if (tempBuffer[0] != 0x7f || tempBuffer[1] != 0x45 || tempBuffer[2] != 0x4c || tempBuffer[3] != 0x46) {
+        printf("File is not an executable.");
+        sti();
+        return -1;
+    }
+    read_data (dentry.inodeNum, 27, tempBuffer, 4); // get bytes 24 to 27
+
+    sti();
+    return 0;
 }
 
 int32_t read(int32_t fd, void* buf, int32_t nBytes) {
