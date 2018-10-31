@@ -67,6 +67,7 @@ void IDT_Initializer() {
   // Set RTC handler
   SET_IDT_ENTRY(idt[RTC_ADDR], rtc_asmlinkage);
   // Set System Call Handler
+  idt[SYSCALL_ADDR].dpl = 3;
   SET_IDT_ENTRY(idt[SYSCALL_ADDR], syscall_handler);
 
 }
