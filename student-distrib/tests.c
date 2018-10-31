@@ -37,8 +37,6 @@ static inline void assertion_failure(){
 int idt_test(){
 	TEST_HEADER;
 	int i;
-
-
 	int result = PASS;
 	for (i = 0; i < 10; ++i){
 		if ((idt[i].offset_15_00 == NULL) &&
@@ -48,40 +46,50 @@ int idt_test(){
 			result = FAIL;
 		}
 	}
-
 	return result;
 }
 
-// add more tests here
-
-void test_WORC() { // Work open read close
-	int bytes = 93;
-	char charBuffer[bytes];
-	int32_t fdd = open((uint8_t*)"frame0.txt");
-	int readdata = read(fdd, charBuffer, bytes);
-	write(1, charBuffer, bytes); // write to terminal
-
-	printf("\nDoes it continue? \n");
-	readdata = read(fdd, charBuffer, 2*bytes);
-	write(1, charBuffer, bytes); // write to terminal
-	close(fdd);
+void test_divide0() {
+	int i;
+	int k = 1;
+	int j = 1;
+	i = 1/(j - k);
 }
 
+void test_keyboard() {
+	printf("print the follow characters: abc123yee");
+}
 
+void test_page() {
+	// int * lowInvalidAddr = (int*) 0x0;
+	// int * low2InvalidAddr = (int*) 0x000B7FF0;
+	int * videoMem = (int*) 0x000B8040;
+	int * highInvalidAddr = (int*) 0x00800010;
+	// x = 0x400000
+	// printf("Invalid Low Address: %d\n", *lowInvalidAddr);
+	printf("Valid Address: %d\n", *videoMem);
+	// printf("Invalid low 2 Address: %d\n", *low2InvalidAddr);
+	printf("Invalid High Address: %d\n", *highInvalidAddr);
+}
 
-void test_terminal() {
-	int bytes = 128;
-	int32_t fdd = 0;
-	char charBuffer[bytes];
-	int read = terminal_read(fdd, charBuffer, bytes);
-	terminal_write(fdd, charBuffer, bytes);
+/* Checkpoint 2 tests */
 
-	while(1) {
-		read = terminal_read(fdd, charBuffer, bytes);
-		terminal_write(fdd, charBuffer, bytes);
-	}
+void test_fileSys() {
+	uint8_t buffer[1000000];
+	// dentry_t testD;
+	int32_t numBytes = 1000000;
+	int32_t i;
+	int read_bytes;
+	i = file_open((uint8_t*)"frame0.txt");
+	if (i == -1) return;
+	read_bytes = file_read(2, buffer, numBytes);
+	terminal_write(1, buffer, read_bytes);
+}
 
-
+void test_dirRead() {
+	int32_t fileNames[42];
+	dir_read(2, fileNames, 32);
+	// terminalWrite(1, fileNames, 32);
 }
 
 void test_RTC() {
@@ -138,7 +146,6 @@ void test_RTC() {
 			removec();
 			x++;
 		}
-
 
 		rtc_write(0, &freqs[4], 4);
 		while (i < 85) {
@@ -214,90 +221,79 @@ void test_RTC() {
 }
 
 void test_RTC_invalid_freq() {
-		int32_t buffer[1];
-		int32_t freqs[2] = {1023, 2048};
-		int32_t numBytes = 1;
-		int32_t i;
-		int32_t x;
-
-		rtc_write(0, &freqs[0], 4);
-		while (i < 10) {
-			rtc_read(0, buffer, numBytes);
-			printf("a");
-			i++;
-		}
-		while(x < 10) {
-			rtc_read(0, buffer, numBytes);
-			removec();
-			x++;
-		}
-		rtc_write(0, &freqs[1], 4);
-		while (i < 20) {
-			rtc_read(0, buffer, numBytes);
-			printf("b");
-			i++;
-		}
-		while(x < 20) {
-			rtc_read(0, buffer, numBytes);
-			removec();
-			x++;
-		}
-
-	}
-
-void test_page() {
-	// int * lowInvalidAddr = (int*) 0x0;
-	// int * low2InvalidAddr = (int*) 0x000B7FF0;
-	int * videoMem = (int*) 0x000B8040;
-	int * highInvalidAddr = (int*) 0x00800010;
-	// x = 0x400000
-	// printf("Invalid Low Address: %d\n", *lowInvalidAddr);
-	printf("Valid Address: %d\n", *videoMem);
-	// printf("Invalid low 2 Address: %d\n", *low2InvalidAddr);
-	printf("Invalid High Address: %d\n", *highInvalidAddr);
-}
-
-void test_keyboard() {
-	printf("print the follow characters: abc123yee");
-
-}
-
-void test_dirRead() {
-	int32_t fileNames[42];
-	dir_read(2, fileNames, 32);
-	// terminalWrite(1, fileNames, 32);
-}
-void test_fileSys() {
-	uint8_t buffer[1000000];
-	// dentry_t testD;
-	int32_t numBytes = 1000000;
+	int32_t buffer[1];
+	int32_t freqs[2] = {1023, 2048};
+	int32_t numBytes = 1;
 	int32_t i;
-	int read_bytes;
-	i = file_open((uint8_t*)"frame0.txt");
-	if (i == -1) return;
-	read_bytes = file_read(2, buffer, numBytes);
-	terminal_write(1, buffer, read_bytes);
+	int32_t x;
+
+	rtc_write(0, &freqs[0], 4);
+	while (i < 10) {
+		rtc_read(0, buffer, numBytes);
+		printf("a");
+		i++;
+	}
+	while(x < 10) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
+	rtc_write(0, &freqs[1], 4);
+	while (i < 20) {
+		rtc_read(0, buffer, numBytes);
+		printf("b");
+		i++;
+	}
+	while(x < 20) {
+		rtc_read(0, buffer, numBytes);
+		removec();
+		x++;
+	}
 }
 
-void test_divide0() {
-	int i;
-	int k = 1;
-	int j = 1;
-	i = 1/(j - k);
+void test_terminal() {
+	int bytes = 128;
+	int32_t fdd = 0;
+	char charBuffer[bytes];
+	int read = terminal_read(fdd, charBuffer, bytes);
+	terminal_write(fdd, charBuffer, bytes);
+
+	while(1) {
+		read = terminal_read(fdd, charBuffer, bytes);
+		terminal_write(fdd, charBuffer, bytes);
+	}
+}
+
+/* Checkpoint 3 tests */
+
+void test_WORC() { // Work open read close
+	int bytes = 93;
+	char charBuffer[bytes];
+	int32_t fdd = open((uint8_t*)"frame0.txt");
+	int readdata = read(fdd, charBuffer, bytes);
+	write(1, charBuffer, bytes); // write to terminal
+
+	printf("\nDoes it continue? \n");
+	readdata = read(fdd, charBuffer, 2*bytes);
+	write(1, charBuffer, bytes); // write to terminal
+	close(fdd);
 }
 
 /* Test suite entry point */
 void launch_tests(){
-	// TEST_OUTPUT("idt_test", idt_test());
+	/* Checkpoint 1 tests */
 	// test_interrupts();
-	//test_keyboard();
-	// launch your tests here
+	// test_divide0();
+	// test_keyboard();
+	// test_page();
+
+	/* Checkpoint 2 tests */
 	// test_fileSys();
 	// test_dirRead();
-	// test_RTC();
+	test_RTC();
 	// test_RTC_invalid_freq();
 	// test_terminal();
-	// test_page();
-	// test_divide0();
-	test_WORC();
+
+	/* Checkpoint 3 tests */
+	// test_WORC();
 }

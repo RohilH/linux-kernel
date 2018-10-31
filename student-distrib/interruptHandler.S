@@ -1,7 +1,25 @@
 #define ASM     1
 #include "x86_desc.h"
 
+.globl keyboard_asmlinkage
+.globl rtc_asmlinkage
 .globl syscall_handler
+
+keyboard_asmlinkage:
+    pushal
+    pushfl
+    call KEYBOARD_HANDLER
+    popfl
+    popal
+    iret
+
+rtc_asmlinkage:
+    pushal
+    pushfl
+    call RTC_HANDLER
+    popfl
+    popal
+    iret
 
 syscall_jumptable:
     .long halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn

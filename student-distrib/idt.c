@@ -63,9 +63,9 @@ void IDT_Initializer() {
   }
 
   // Set Keyboard handler
-  SET_IDT_ENTRY(idt[KEY_ADDR], KEYBOARD_HANDLER);
+  SET_IDT_ENTRY(idt[KEY_ADDR], keyboard_asmlinkage);
   // Set RTC handler
-  SET_IDT_ENTRY(idt[RTC_ADDR], RTC_HANDLER);
+  SET_IDT_ENTRY(idt[RTC_ADDR], rtc_asmlinkage);
   // Set System Call Handler
   SET_IDT_ENTRY(idt[SYSCALL_ADDR], syscall_handler);
 

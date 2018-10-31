@@ -66,7 +66,6 @@ void KEYBOARD_INIT() {
  *     RETURN VALUE: none
  */
 void KEYBOARD_HANDLER() {
-    asm("pusha");
     cli();
 
     scanCode = inb(0x60); // Obtain key scan code
@@ -106,19 +105,15 @@ void KEYBOARD_HANDLER() {
     if (scanCode == LSHIFT_PRESSED || scanCode == RSHIFT_PRESSED) shift = 1;
     if (scanCode == LSHIFT_RELEASED || scanCode == RSHIFT_RELEASED) shift = 0;
 
-
     // Handle CTRL logic
     if (scanCode == CRTL_PRESSED) ctrl = 1;
     if (scanCode == CRTL_RELEASED) ctrl = 0;
-
-
 
     prevScanCode = scanCode; // Update previous scan code
 
     send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
 
     sti();
-    asm("popa");
 }
 
 /*
