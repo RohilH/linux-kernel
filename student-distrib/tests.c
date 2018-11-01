@@ -281,7 +281,15 @@ void test_WORC() { // Work open read close
 
 
 void test_execute() { // Work open read close
-	execute((uint8_t*)"shell");
+	int8_t* shell = "shell";
+	asm volatile (
+		"movl $2, %%eax;"
+		"movl %0, %%ebx;"
+		"int $0x80;"
+		:
+		: "r" (shell)
+		: "eax" , "ebx"
+	);
 }
 /* Test suite entry point */
 void launch_tests(){
@@ -299,6 +307,6 @@ void launch_tests(){
 	// test_terminal();
 
 	/* Checkpoint 3 tests */
-	test_WORC();
-	// test_execute();
+	// test_WORC();
+	test_execute();
 }

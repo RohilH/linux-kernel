@@ -26,6 +26,8 @@ void fsInit (uint32_t startAddr) {
  */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
   // check if filename is less than 32 bits
+  // printf("Gets here\n");
+
   if (strlen((int8_t*)fname) > 32) return -1;
   // loops through all the dentries in the boot block
   uint32_t i;

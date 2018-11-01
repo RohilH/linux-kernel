@@ -25,7 +25,7 @@ rtc_asmlinkage:
     iret
 
 syscall_jumptable:
-    .long halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
+    .long 0x000B8000, halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
 
 syscall_handler:
     cli

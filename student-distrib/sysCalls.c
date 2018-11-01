@@ -24,10 +24,12 @@ int32_t initPCB() {
     fileDescriptor_t stdinFD;
     stdinFD.fileOpsTablePtr = stdin;
     pcb_instance[currProcessIndex].fileArray[0] = stdinFD;
+    pcb_instance[currProcessIndex].fileArray[0].flags = 1;
 
     fileDescriptor_t stdoutFD;
     stdoutFD.fileOpsTablePtr = stdout;
     pcb_instance[currProcessIndex].fileArray[1] = stdoutFD;
+    pcb_instance[currProcessIndex].fileArray[1].flags = 1;
 
     fileDescriptor_t emptyFD;
     emptyFD.fileOpsTablePtr = blankTable;
@@ -57,11 +59,11 @@ int32_t halt(uint8_t status) {
 
 int32_t execute(const uint8_t * command) {
     cli();
-    if (pcb_instance[0].fileArray == NULL)
-        currProcessIndex = 0; // Initial process index set to null
+    // if (currProcessIndex == -2)
+    //     currProcessIndex = 0; // Initial process index set to null
     /* NOTE: STEP 1: Parse command for file name and argument */
     int i;
-    printf("CurrProcIndex %d \n", currProcessIndex);
+    // printf("CurrProcIndex %d \n", currProcessIndex);
     int fileNameStart = 0, fileNameEnd = 0;
     while (command[fileNameStart] == ' ') // remove extra spaces
         fileNameStart++;
@@ -124,6 +126,13 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
     // printf("Page Fault 7 \n");
+    int ret;
+    ret = startNewPCB();  //puts new pcb in pcb array
+    if (ret != 0) {
+        printf("Couldn't create page; PCBs are full");
+        sti();
+        return -1;
+    }
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
@@ -138,18 +147,11 @@ int32_t execute(const uint8_t * command) {
 
     /* NOTE: STEP 5: Setup new PCB */
 
-    int ret;
-    ret = startNewPCB();  //puts new pcb in pcb array
-    if (ret != 0) {
-        printf("Couldn't create page; PCBs are full");
-        sti();
-        return -1;
-    }
-    printf("Page Fault 9 \n");
+    // printf("Page Fault 9 \n");
     /* NOTE: STEP 6: Create TSS for context switching  */
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
-    printf("Page Fault 10 \n");
+    // printf("Page Fault 10 \n");
     // #define KERNEL_CS   0x0010
     // #define KERNEL_DS   0x0018
     // #define USER_CS     0x0023
@@ -163,7 +165,10 @@ int32_t execute(const uint8_t * command) {
       "mov   %%ax, %%gs;"
       "pushl   $0x2B;"
       "pushl %0;"
-      "pushf;"
+      "pushfl;"
+      "popl %%eax;"
+      "orl $0x00000200, %%eax;"
+      "pushl    %%eax;"
       "pushl   $0x23;"
       "pushl   %1;"
       "iret;"
