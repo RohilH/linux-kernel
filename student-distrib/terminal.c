@@ -45,8 +45,8 @@ int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
       putc(buffer[i]);
     }
     // ret = printf((char*) buffer);
-    char enterChar = '\n';
-    putc(enterChar);
+    // char enterChar = '\n';
+    // putc(enterChar);
     return ret;
 }
 

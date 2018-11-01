@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "x86_desc.h"
+#include "i8259.h"
 #include "lib.h"
 #include "rtc.h"
 #include "terminal.h"
@@ -267,6 +268,7 @@ void test_terminal() {
 /* Checkpoint 3 tests */
 
 void test_WORC() { // Work open read close
+	startNewPCB();
 	int bytes = 93;
 	char charBuffer[bytes];
 	int32_t fdd = open((uint8_t*)"frame0.txt");
@@ -281,6 +283,7 @@ void test_WORC() { // Work open read close
 
 
 void test_execute() { // Work open read close
+	// disable_irq(40);
 	int8_t* shell = "shell";
 	asm volatile (
 		"movl $2, %%eax;"

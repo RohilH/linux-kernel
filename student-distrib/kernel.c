@@ -156,7 +156,6 @@ void entry(unsigned long magic, unsigned long addr) {
     KEYBOARD_INIT(); // Initialize keyboard
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging
-    // initPCB();
     currProcessIndex = -2;
 
     clear(); // Clear the screen

@@ -37,6 +37,7 @@ int32_t initPCB() {
     int i = 0;
     for (i = 2; i < numFiles; i++) {
         pcb_instance[currProcessIndex].fileArray[i] = emptyFD;
+        pcb_instance[currProcessIndex].fileArray[i].flags = 0;
     }
     if (currProcessIndex == 0) {
         pcb_instance[currProcessIndex].parentPtr = NULL;
@@ -141,7 +142,7 @@ int32_t execute(const uint8_t * command) {
 
     /* NOTE: STEP 4: Setup User level Program Loader */
     // CHANGE LENGTH LATER
-    read_data (dentry.inodeNum, 0, ProgramImageAddress, PageSize4MB); // loads executable into user video mem
+    read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
     // printf("Page Fault 8 \n");
 
 
