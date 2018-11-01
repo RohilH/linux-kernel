@@ -34,11 +34,20 @@ void PAGING_INIT() {
     "movl  %%eax, %%cr0;"
     :                       // no outputs
     : "r" (pageDirectory)
-    : "eax"
+    : "eax" // clobbers
   );
 }
 
 void getNewPage(uint32_t virtualAddress, uint32_t physicalAddress) {
     uint32_t pageDirIndex = virtualAddress/PageSize4MB;
     pageDirectory[pageDirIndex] = physicalAddress + PageSize4MBEnable + UserPrivilege + ReadWriteEnable + PresentEnable;
+
+    // Flush TLB
+    asm volatile (
+      "movl  %%cr3, %%eax;"
+      "movl  %%eax, %%cr3;"
+      :
+      :
+      : "eax" // clobbers
+    );
 }

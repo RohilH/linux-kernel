@@ -279,6 +279,10 @@ void test_WORC() { // Work open read close
 	close(fdd);
 }
 
+
+void test_execute() { // Work open read close
+	execute((uint8_t*)"shell");
+}
 /* Test suite entry point */
 void launch_tests(){
 	/* Checkpoint 1 tests */
@@ -296,4 +300,5 @@ void launch_tests(){
 
 	/* Checkpoint 3 tests */
 	test_WORC();
+	// test_execute();
 }

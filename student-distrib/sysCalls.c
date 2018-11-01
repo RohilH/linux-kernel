@@ -1,5 +1,6 @@
 #include "sysCalls.h"
 #include "lib.h"
+#include "types.h"
 #include "fileSystem.h"
 #include "terminal.h"
 #include "paging.h"
@@ -17,7 +18,8 @@ fileOpsTable_t blankTable = {emptyReturn, emptyReturn, emptyReturn, emptyReturn}
 
 
 int32_t initPCB() {
-    currProcessIndex = 0;
+    // if (currProcessIndex == -2)
+    //     currProcessIndex = 0;
 
     fileDescriptor_t stdinFD;
     stdinFD.fileOpsTablePtr = stdin;
@@ -36,17 +38,17 @@ int32_t initPCB() {
     }
     if (currProcessIndex == 0) {
         pcb_instance[currProcessIndex].parentPtr = NULL;
-        pcb_instance[currProcessIndex].childPtr = NULL;
+        // pcb_instance[currProcessIndex].childPtr = NULL;
     }
-    else if (currProcessIndex < 7) {
+    else if (currProcessIndex < 8) {
         pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
-        pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
+        // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
     }
-    else if (currProcessIndex == 7) {
-        pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
-        pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
-        pcb_instance[currProcessIndex].childPtr = NULL;
-    }
+    // else if (currProcessIndex == 7) {
+    //     pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
+        // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
+        // pcb_instance[currProcessIndex].childPtr = NULL;
+    // }
     return 0;
 }
 int32_t halt(uint8_t status) {
@@ -55,14 +57,16 @@ int32_t halt(uint8_t status) {
 
 int32_t execute(const uint8_t * command) {
     cli();
-
+    if (pcb_instance[0].fileArray == NULL)
+        currProcessIndex = 0; // Initial process index set to null
     /* NOTE: STEP 1: Parse command for file name and argument */
     int i;
+    printf("CurrProcIndex %d \n", currProcessIndex);
     int fileNameStart = 0, fileNameEnd = 0;
     while (command[fileNameStart] == ' ') // remove extra spaces
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ') // get filename string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get filename string
         fileNameEnd++;
 
     if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
@@ -70,21 +74,23 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-
+    // printf("Page Fault 1 \n");
     uint8_t filename[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
     }
     filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+    // printf("Page Fault 2 \n");
 
     fileNameEnd++;
     fileNameStart = fileNameEnd;
     while (command[fileNameStart] == ' ') // remove extra spaces
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ') // get argument string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get argument string
         fileNameEnd++;
 
+    // printf("Page Fault 3 \n");
     if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
         printf("Command could not be executed: argument length too long.");
         sti();
@@ -95,7 +101,10 @@ int32_t execute(const uint8_t * command) {
     for (i = fileNameStart; i < fileNameEnd; i++) {
         argToPass[i - fileNameStart] = command[i];
     }
+    // printf("Page Fault 4 \n");
+
     argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+    // printf("Page Fault 5 \n");
 
     /* NOTE: STEP 2: Check for valid executable */
     dentry_t dentry;
@@ -104,6 +113,8 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
+    // printf("Page Fault 6 \n");
+
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers
     uint8_t tempBuffer[4];
     read_data (dentry.inodeNum, 0, tempBuffer, 4);
@@ -112,14 +123,56 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-    read_data (dentry.inodeNum, 27, tempBuffer, 4); // get bytes 24 to 27
+    // printf("Page Fault 7 \n");
 
+    read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
+    uint32_t entryPoint = *((uint32_t*) tempBuffer);
     /* NOTE: STEP 3: Setup paging */
-    startNewPCB();  //puts new pcb in pcb array
+    getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex+1));
 
-    getNewPage(VirtualStartAddress, KernelOffset + PageSize4MB*currProcessIndex);
+    /* NOTE: STEP 4: Setup User level Program Loader */
+    // CHANGE LENGTH LATER
+    read_data (dentry.inodeNum, 0, ProgramImageAddress, PageSize4MB); // loads executable into user video mem
+    // printf("Page Fault 8 \n");
 
+
+    /* NOTE: STEP 5: Setup new PCB */
+
+    int ret;
+    ret = startNewPCB();  //puts new pcb in pcb array
+    if (ret != 0) {
+        printf("Couldn't create page; PCBs are full");
+        sti();
+        return -1;
+    }
+    printf("Page Fault 9 \n");
+    /* NOTE: STEP 6: Create TSS for context switching  */
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
+    printf("Page Fault 10 \n");
+    // #define KERNEL_CS   0x0010
+    // #define KERNEL_DS   0x0018
+    // #define USER_CS     0x0023
+    // #define USER_DS     0x002B
+    int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
+    asm volatile (
+      "mov   $0x2B, %%ax;"
+      "mov   %%ax, %%ds;"
+      "mov   %%ax, %%es;"
+      "mov   %%ax, %%fs;"
+      "mov   %%ax, %%gs;"
+      "pushl   $0x2B;"
+      "pushl %0;"
+      "pushf;"
+      "pushl   $0x23;"
+      "pushl   %1;"
+      "iret;"
+      :                       // no outputs
+      : "r" (userStackPtr), "r" (entryPoint)
+      : "eax", "edx" // clobbers
+    );
     sti();
+    // printf("Page Fault 11 \n");
     return 0;
 }
 
@@ -219,14 +272,14 @@ int32_t sigReturn(void) {
 }
 
 int32_t startNewPCB() {
+    if (currProcessIndex == -2)
+        currProcessIndex = 0;
+    else
+        currProcessIndex++;
     if (currProcessIndex >= 8) {
         printf("Too many processes running; cannot create new PCB.");
+        currProcessIndex--;
         return -1;
     }
-    if (currProcessIndex < 0) {
-        printf("Invalid PCB Index.");
-        return -1;
-    }
-    currProcessIndex++;
     return initPCB();
 }
