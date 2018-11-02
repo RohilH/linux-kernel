@@ -31,8 +31,17 @@ syscall_jumptable:
 
 syscall_handler:
     cli
-    # push all registers and flags
-    pushal
+    # push all registers (except eax) and flags
+    pushl %es
+    pushl %ds
+    pushl %ebp
+    pushl %esi
+    pushl %edi
+
+    # push arguments 1, 2, 3 onto stack
+    pushl %edx # 3
+    pushl %ecx # 2
+    pushl %ebx # 1
     pushfl
 
     # protect all of the registers from modification by the system call
@@ -62,18 +71,20 @@ invalid_syscall:
     movl $-1, %eax
 
 done:
+    addl $24, %esp
     # pop all registers off stack
+    # pop all registers and flags
+    popfl
     popl %ebx
     popl %ecx
     popl %edx
     popl %edi
     popl %esi
     popl %ebp
-
+    popl %ds
+    popl %es
     # movl $SAVE_EAX, %eax
 
-    # pop all registers and flags
-    popfl
-    popal
+    # popal
     sti
     iret
