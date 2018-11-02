@@ -88,8 +88,16 @@ void test_fileSys() {
 }
 
 void test_dirRead() {
-	int32_t fileNames[42];
-	dir_read(2, fileNames, 32);
+	int8_t buffer[32];
+	// int32_t fileNames[42];
+	int len = 2;
+	int8_t* FILEname = "File Name: ";
+
+	while (	(len = dir_read(2, buffer, 32)) > 0) {
+		terminal_write(1, FILEname, 12);
+		terminal_write(1, buffer, 32);
+		putc('\n');
+	}
 	// terminalWrite(1, fileNames, 32);
 }
 
