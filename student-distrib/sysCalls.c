@@ -278,10 +278,10 @@ int32_t sigReturn(void) {
 }
 
 int32_t startNewPCB() {
-    if (currProcessIndex == -2)
-        currProcessIndex = 0;
-    else
-        currProcessIndex++;
+    // if (currProcessIndex == -2)
+    //     currProcessIndex = 0;
+    // else
+    currProcessIndex++;
     if (currProcessIndex >= 8) {
         printf("Too many processes running; cannot create new PCB.");
         currProcessIndex--;
