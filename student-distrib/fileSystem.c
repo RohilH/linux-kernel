@@ -192,13 +192,12 @@ int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
     int validRead = read_dentry_by_index (fileIndexForDir, &direntry);
     if (validRead == 0) {
         int8_t* filename = (int8_t*) buf;
-        for (i = 0; i < 33; i++)
-            filename[i] = '\0';
-        // filename[32] = '\0';
-        int fileNameLen = strlen(direntry.fileName);
-        strncpy(filename, direntry.fileName, fileNameLen);
+        for (i = 0; i < 32; i++) {
+            filename[i] = direntry.fileName[i];
+        }
+        filename[32] = '\0';
         fileIndexForDir++;
-        return fileNameLen;
+        return i;
     }
     return -1;
 
