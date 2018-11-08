@@ -62,6 +62,8 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress);
 
 int32_t sigReturn(void);
 
+pcb_t* generatePCBPointer(int currProcessIndex);
+
 
 
 #endif

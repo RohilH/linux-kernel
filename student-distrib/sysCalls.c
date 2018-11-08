@@ -74,7 +74,7 @@ int32_t halt(uint8_t status) {
   tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP0;
   tss.ss0 = pcb_instance[currProcessIndex].parentPtr -> pcbSS0;
   //restore parent paging
-  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex-1));
+  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex));
   //Jump to execute return
   storeESP = pcb_instance[currProcessIndex].parentPtr -> pcbESP;
   storeEBP = pcb_instance[currProcessIndex].parentPtr -> pcbEBP;
@@ -174,20 +174,16 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
+    uint32_t storeESP;
+    uint32_t storeEBP;
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
 
-
-    if(currProcessIndex > 0) {
-      uint32_t storeESP;
-      uint32_t storeEBP;
-
-      asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
-      asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
-
-      pcb_instance[currProcessIndex].parentPtr -> pcbESP = storeESP;
-      pcb_instance[currProcessIndex].parentPtr -> pcbEBP = storeEBP;
-
-      pcb_instance[currProcessIndex].parentPtr -> pcbSS0 = tss.ss0;
-      pcb_instance[currProcessIndex].parentPtr -> pcbESP0 = tss.esp0;
+      pcb_t* currPointer =  generatePCBPointer(currProcessIndex);
+      currPointer -> pcbESP = storeESP;
+      currPointer -> pcbEBP = storeEBP;
+      currPointer -> pcbSS0 = tss.ss0;
+      currPointer -> pcbESP0 = tss.esp0;
     }
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
@@ -345,4 +341,8 @@ int32_t startNewPCB() {
         return -1;
     }
     return initPCB();
+}
+
+pcb_t* generatePCBPointer(int currProcessIndex) {
+  return (pcb_t*)(0x00400000 - 0x1000*(currProcessIndex)); //4mb - 4kb*currProcessIndex
 }
