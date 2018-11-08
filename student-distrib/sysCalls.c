@@ -47,39 +47,47 @@ int32_t initPCB() {
         pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
         // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
     }
-    // else if (currProcessIndex == 7) {
-    //     pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
-        // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
-        // pcb_instance[currProcessIndex].childPtr = NULL;
-    // }
+
+    uint32_t storeESP;
+    uint32_t storeEBP;
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
+    pcb_instance[currProcessIndex].pcbESP = storeESP;
+    pcb_instance[currProcessIndex].pcbEBP = storeEBP;
+    pcb_instance[currProcessIndex].pcbSS0 = tss.ss0;
+    pcb_instance[currProcessIndex].pcbESP0 = tss.esp0;
+
     return 0;
 }
 int32_t halt(uint8_t status) {
   //restart shell if halting last process
-  if(currProcessIndex == 0) {
-    //pcb_instance[currProcessIndex] = NULL;
-    uint8_t* shellCommand = (uint8_t*)"shell";
-    execute(shellCommand);
-  }
-  // Close relevant File descriptors
+  // if(currProcessIndex == 0) {
+  //   //pcb_instance[currProcessIndex] = NULL;
+  //   uint8_t* shellCommand = (uint8_t*)"shell";
+  //   execute(shellCommand);
+  // }
+  // // Close relevant File descriptors
   cli();
-  int x;
+  int i;
   uint32_t storeESP;
   uint32_t storeEBP;
-  for(x=0; x<8; x++) {
-    close(x);
+  for(i = 0; i < numFiles; i++) {
+    close(i);
+    pcb_instance[currProcessIndex].fileArray[i].fileOpsTablePtr = blankTable;
+    pcb_instance[currProcessIndex].fileArray[i].flags = 0;
   }
-
-  //Modify TSS according to the parent
+  //
+  // //Modify TSS according to the parent
   tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP0;
   tss.ss0 = pcb_instance[currProcessIndex].parentPtr -> pcbSS0;
-  //restore parent paging
-  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex));
-  //Jump to execute return
-  storeESP = pcb_instance[currProcessIndex].parentPtr -> pcbESP;
-  storeEBP = pcb_instance[currProcessIndex].parentPtr -> pcbEBP;
-
+  // //restore parent paging
+  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
+  // //Jump to execute return
+  storeESP = pcb_instance[currProcessIndex].parentPtr->pcbESP;
+  storeEBP = pcb_instance[currProcessIndex].parentPtr->pcbEBP;
+  //
   uint32_t castStatus = (uint32_t)status;
+  currProcessIndex--;
   asm volatile (
     "movl   %0, %%eax;"
     "movl   %1, %%esp;"
@@ -174,17 +182,13 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
-    uint32_t storeESP;
-    uint32_t storeEBP;
-    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
-    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
+    //
+    // pcb_t* currPointer =  generatePCBPointer(currProcessIndex);
+    // currPointer -> pcbESP = storeESP;
+    // currPointer -> pcbEBP = storeEBP;
+    // currPointer -> pcbSS0 = tss.ss0;
+    // currPointer -> pcbESP0 = tss.esp0;
 
-      pcb_t* currPointer =  generatePCBPointer(currProcessIndex);
-      currPointer -> pcbESP = storeESP;
-      currPointer -> pcbEBP = storeEBP;
-      currPointer -> pcbSS0 = tss.ss0;
-      currPointer -> pcbESP0 = tss.esp0;
-    
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
@@ -224,11 +228,15 @@ int32_t execute(const uint8_t * command) {
       "pushl   $0x23;"
       "pushl   %1;"
       "iret;"
+      "execute_end:;"
+      "leave;"
+      "ret;"
       :                       // no outputs
       : "r" (userStackPtr), "r" (entryPoint)
       : "eax", "edx" // clobbers
     );
-    asm volatile("execute_end:");
+    // asm volatile(
+    // );
 
     sti();
     // printf("Page Fault 11 \n");
