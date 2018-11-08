@@ -28,6 +28,10 @@ typedef struct fileDescriptor_t {
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
     struct pcb_t* parentPtr;
+    uint32_t pcbESP;
+    uint32_t pcbEBP;
+    uint32_t pcbESP0;
+    uint32_t pcbSS0;
     // struct pcb_t* childPtr;
 } pcb_t;
 

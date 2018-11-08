@@ -55,7 +55,43 @@ int32_t initPCB() {
     return 0;
 }
 int32_t halt(uint8_t status) {
-  return 0;
+  //restart shell if halting last process
+  if(currProcessIndex == 0) {
+    //pcb_instance[currProcessIndex] = NULL;
+    uint8_t* shellCommand = (uint8_t*)"shell";
+    execute(shellCommand);
+  }
+  // Close relevant File descriptors
+  cli();
+  int x;
+  uint32_t storeESP;
+  uint32_t storeEBP;
+  for(x=0; x<8; x++) {
+    close(x);
+  }
+
+  //Modify TSS according to the parent
+  tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP0;
+  tss.ss0 = pcb_instance[currProcessIndex].parentPtr -> pcbSS0;
+  //restore parent paging
+  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex-1));
+  //Jump to execute return
+  storeESP = pcb_instance[currProcessIndex].parentPtr -> pcbESP;
+  storeEBP = pcb_instance[currProcessIndex].parentPtr -> pcbEBP;
+
+  uint32_t castStatus = (uint32_t)status;
+  asm volatile (
+    "movl   %0, %%eax;"
+    "movl   %1, %%esp;"
+    "movl   %2, %%ebp;"
+    "jmp execute_end;"
+    :                       // no outputs
+    : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
+    : "eax" // clobbers
+  );
+
+
+  return 0; //never get to this point}
 }
 
 int32_t execute(const uint8_t * command) {
@@ -127,12 +163,31 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
     // printf("Page Fault 7 \n");
+
+
+
     int ret;
     ret = startNewPCB();  //puts new pcb in pcb array
     if (ret != 0) {
         printf("Couldn't create page; PCBs are full");
         sti();
         return -1;
+    }
+
+
+
+    if(currProcessIndex > 0) {
+      uint32_t storeESP;
+      uint32_t storeEBP;
+
+      asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
+      asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
+
+      pcb_instance[currProcessIndex].parentPtr -> pcbESP = storeESP;
+      pcb_instance[currProcessIndex].parentPtr -> pcbEBP = storeEBP;
+
+      pcb_instance[currProcessIndex].parentPtr -> pcbSS0 = tss.ss0;
+      pcb_instance[currProcessIndex].parentPtr -> pcbESP0 = tss.esp0;
     }
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
@@ -177,6 +232,8 @@ int32_t execute(const uint8_t * command) {
       : "r" (userStackPtr), "r" (entryPoint)
       : "eax", "edx" // clobbers
     );
+    asm volatile("execute_end:");
+
     sti();
     // printf("Page Fault 11 \n");
     return 0;
