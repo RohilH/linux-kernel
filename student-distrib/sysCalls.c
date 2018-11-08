@@ -184,7 +184,7 @@ int32_t execute(const uint8_t * command) {
       currPointer -> pcbEBP = storeEBP;
       currPointer -> pcbSS0 = tss.ss0;
       currPointer -> pcbESP0 = tss.esp0;
-    }
+    
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
