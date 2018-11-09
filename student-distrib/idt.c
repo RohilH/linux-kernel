@@ -1,6 +1,7 @@
 #include "x86_desc.h"
 #include "idt.h"
 #include "lib.h"
+#include "sysCalls.h"
 #include "keyboard.h"
 #include "interruptHandler.h"
 #include "rtc.h"
@@ -74,22 +75,25 @@ void IDT_Initializer() {
 
 // Handlers
 void DIVISION_ERROR_HANDLER() {
-  asm("pusha");
+  // asm("pusha");
   printf("DIVISION_ERROR Occured\n");
-  asm("popa");
+  // asm("popa");
+  halt(0);
   // asm("iret");
-  cli();
-  while(1);
-  sti();
+  // cli();
+  // while(1);
+  // sti();
 }
 void RESERVED_HANDLER() {
-  asm("pusha");
+  // asm("pusha");
   printf("RESERVED Occured\n");
-  asm("popa");
+  // asm("popa");
+  halt(0);
+
   // asm("iret");
-  cli();
-  while(1);
-  sti();
+  // cli();
+  // while(1);
+  // sti();
 }
 void NMI_HANDLER() {
   asm("pusha");
@@ -200,13 +204,12 @@ void GENERAL_PROTECTION_HANDLER() {
   sti();
 }
 void PAGE_FAULT_HANDLER() {
-  asm("pusha");
   printf("PAGE_FAULT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
+
+  // cli();
+  // while(1);
+  // sti();
 }
 void MATH_FPU_FAULT_HANDLER() {
   asm("pusha");

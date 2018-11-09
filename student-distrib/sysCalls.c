@@ -17,68 +17,76 @@ fileOpsTable_t RTCTable = {rtc_open, rtc_read, rtc_write, rtc_close};
 fileOpsTable_t blankTable = {emptyReturn, emptyReturn, emptyReturn, emptyReturn};
 
 
-int32_t initPCB() {
+pcb_t* initPCB() {
     // if (currProcessIndex == -2)
     //     currProcessIndex = 0;
+    currProcessIndex++;
+    if (currProcessIndex >= 8) {
+        printf("Too many processes running; cannot create new PCB.");
+        currProcessIndex--;
+        return NULL;
+    }
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex); // put PCB at top of respective kernel stack
 
+    // Setup STDIN
     fileDescriptor_t stdinFD;
     stdinFD.fileOpsTablePtr = stdin;
-    pcb_instance[currProcessIndex].fileArray[0] = stdinFD;
-    pcb_instance[currProcessIndex].fileArray[0].flags = 1;
+    currPCB->fileArray[0] = stdinFD;
+    currPCB->fileArray[0].flags = 1;
 
+    // Setup STDOUT
     fileDescriptor_t stdoutFD;
     stdoutFD.fileOpsTablePtr = stdout;
-    pcb_instance[currProcessIndex].fileArray[1] = stdoutFD;
-    pcb_instance[currProcessIndex].fileArray[1].flags = 1;
+    currPCB->fileArray[1] = stdoutFD;
+    currPCB->fileArray[1].flags = 1;
 
+    // Setup Blank tables for remaining files
     fileDescriptor_t emptyFD;
     emptyFD.fileOpsTablePtr = blankTable;
 
     int i = 0;
     for (i = 2; i < numFiles; i++) {
-        pcb_instance[currProcessIndex].fileArray[i] = emptyFD;
-        pcb_instance[currProcessIndex].fileArray[i].flags = 0;
+        currPCB->fileArray[i] = emptyFD;
+        currPCB->fileArray[i].flags = 0;
     }
-    if (currProcessIndex == 0) {
-        pcb_instance[currProcessIndex].parentPtr = NULL;
-        // pcb_instance[currProcessIndex].childPtr = NULL;
-    }
-    else if (currProcessIndex < 8) {
-        pcb_instance[currProcessIndex].parentPtr = &pcb_instance[currProcessIndex - 1];
-        // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
-    }
-
-
-    // pcb_instance[currProcessIndex].pcbSS0 = tss.ss0;
-    // pcb_instance[currProcessIndex].pcbESP0 = tss.esp0;
-
-    return 0;
+    // if (currProcessIndex == 0) {
+    //     currPCB->parentPtr = NULL;
+    // }
+    // else if (currProcessIndex < 8) {
+    //     currPCB->parentPtr = generatePCBPointer(currProcessIndex - 1);
+    // }
+    return currPCB;
 }
 int32_t halt(uint8_t status) {
   //restart shell if halting last process
   if(currProcessIndex == 0) {
     //pcb_instance[currProcessIndex] = NULL;
+    currProcessIndex--;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
   }
-  // // Close relevant File descriptors
   cli();
+
   int i;
   uint32_t storeESP;
   uint32_t storeEBP;
+
+  pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+
+  // Close relevant File descriptors
   for(i = 0; i < numFiles; i++) {
-    close(i);
-    pcb_instance[currProcessIndex].fileArray[i].fileOpsTablePtr = blankTable;
-    pcb_instance[currProcessIndex].fileArray[i].flags = 0;
+    currPCB->fileArray[i].fileOpsTablePtr = blankTable;
+    currPCB->fileArray[i].flags = 0;
+    currPCB->fileArray[i].fileOpsTablePtr.close(i);
   }
   //
   // //restore parent paging
   getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
   // //Jump to execute return
-  storeESP = pcb_instance[currProcessIndex].parentPtr->pcbESP;
-  storeEBP = pcb_instance[currProcessIndex].parentPtr->pcbEBP;
+  storeESP = currPCB->pcbESP;
+  storeEBP = currPCB->pcbEBP;
   // //Modify TSS according to the parent
-  tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP;
+  tss.esp0 = currPCB->pcbESP;
 
   uint32_t castStatus = (uint32_t)status;
   currProcessIndex--;
@@ -101,19 +109,8 @@ int32_t halt(uint8_t status) {
 
 int32_t execute(const uint8_t * command) {
     cli();
-
-    uint32_t storeESP;
-    uint32_t storeEBP;
-    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
-    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
-    pcb_instance[currProcessIndex].pcbESP = storeESP;
-    pcb_instance[currProcessIndex].pcbEBP = storeEBP;
-
-    // if (currProcessIndex == -2)
-    //     currProcessIndex = 0; // Initial process index set to null
     /* NOTE: STEP 1: Parse command for file name and argument */
     int i;
-    // printf("CurrProcIndex %d \n", currProcessIndex);
     int fileNameStart = 0, fileNameEnd = 0;
     while (command[fileNameStart] == ' ') // remove extra spaces
         fileNameStart++;
@@ -126,13 +123,12 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-    // printf("Page Fault 1 \n");
-    uint8_t filename[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
+    uint8_t filename[maxFileNameSize]; // initialize filename
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
     }
     filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
-    // printf("Page Fault 2 \n");
+
 
     fileNameEnd++;
     fileNameStart = fileNameEnd;
@@ -142,9 +138,7 @@ int32_t execute(const uint8_t * command) {
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get argument string
         fileNameEnd++;
 
-    // printf("Page Fault 3 \n");
     if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
-        printf("Command could not be executed: argument length too long.");
         sti();
         return -1;
     }
@@ -153,36 +147,33 @@ int32_t execute(const uint8_t * command) {
     for (i = fileNameStart; i < fileNameEnd; i++) {
         argToPass[i - fileNameStart] = command[i];
     }
-    // printf("Page Fault 4 \n");
-
     argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
-    // printf("Page Fault 5 \n");
+
 
     /* NOTE: STEP 2: Check for valid executable */
     dentry_t dentry;
     if (read_dentry_by_name(filename, &dentry) != 0) {
-        printf("Couldn't find file.");
         sti();
         return -1;
     }
-    // printf("Page Fault 6 \n");
-
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers
     uint8_t tempBuffer[4];
     read_data (dentry.inodeNum, 0, tempBuffer, 4);
     if (tempBuffer[0] != 0x7f || tempBuffer[1] != 0x45 || tempBuffer[2] != 0x4c || tempBuffer[3] != 0x46) {
-        printf("File is not an executable.");
         sti();
         return -1;
     }
-    // printf("Page Fault 7 \n");
 
+    pcb_t* currPCB = initPCB();
+    uint32_t storeESP;
+    uint32_t storeEBP;
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP));
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
 
+    currPCB->pcbESP = storeESP;
+    currPCB->pcbEBP = storeEBP;
 
-    int ret;
-    ret = startNewPCB();  //puts new pcb in pcb array
-    if (ret != 0) {
-        printf("Couldn't create page; PCBs are full");
+    if (currPCB == NULL) {
         sti();
         return -1;
     }
@@ -193,20 +184,13 @@ int32_t execute(const uint8_t * command) {
     getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex+1));
 
     /* NOTE: STEP 4: Setup User level Program Loader */
-    // CHANGE LENGTH LATER
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
-    // printf("Page Fault 8 \n");
-
-
     /* NOTE: STEP 5: Setup new PCB */
 
-    // printf("Page Fault 9 \n");
     /* NOTE: STEP 6: Create TSS for context switching  */
 
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
-    // printf("Page Fault 10 \n");
-
 
     int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
     asm volatile (
@@ -245,11 +229,12 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     if (buf == NULL)
         return -1;
 
-    if (pcb_instance[currProcessIndex].fileArray[fd].flags == 0) // file not in use
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    if (currPCB->fileArray[fd].flags == 0) // file not in use
         return -1;
     // printf("Did I page fault part 3?");
 
-    return pcb_instance[currProcessIndex].fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
+    return currPCB->fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
 }
 
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
@@ -260,21 +245,23 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     if (buf == NULL)
         return -1;
     // printf("Did I page fault part 4?");
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
 
-    if (pcb_instance[currProcessIndex].fileArray[fd].flags == 0) // file not in use
+    if (currPCB->fileArray[fd].flags == 0) // file not in use
         return -1;
     // printf("Did I page fault part 5?");
-    return pcb_instance[currProcessIndex].fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
+    return currPCB->fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
 }
 
 int32_t open(const uint8_t* fileName) {
     dentry_t dentry;
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
     int i;
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     for (i = 2; i < numFiles; i++) {
-        if ((pcb_instance[currProcessIndex].fileArray[i]).flags == 0) {
-            pcb_instance[currProcessIndex].fileArray[i].flags = 1;
-            pcb_instance[currProcessIndex].fileArray[i].filePosition = 0;
+        if ((currPCB->fileArray[i]).flags == 0) {
+            currPCB->fileArray[i].flags = 1;
+            currPCB->fileArray[i].filePosition = 0;
             break;
         }
     }
@@ -285,22 +272,22 @@ int32_t open(const uint8_t* fileName) {
         if (rtc_open(fileName) == -1) { // failed rtc open
             return -1;
         }
-        pcb_instance[currProcessIndex].fileArray[i].fileOpsTablePtr = RTCTable;
-        pcb_instance[currProcessIndex].fileArray[i].inodeNum = NULL;
+        currPCB->fileArray[i].fileOpsTablePtr = RTCTable;
+        currPCB->fileArray[i].inodeNum = NULL;
     }
     else if (dentry.fileType == 1) { // Directory
-        if (dir_open(fileName) == -1) { // failed rtc open
+        if (dir_open(fileName) == -1) { // failed dir open
             return -1;
         }
-        pcb_instance[currProcessIndex].fileArray[i].fileOpsTablePtr = dirTable;
-        pcb_instance[currProcessIndex].fileArray[i].inodeNum = NULL;
+        currPCB->fileArray[i].fileOpsTablePtr = dirTable;
+        currPCB->fileArray[i].inodeNum = NULL;
     }
     else if (dentry.fileType == 2) { // File
-        if (file_open(fileName) == -1) { // failed rtc open
+        if (file_open(fileName) == -1) { // failed file open
             return -1;
         }
-        pcb_instance[currProcessIndex].fileArray[i].fileOpsTablePtr = fileTable;
-        pcb_instance[currProcessIndex].fileArray[i].inodeNum = dentry.inodeNum;
+        currPCB->fileArray[i].fileOpsTablePtr = fileTable;
+        currPCB->fileArray[i].inodeNum = dentry.inodeNum;
     }
     return i;
 }
@@ -308,12 +295,12 @@ int32_t open(const uint8_t* fileName) {
 int32_t close(int32_t fd) {
     if (fd < 0 || fd > numFiles)
         return -1;
-
-    if (pcb_instance[currProcessIndex].fileArray[fd].flags == 0) // file not in use
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    if (currPCB->fileArray[fd].flags == 0) // file not in use
         return -1;
 
-    pcb_instance[currProcessIndex].fileArray[fd].flags = 1; // set to in use
-    return pcb_instance[currProcessIndex].fileArray[fd].fileOpsTablePtr.close(fd);
+    currPCB->fileArray[fd].flags = 0; // set to in use
+    return currPCB->fileArray[fd].fileOpsTablePtr.close(fd);
 }
 
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
@@ -332,19 +319,6 @@ int32_t sigReturn(void) {
   return 0;
 }
 
-int32_t startNewPCB() {
-    // if (currProcessIndex == -2)
-    //     currProcessIndex = 0;
-    // else
-    currProcessIndex++;
-    if (currProcessIndex >= 8) {
-        printf("Too many processes running; cannot create new PCB.");
-        currProcessIndex--;
-        return -1;
-    }
-    return initPCB();
-}
-
 pcb_t* generatePCBPointer(int currProcessIndex) {
-  return (pcb_t*)(0x00400000 - 0x1000*(currProcessIndex)); //4mb - 4kb*currProcessIndex
+  return (pcb_t*)(0x00800000 - 0x2000*(currProcessIndex + 1)); //8mb - 4kb*currProcessIndex
 }

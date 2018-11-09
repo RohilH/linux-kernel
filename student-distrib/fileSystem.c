@@ -122,13 +122,14 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
-  printf("File Pos: %d\n", pcb_instance[currProcessIndex].fileArray[fd].filePosition);
-  uint32_t offset = pcb_instance[currProcessIndex].fileArray[fd].filePosition;
+  pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+  printf("File Pos: %d\n", currPCB->fileArray[fd].filePosition);
+  uint32_t offset = currPCB->fileArray[fd].filePosition;
 
   // read file data and store in buf
-  bytesRead = read_data(pcb_instance[currProcessIndex].fileArray[fd].inodeNum, offset, buffer, nBytes);
+  bytesRead = read_data(currPCB->fileArray[fd].inodeNum, offset, buffer, nBytes);
   printf("Bytes read: %d\n", bytesRead);
-  pcb_instance[currProcessIndex].fileArray[fd].filePosition += bytesRead;
+  currPCB->fileArray[fd].filePosition += bytesRead;
   return bytesRead;
 }
 

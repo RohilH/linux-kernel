@@ -276,7 +276,7 @@ void test_terminal() {
 /* Checkpoint 3 tests */
 
 void test_WORC() { // Work open read close
-	startNewPCB();
+	initPCB();
 	int bytes = 93;
 	char charBuffer[bytes];
 	int32_t fdd = open((uint8_t*)"frame0.txt");

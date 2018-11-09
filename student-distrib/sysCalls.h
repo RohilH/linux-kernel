@@ -11,6 +11,7 @@
 #define maxFileNameSize 32
 #define VirtualStartAddress 0x08000000
 #define ProgramImageAddress 0x08048000
+
 typedef struct fileOpsTable_t {
     int32_t (*open) (const uint8_t* fileName);
     int32_t (*read) (int32_t fd, void* buf, int32_t nBytes);
@@ -27,7 +28,7 @@ typedef struct fileDescriptor_t {
 
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
-    struct pcb_t* parentPtr;
+    // struct pcb_t* parentPtr;
     uint32_t pcbESP;
     uint32_t pcbEBP;
     // struct pcb_t* childPtr;
@@ -36,9 +37,7 @@ typedef struct pcb_t {
 
 pcb_t pcb_instance[8];
 int currProcessIndex; // Initial process index set to null
-int32_t initPCB();
-
-int32_t startNewPCB();
+pcb_t* initPCB();
 
 int32_t halt(uint8_t status);
 
