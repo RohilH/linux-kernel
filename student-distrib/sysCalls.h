@@ -35,7 +35,7 @@ typedef struct pcb_t {
 } pcb_t;
 
 
-pcb_t pcb_instance[8];
+// pcb_t pcb_instance[8];
 int currProcessIndex; // Initial process index set to null
 pcb_t* initPCB();
 
@@ -61,6 +61,6 @@ int32_t sigReturn(void);
 
 pcb_t* generatePCBPointer(int currProcessIndex);
 
-
+int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass);
 
 #endif

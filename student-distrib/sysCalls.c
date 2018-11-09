@@ -110,45 +110,14 @@ int32_t halt(uint8_t status) {
 int32_t execute(const uint8_t * command) {
     cli();
     /* NOTE: STEP 1: Parse command for file name and argument */
-    int i;
-    int fileNameStart = 0, fileNameEnd = 0;
-    while (command[fileNameStart] == ' ') // remove extra spaces
-        fileNameStart++;
-    fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get filename string
-        fileNameEnd++;
-
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
-        printf("Command could not be executed: file name too long.");
-        sti();
-        return -1;
-    }
     uint8_t filename[maxFileNameSize]; // initialize filename
-    for (i = fileNameStart; i < fileNameEnd; i++) {
-        filename[i - fileNameStart] = command[i];
-    }
-    filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
-
-
-    fileNameEnd++;
-    fileNameStart = fileNameEnd;
-    while (command[fileNameStart] == ' ') // remove extra spaces
-        fileNameStart++;
-    fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get argument string
-        fileNameEnd++;
-
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+    uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
+    int i, ret;
+    ret = parseCommands(command, filename, argToPass);
+    if (ret == -1) {
         sti();
         return -1;
     }
-
-    uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
-    for (i = fileNameStart; i < fileNameEnd; i++) {
-        argToPass[i - fileNameStart] = command[i];
-    }
-    argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
-
 
     /* NOTE: STEP 2: Check for valid executable */
     dentry_t dentry;
@@ -156,20 +125,21 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-    // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers
     uint8_t tempBuffer[4];
     read_data (dentry.inodeNum, 0, tempBuffer, 4);
+    // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers (makes sure file is executable)
     if (tempBuffer[0] != 0x7f || tempBuffer[1] != 0x45 || tempBuffer[2] != 0x4c || tempBuffer[3] != 0x46) {
         sti();
         return -1;
     }
+
+    /* NOTE: STEP 3: Setup new PCB */
 
     pcb_t* currPCB = initPCB();
     uint32_t storeESP;
     uint32_t storeEBP;
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
-
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
 
@@ -180,12 +150,11 @@ int32_t execute(const uint8_t * command) {
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
-    /* NOTE: STEP 3: Setup paging */
+    /* NOTE: STEP 4: Setup paging */
     getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex+1));
 
-    /* NOTE: STEP 4: Setup User level Program Loader */
+    /* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
-    /* NOTE: STEP 5: Setup new PCB */
 
     /* NOTE: STEP 6: Create TSS for context switching  */
 
@@ -215,9 +184,7 @@ int32_t execute(const uint8_t * command) {
       : "r" (userStackPtr), "r" (entryPoint)
       : "eax", "edx" // clobbers
     );
-
     sti();
-    // printf("Page Fault 11 \n");
     return 0;
 }
 
@@ -321,4 +288,46 @@ int32_t sigReturn(void) {
 
 pcb_t* generatePCBPointer(int currProcessIndex) {
   return (pcb_t*)(0x00800000 - 0x2000*(currProcessIndex + 1)); //8mb - 4kb*currProcessIndex
+}
+
+int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass) {
+    int i;
+    int fileNameStart = 0, fileNameEnd = 0;
+    while (command[fileNameStart] == ' ') // remove extra spaces
+        fileNameStart++;
+    fileNameEnd = fileNameStart;
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get filename string
+        fileNameEnd++;
+
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+        printf("Command could not be executed: file name too long.");
+        sti();
+        return -1;
+    }
+    // uint8_t filename[maxFileNameSize]; // initialize filename
+    for (i = fileNameStart; i < fileNameEnd; i++) {
+        filename[i - fileNameStart] = command[i];
+    }
+    filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+
+
+    fileNameEnd++;
+    fileNameStart = fileNameEnd;
+    while (command[fileNameStart] == ' ') // remove extra spaces
+        fileNameStart++;
+    fileNameEnd = fileNameStart;
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get argument string
+        fileNameEnd++;
+
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+        sti();
+        return -1;
+    }
+
+    // uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
+    for (i = fileNameStart; i < fileNameEnd; i++) {
+        argToPass[i - fileNameStart] = command[i];
+    }
+    argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+    return 0;
 }
