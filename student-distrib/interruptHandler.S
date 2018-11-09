@@ -19,11 +19,11 @@ rtc_asmlinkage:
     iret
 
 keyboard_asmlinkage:
-#    pushal
-#    pushfl
+    pushal
+    pushfl
     call KEYBOARD_HANDLER
-#    popfl
-#    popal
+    popfl
+    popal
     iret
 
 syscall_jumptable:

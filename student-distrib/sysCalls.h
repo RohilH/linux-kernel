@@ -30,8 +30,6 @@ typedef struct pcb_t {
     struct pcb_t* parentPtr;
     uint32_t pcbESP;
     uint32_t pcbEBP;
-    uint32_t pcbESP0;
-    uint32_t pcbSS0;
     // struct pcb_t* childPtr;
 } pcb_t;
 

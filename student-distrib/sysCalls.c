@@ -54,8 +54,8 @@ int32_t initPCB() {
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
     pcb_instance[currProcessIndex].pcbESP = storeESP;
     pcb_instance[currProcessIndex].pcbEBP = storeEBP;
-    pcb_instance[currProcessIndex].pcbSS0 = tss.ss0;
-    pcb_instance[currProcessIndex].pcbESP0 = tss.esp0;
+    // pcb_instance[currProcessIndex].pcbSS0 = tss.ss0;
+    // pcb_instance[currProcessIndex].pcbESP0 = tss.esp0;
 
     return 0;
 }
@@ -77,25 +77,27 @@ int32_t halt(uint8_t status) {
     pcb_instance[currProcessIndex].fileArray[i].flags = 0;
   }
   //
-  // //Modify TSS according to the parent
-  tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP0;
-  tss.ss0 = pcb_instance[currProcessIndex].parentPtr -> pcbSS0;
   // //restore parent paging
   getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
   // //Jump to execute return
   storeESP = pcb_instance[currProcessIndex].parentPtr->pcbESP;
   storeEBP = pcb_instance[currProcessIndex].parentPtr->pcbEBP;
-  //
+  // //Modify TSS according to the parent
+  tss.esp0 = pcb_instance[currProcessIndex].parentPtr -> pcbESP;
+
   uint32_t castStatus = (uint32_t)status;
   currProcessIndex--;
   asm volatile (
     "movl   %0, %%eax;"
     "movl   %1, %%esp;"
     "movl   %2, %%ebp;"
-    "jmp execute_end;"
+    "leave;"
+    "ret;"
     :                       // no outputs
     : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
     : "eax" // clobbers
+    //
+    // "jmp execute_end;"
   );
 
 
@@ -182,14 +184,6 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
-    //
-    // pcb_t* currPointer =  generatePCBPointer(currProcessIndex);
-    // currPointer -> pcbESP = storeESP;
-    // currPointer -> pcbEBP = storeEBP;
-    // currPointer -> pcbSS0 = tss.ss0;
-    // currPointer -> pcbESP0 = tss.esp0;
-
-
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
     /* NOTE: STEP 3: Setup paging */
@@ -208,10 +202,7 @@ int32_t execute(const uint8_t * command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
     // printf("Page Fault 10 \n");
-    // #define KERNEL_CS   0x0010
-    // #define KERNEL_DS   0x0018
-    // #define USER_CS     0x0023
-    // #define USER_DS     0x002B
+
     int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
     asm volatile (
       "mov   $0x2B, %%ax;"
@@ -228,15 +219,11 @@ int32_t execute(const uint8_t * command) {
       "pushl   $0x23;"
       "pushl   %1;"
       "iret;"
-      "execute_end:;"
-      "leave;"
-      "ret;"
       :                       // no outputs
       : "r" (userStackPtr), "r" (entryPoint)
       : "eax", "edx" // clobbers
     );
-    // asm volatile(
-    // );
+    // "execute_end:;"
 
     sti();
     // printf("Page Fault 11 \n");
