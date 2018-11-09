@@ -29,7 +29,7 @@ void IDT_Initializer() {
   }
 
   // Manually set first 20 offset values with appropriate handler
-  SET_IDT_ENTRY(idt[0], DIVISION_ERROR_HANDLER);
+  SET_IDT_ENTRY(idt[0], dzerohandler);
   SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
   SET_IDT_ENTRY(idt[2], NMI_HANDLER);
   SET_IDT_ENTRY(idt[3], BREAK_POINT_HANDLER);
@@ -75,175 +75,78 @@ void IDT_Initializer() {
 
 // Handlers
 void DIVISION_ERROR_HANDLER() {
-  // asm("pusha");
   printf("DIVISION_ERROR Occured\n");
-  // asm("popa");
   halt(0);
-  // asm("iret");
-  // cli();
-  // while(1);
-  // sti();
 }
 void RESERVED_HANDLER() {
-  // asm("pusha");
   printf("RESERVED Occured\n");
-  // asm("popa");
   halt(0);
-
-  // asm("iret");
-  // cli();
-  // while(1);
-  // sti();
 }
 void NMI_HANDLER() {
-  asm("pusha");
   printf("NMI Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void BREAK_POINT_HANDLER() {
-  asm("pusha");
   printf("BREAK_POINT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void OVERFLOW_HANDLER() {
-  asm("pusha");
   printf("OVERFLOW Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void BOUNDS_HANDLER() {
-  asm("pusha");
   printf("BOUNDS Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void INVALID_OPCODE_HANDLER() {
-  asm("pusha");
   printf("INVALID_OPCODE Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void DEVICE_NOT_AVAILABLE_HANDLER() {
-  asm("pusha");
   printf("DEVICE_NOT_AVAILABLE Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void DOUBLE_FAULT_HANDLER() {
-  asm("pusha");
   printf("DOUBLE_FAULT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
-  asm("pusha");
   printf("COPROCESSOR_SEGMENT_OVERRUN Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void INVALID_TSS_HANDLER() {
-  asm("pusha");
   printf("INVALID_TSS Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void SEGMENT_NOT_PRESENT_HANDLER() {
-  asm("pusha");
   printf("SEGMENT_NOT_PRESENT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void STACK_SEGMENT_FAULT_HANDLER() {
-  asm("pusha");
   printf("STACK_SEGMENT_FAULT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void GENERAL_PROTECTION_HANDLER() {
-  asm("pusha");
   printf("GENERAL_PROTECTION Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void PAGE_FAULT_HANDLER() {
   printf("PAGE_FAULT Occured\n");
   halt(0);
-
-  // cli();
-  // while(1);
-  // sti();
 }
 void MATH_FPU_FAULT_HANDLER() {
-  asm("pusha");
   printf("MATH_FAULT Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void ALIGNMENT_CHECK_HANDLER() {
-  asm("pusha");
   printf("ALIGNMENT_CHECK Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void MACHINE_CHECK_HANDLER() {
-  asm("pusha");
   printf("MACHINE_CHECK Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
 void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
-  asm("pusha");
   printf("SIMD_FLOATING_POINT_EXCEPTION Occured\n");
-  asm("popa");
-  // asm("iret");
-  cli();
-  while(1);
-  sti();
+  halt(0);
 }
