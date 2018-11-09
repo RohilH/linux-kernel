@@ -112,7 +112,7 @@ int32_t execute(const uint8_t * command) {
     /* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
     uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
-    int i, ret;
+    int ret;
     ret = parseCommands(command, filename, argToPass);
     if (ret == -1) {
         sti();

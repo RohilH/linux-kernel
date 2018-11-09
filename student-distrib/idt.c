@@ -29,7 +29,7 @@ void IDT_Initializer() {
   }
 
   // Manually set first 20 offset values with appropriate handler
-  SET_IDT_ENTRY(idt[0], dzerohandler);
+  SET_IDT_ENTRY(idt[0], DIVISION_ERROR_HANDLER);
   SET_IDT_ENTRY(idt[1], RESERVED_HANDLER);
   SET_IDT_ENTRY(idt[2], NMI_HANDLER);
   SET_IDT_ENTRY(idt[3], BREAK_POINT_HANDLER);
@@ -73,7 +73,7 @@ void IDT_Initializer() {
 
 }
 
-// Handlers
+// Exception Handlers
 void DIVISION_ERROR_HANDLER() {
   printf("DIVISION_ERROR Occured\n");
   halt(0);

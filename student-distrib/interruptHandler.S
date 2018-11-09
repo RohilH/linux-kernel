@@ -8,8 +8,6 @@
 # .data
 # SAVE_EAX:
 
-
-
 rtc_asmlinkage:
     pushal
     pushfl
