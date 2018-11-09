@@ -48,12 +48,7 @@ int32_t initPCB() {
         // pcb_instance[currProcessIndex - 1].childPtr = &pcb_instance[currProcessIndex];
     }
 
-    uint32_t storeESP;
-    uint32_t storeEBP;
-    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
-    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
-    pcb_instance[currProcessIndex].pcbESP = storeESP;
-    pcb_instance[currProcessIndex].pcbEBP = storeEBP;
+
     // pcb_instance[currProcessIndex].pcbSS0 = tss.ss0;
     // pcb_instance[currProcessIndex].pcbESP0 = tss.esp0;
 
@@ -61,11 +56,11 @@ int32_t initPCB() {
 }
 int32_t halt(uint8_t status) {
   //restart shell if halting last process
-  // if(currProcessIndex == 0) {
-  //   //pcb_instance[currProcessIndex] = NULL;
-  //   uint8_t* shellCommand = (uint8_t*)"shell";
-  //   execute(shellCommand);
-  // }
+  if(currProcessIndex == 0) {
+    //pcb_instance[currProcessIndex] = NULL;
+    uint8_t* shellCommand = (uint8_t*)"shell";
+    execute(shellCommand);
+  }
   // // Close relevant File descriptors
   cli();
   int i;
@@ -91,13 +86,13 @@ int32_t halt(uint8_t status) {
     "movl   %0, %%eax;"
     "movl   %1, %%esp;"
     "movl   %2, %%ebp;"
-    "leave;"
-    "ret;"
+    "jmp execute_end;"
+    // "leave;"
+    // "ret;"
     :                       // no outputs
     : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
     : "eax" // clobbers
     //
-    // "jmp execute_end;"
   );
 
 
@@ -106,6 +101,14 @@ int32_t halt(uint8_t status) {
 
 int32_t execute(const uint8_t * command) {
     cli();
+
+    uint32_t storeESP;
+    uint32_t storeEBP;
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP) );
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP) );
+    pcb_instance[currProcessIndex].pcbESP = storeESP;
+    pcb_instance[currProcessIndex].pcbEBP = storeEBP;
+
     // if (currProcessIndex == -2)
     //     currProcessIndex = 0; // Initial process index set to null
     /* NOTE: STEP 1: Parse command for file name and argument */
@@ -199,9 +202,11 @@ int32_t execute(const uint8_t * command) {
 
     // printf("Page Fault 9 \n");
     /* NOTE: STEP 6: Create TSS for context switching  */
+
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
     // printf("Page Fault 10 \n");
+
 
     int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
     asm volatile (
@@ -213,17 +218,19 @@ int32_t execute(const uint8_t * command) {
       "pushl   $0x2B;"
       "pushl %0;"
       "pushfl;"
-      "popl %%eax;"
-      "orl $0x00000200, %%eax;"
-      "pushl    %%eax;"
+      "popl %%edx;"
+      "orl $0x00000200, %%edx;"
+      "pushl    %%edx;"
       "pushl   $0x23;"
       "pushl   %1;"
       "iret;"
+      "execute_end:;"
+      "leave;"
+      "ret;"
       :                       // no outputs
       : "r" (userStackPtr), "r" (entryPoint)
       : "eax", "edx" // clobbers
     );
-    // "execute_end:;"
 
     sti();
     // printf("Page Fault 11 \n");
