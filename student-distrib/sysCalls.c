@@ -5,10 +5,21 @@
 #include "terminal.h"
 #include "paging.h"
 
-int32_t emptyReturn () {
-    return -1;
-}
+#define DEL_CHAR 0x7f
+#define E_CHAR 0x45
+#define L_CHAR 0x4c
+#define F_CHAR 0x46
 
+/*
+* emptyReturn
+*     DESCRIPTION: Returns -1 for fileops failure
+*     INPUTS: none
+*     OUTPUTS: none
+*     RETURN VALUE: -1
+*/
+int32_t emptyReturn() { return -1; }
+
+// File operation tables for std, file, dir, rtc
 fileOpsTable_t stdin = {terminal_open, terminal_read, emptyReturn, terminal_close};
 fileOpsTable_t stdout = {terminal_open, emptyReturn, terminal_write, terminal_close};
 fileOpsTable_t fileTable = {file_open, file_read, file_write, file_close};
@@ -16,7 +27,13 @@ fileOpsTable_t dirTable = {dir_open, dir_read, dir_write, dir_close};
 fileOpsTable_t RTCTable = {rtc_open, rtc_read, rtc_write, rtc_close};
 fileOpsTable_t blankTable = {emptyReturn, emptyReturn, emptyReturn, emptyReturn};
 
-
+/*
+ * initPCB
+ *     DESCRIPTION: Setup PCB of current process
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: PCB of current process
+ */
 pcb_t* initPCB() {
     // if (currProcessIndex == -2)
     //     currProcessIndex = 0;
@@ -26,7 +43,8 @@ pcb_t* initPCB() {
         currProcessIndex--;
         return NULL;
     }
-    pcb_t* currPCB = generatePCBPointer(currProcessIndex); // put PCB at top of respective kernel stack
+    // Put PCB at top of respective kernel stack
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
 
     // Setup STDIN
     fileDescriptor_t stdinFD;
@@ -57,8 +75,16 @@ pcb_t* initPCB() {
     // }
     return currPCB;
 }
+
+/*
+ * halt
+ *     DESCRIPTION: Terminate the running process
+ *     INPUTS: uint8_t status - parent process value
+ *     OUTPUTS: none
+ *     RETURN VALUE: Parent is restored and process is terminated
+ */
 int32_t halt(uint8_t status) {
-  //restart shell if halting last process
+  // Restart shell if halting last process
   if(currProcessIndex == 0) {
     //pcb_instance[currProcessIndex] = NULL;
     currProcessIndex--;
@@ -71,6 +97,7 @@ int32_t halt(uint8_t status) {
   uint32_t storeESP;
   uint32_t storeEBP;
 
+  // Obtain current pcb_t *
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
 
   // Close relevant File descriptors
@@ -79,13 +106,13 @@ int32_t halt(uint8_t status) {
     currPCB->fileArray[i].flags = 0;
     currPCB->fileArray[i].fileOpsTablePtr.close(i);
   }
-  //
-  // //restore parent paging
+
+  // Restore parent paging
   getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
-  // //Jump to execute return
+  // Jump to execute return
   storeESP = currPCB->pcbESP;
   storeEBP = currPCB->pcbEBP;
-  // //Modify TSS according to the parent
+  // Modify TSS according to the parent
   tss.esp0 = currPCB->pcbESP;
 
   uint32_t castStatus = (uint32_t)status;
@@ -107,9 +134,17 @@ int32_t halt(uint8_t status) {
   return 0; //never get to this point}
 }
 
+/*
+ * execute
+ *     DESCRIPTION: Execute new program
+ *     INPUTS: uint8_t * command - file name and arguments (separated by space)
+ *     OUTPUTS: none
+ *     RETURN VALUE: If program is not executed, return -1
+                     If program is executed, return 0
+ */
 int32_t execute(const uint8_t * command) {
     cli();
-    /* NOTE: STEP 1: Parse command for file name and argument */
+    ///////* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
     uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
     int ret;
@@ -119,7 +154,7 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
-    /* NOTE: STEP 2: Check for valid executable */
+    ///////* NOTE: STEP 2: Check for valid executable */
     dentry_t dentry;
     if (read_dentry_by_name(filename, &dentry) != 0) {
         sti();
@@ -128,16 +163,17 @@ int32_t execute(const uint8_t * command) {
     uint8_t tempBuffer[4];
     read_data (dentry.inodeNum, 0, tempBuffer, 4);
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers (makes sure file is executable)
-    if (tempBuffer[0] != 0x7f || tempBuffer[1] != 0x45 || tempBuffer[2] != 0x4c || tempBuffer[3] != 0x46) {
+    // Check for ELF in beginning four bytes of buffer
+    if (tempBuffer[0] != DEL_CHAR || tempBuffer[1] != E_CHAR || tempBuffer[2] != L_CHAR || tempBuffer[3] != F_CHAR) {
         sti();
         return -1;
     }
 
-    /* NOTE: STEP 3: Setup new PCB */
-
+    ///////* NOTE: STEP 3: Setup new PCB */
     pcb_t* currPCB = initPCB();
     uint32_t storeESP;
     uint32_t storeEBP;
+    // Store ESP and EBP in pcb
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
     currPCB->pcbESP = storeESP;
@@ -150,18 +186,19 @@ int32_t execute(const uint8_t * command) {
 
     read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
-    /* NOTE: STEP 4: Setup paging */
+
+    ///////* NOTE: STEP 4: Setup paging */
     getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex+1));
 
-    /* NOTE: STEP 5: Setup User level Program Loader */
+    ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
 
-    /* NOTE: STEP 6: Create TSS for context switching  */
-
+    ///////* NOTE: STEP 6: Create TSS for context switching  */
+    // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 *(currProcessIndex) - 4;
-
+    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - 4;
     int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
+    // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"
       "mov   %%ax, %%ds;"
@@ -188,42 +225,62 @@ int32_t execute(const uint8_t * command) {
     return 0;
 }
 
+/*
+ * read
+ *     DESCRIPTION: Dispatch read descriptor file operation function
+ *     INPUTS: fd, buf, nBytes
+ *     OUTPUTS: none
+ *     RETURN VALUE: If any inputs are invalid or null, return -1
+ *                   Else, return numner of read bytes.
+ */
 int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     // printf("Did I page fault part 2?");
-
-    if (fd < 0 || fd > numFiles)
-        return -1;
-    if (buf == NULL)
-        return -1;
+    // Check for out of bounds and null erors
+    if (fd < 0 || fd > numFiles) return -1;
+    if (buf == NULL) return -1;
 
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    if (currPCB->fileArray[fd].flags == 0) // file not in use
+    if (currPCB->fileArray[fd].flags == 0) // File not in use
         return -1;
     // printf("Did I page fault part 3?");
-
     return currPCB->fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
 }
 
+/*
+ * write
+ *     DESCRIPTION: Dispatch write descriptor file operation function
+ *     INPUTS: fd, buf, nBytes
+ *     OUTPUTS: none
+ *     RETURN VALUE: If any inputs are invalid or null, return -1
+ *                   Else, return numner of read bytes.
+ */
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
-    if (fd < 0 || fd > numFiles)
-        return -1;
+    // Check for out of bounds and null erors
+    if (fd < 0 || fd > numFiles) return -1;
     // printf("Did I page fault part 3?");
-
-    if (buf == NULL)
-        return -1;
+    if (buf == NULL)  return -1;
     // printf("Did I page fault part 4?");
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-
-    if (currPCB->fileArray[fd].flags == 0) // file not in use
-        return -1;
+    // File not in use
+    if (currPCB->fileArray[fd].flags == 0) return -1;
     // printf("Did I page fault part 5?");
     return currPCB->fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
 }
 
+/*
+ * open
+ *     DESCRIPTION: Accesses filesystem and opens specified file
+ *     INPUTS: fileName
+ *     OUTPUTS: none
+ *     RETURN VALUE: If file not opened, return -1
+ *                   Else, return file index
+ */
 int32_t open(const uint8_t* fileName) {
     dentry_t dentry;
+    // Check for invalid fileName
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
     int i;
+    // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     for (i = 2; i < numFiles; i++) {
         if ((currPCB->fileArray[i]).flags == 0) {
@@ -232,8 +289,8 @@ int32_t open(const uint8_t* fileName) {
             break;
         }
     }
-    if (i == 7) // if PCB is full
-        return -1;
+    // If PCB is full
+    if (i == 7) return -1;
 
     if (dentry.fileType == 0) { // RTC
         if (rtc_open(fileName) == -1) { // failed rtc open
@@ -259,47 +316,100 @@ int32_t open(const uint8_t* fileName) {
     return i;
 }
 
+/*
+ * close
+ *     DESCRIPTION: Close specified file
+ *     INPUTS: fileName
+ *     OUTPUTS: none
+ *     RETURN VALUE: If file not opened, return -1
+ *                   Else, return file index
+ */
 int32_t close(int32_t fd) {
-    if (fd < 0 || fd > numFiles)
-        return -1;
+    // Check for bound error
+    if (fd < 0 || fd > numFiles) return -1;
+    // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    if (currPCB->fileArray[fd].flags == 0) // file not in use
-        return -1;
-
-    currPCB->fileArray[fd].flags = 0; // set to in use
+    // File not in use
+    if (currPCB->fileArray[fd].flags == 0) return -1;
+    // Set to in use
+    currPCB->fileArray[fd].flags = 0;
     return currPCB->fileArray[fd].fileOpsTablePtr.close(fd);
 }
 
+/*
+ * getArgs
+ *     DESCRIPTION:
+ *     INPUTS:
+ *     OUTPUTS:
+ *     RETURN VALUE: 0
+ */
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
   return 0;
 }
 
+/*
+ * vidMap
+ *     DESCRIPTION:
+ *     INPUTS:
+ *     OUTPUTS:
+ *     RETURN VALUE: 0
+ */
 int32_t vidMap(uint8_t ** screenStart) {
   return 0;
 }
 
+/*
+ * setHandler
+ *     DESCRIPTION:
+ *     INPUTS:
+ *     OUTPUTS:
+ *     RETURN VALUE: 0
+ */
 int32_t setHandler(int32_t sigNum, void* handlerAddress) {
   return 0;
 }
 
+/*
+ * sigReturn
+ *     DESCRIPTION:
+ *     INPUTS:
+ *     OUTPUTS:
+ *     RETURN VALUE: 0
+ */
 int32_t sigReturn(void) {
   return 0;
 }
 
+/*
+ * generatePCBPointer
+ *     DESCRIPTION: Generate pointer to active pcb
+ *     INPUTS: currProcessIndex
+ *     OUTPUTS: none
+ *     RETURN VALUE: pcb_t pointer
+ */
 pcb_t* generatePCBPointer(int currProcessIndex) {
-  return (pcb_t*)(0x00800000 - 0x2000*(currProcessIndex + 1)); //8mb - 4kb*currProcessIndex
+  //8mb - 4kb*currProcessIndex
+  return (pcb_t*)(0x00800000 - 0x2000*(currProcessIndex + 1));
 }
 
+/*
+ * parseCommands
+ *     DESCRIPTION: Splice space-separated command for filename and arguments
+ *     INPUTS: command, filename, argToPass
+ *     OUTPUTS: none
+ *     RETURN VALUE: If command is invalid, return -1,
+                     Else, return 0
+ */
 int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass) {
     int i;
     int fileNameStart = 0, fileNameEnd = 0;
-    while (command[fileNameStart] == ' ') // remove extra spaces
+    while (command[fileNameStart] == ' ') // Remove extra spaces
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get filename string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // Get filename string
         fileNameEnd++;
 
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // Command cannot be executed
         printf("Command could not be executed: file name too long.");
         sti();
         return -1;
@@ -308,18 +418,18 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
     }
-    filename[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+    filename[fileNameEnd - fileNameStart] = '\0'; // Null terminated string
 
 
     fileNameEnd++;
     fileNameStart = fileNameEnd;
-    while (command[fileNameStart] == ' ') // remove extra spaces
+    while (command[fileNameStart] == ' ') // Remove extra spaces
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // get argument string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // Get argument string
         fileNameEnd++;
 
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // command cannot be executed
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // Command cannot be executed
         sti();
         return -1;
     }
@@ -328,6 +438,6 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     for (i = fileNameStart; i < fileNameEnd; i++) {
         argToPass[i - fileNameStart] = command[i];
     }
-    argToPass[fileNameEnd - fileNameStart] = '\0'; // null terminated string
+    argToPass[fileNameEnd - fileNameStart] = '\0'; // Null terminated string
     return 0;
 }
