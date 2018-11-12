@@ -30,8 +30,6 @@ fileOpsTable_t blankTable = {emptyReturn, emptyReturn, emptyReturn, emptyReturn}
  *     RETURN VALUE: PCB of current process
  */
 pcb_t* initPCB() {
-    // if (currProcessIndex == -2)
-    //     currProcessIndex = 0;
     currProcessIndex++;
     // Check if # processes exceeds max # processes
     if (currProcessIndex >= max_processes) {
@@ -68,12 +66,6 @@ pcb_t* initPCB() {
         currPCB->fileArray[i] = emptyFD;
         currPCB->fileArray[i].flags = 0;
     }
-    // if (currProcessIndex == 0) {
-    //     currPCB->parentPtr = NULL;
-    // }
-    // else if (currProcessIndex < 8) {
-    //     currPCB->parentPtr = generatePCBPointer(currProcessIndex - 1);
-    // }
     return currPCB;
 }
 
@@ -87,7 +79,6 @@ pcb_t* initPCB() {
 int32_t halt(uint8_t status) {
   // Restart shell if halting last process
   if(currProcessIndex == 0) {
-    //pcb_instance[currProcessIndex] = NULL;
     currProcessIndex--;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
@@ -237,7 +228,6 @@ int32_t execute(const uint8_t * command) {
  *                   Else, return numner of read bytes.
  */
 int32_t read(int32_t fd, void* buf, int32_t nBytes) {
-    // printf("Did I page fault part 2?");
     // Check for out of bounds and null erors
     if (fd < 0 || fd > numFiles) return -1;
     if (buf == NULL) return -1;
@@ -245,7 +235,6 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     if (currPCB->fileArray[fd].flags == 0) // File not in use
         return -1;
-    // printf("Did I page fault part 3?");
     return currPCB->fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
 }
 
@@ -260,13 +249,12 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     // Check for out of bounds and null erors
     if (fd < 0 || fd > numFiles) return -1;
-    // printf("Did I page fault part 3?");
+    // Check for NULL buffer
     if (buf == NULL)  return -1;
-    // printf("Did I page fault part 4?");
+    // Get pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
     if (currPCB->fileArray[fd].flags == 0) return -1;
-    // printf("Did I page fault part 5?");
     return currPCB->fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
 }
 
@@ -402,18 +390,21 @@ pcb_t* generatePCBPointer(int currProcessIndex) {
  *     INPUTS: command, filename, argToPass
  *     OUTPUTS: none
  *     RETURN VALUE: If command is invalid, return -1,
-                     Else, return 0
+ *                   Else, return 0
  */
 int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass) {
     int i;
     int fileNameStart = 0, fileNameEnd = 0;
-    while (command[fileNameStart] == ' ') // Remove extra spaces
+    // Remove extra spaces
+    while (command[fileNameStart] == ' ')
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // Get filename string
+    // Get filename string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
 
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // Command cannot be executed
+    // Command cannot be executed if filename length exceeds 32 chars
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) {
         printf("Command could not be executed: file name too long.");
         sti();
         return -1;
@@ -422,18 +413,22 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
     }
-    filename[fileNameEnd - fileNameStart] = '\0'; // Null terminated string
+    // Null terminated string
+    filename[fileNameEnd - fileNameStart] = '\0';
 
 
     fileNameEnd++;
+    // Move to beginning of next word
     fileNameStart = fileNameEnd;
-    while (command[fileNameStart] == ' ') // Remove extra spaces
+    // Remove extra spaces
+    while (command[fileNameStart] == ' ')
         fileNameStart++;
     fileNameEnd = fileNameStart;
-    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0') // Get argument string
+    // Get argument string
+    while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
-
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) { // Command cannot be executed
+    // Command cannot be executed
+    if (fileNameEnd - fileNameStart >= maxFileNameSize) {
         sti();
         return -1;
     }
@@ -442,6 +437,7 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     for (i = fileNameStart; i < fileNameEnd; i++) {
         argToPass[i - fileNameStart] = command[i];
     }
-    argToPass[fileNameEnd - fileNameStart] = '\0'; // Null terminated string
+    // Null terminated string
+    argToPass[fileNameEnd - fileNameStart] = '\0';
     return 0;
 }
