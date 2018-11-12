@@ -38,6 +38,13 @@ void PAGING_INIT() {
   );
 }
 
+/*
+ * getNewPage
+ *     DESCRIPTION: Initialize paging
+ *     INPUTS: virtualAddress, physicalAddress
+ *     OUTPUTS: none
+ *     RETURN VALUE: New page in page directory and TLB flushed
+ */
 void getNewPage(uint32_t virtualAddress, uint32_t physicalAddress) {
     uint32_t pageDirIndex = virtualAddress/PageSize4MB;
     pageDirectory[pageDirIndex] = physicalAddress + PageSize4MBEnable + UserPrivilege + ReadWriteEnable + PresentEnable;

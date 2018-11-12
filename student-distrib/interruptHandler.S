@@ -8,6 +8,7 @@
 # .data
 # SAVE_EAX:
 
+# Assmebly linkage for rtc and keyboard handlers
 rtc_asmlinkage:
     pushal
     pushfl
@@ -24,6 +25,7 @@ keyboard_asmlinkage:
     popal
     iret
 
+# Jump table to system calls
 syscall_jumptable:
     .long 0x000B8000, halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
 

@@ -15,9 +15,12 @@
 #define videoMemIndex       0xB8
 #define PageSize4MB         0x00400000
 
+// Page Directory of 1024 PTEs
 uint32_t pageDirectory[1024] __attribute__((aligned(4096)));
+// Page Table of 1024 entries
 uint32_t pageTable[1024] __attribute__((aligned(4096)));
 
+// Initialize Page
 void PAGING_INIT();
 void getNewPage(uint32_t virtualAddress, uint32_t physicalAddress);
 #endif

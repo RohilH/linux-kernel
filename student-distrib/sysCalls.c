@@ -5,11 +5,6 @@
 #include "terminal.h"
 #include "paging.h"
 
-#define DEL_CHAR 0x7f
-#define E_CHAR 0x45
-#define L_CHAR 0x4c
-#define F_CHAR 0x46
-
 /*
 * emptyReturn
 *     DESCRIPTION: Returns -1 for fileops failure
@@ -38,7 +33,8 @@ pcb_t* initPCB() {
     // if (currProcessIndex == -2)
     //     currProcessIndex = 0;
     currProcessIndex++;
-    if (currProcessIndex >= 8) {
+    // Check if # processes exceeds max # processes
+    if (currProcessIndex >= max_processes) {
         printf("Too many processes running; cannot create new PCB.");
         currProcessIndex--;
         return NULL;
@@ -48,13 +44,17 @@ pcb_t* initPCB() {
 
     // Setup STDIN
     fileDescriptor_t stdinFD;
+    // Point to respective file op function
     stdinFD.fileOpsTablePtr = stdin;
+    // Update current PCB with stdin
     currPCB->fileArray[0] = stdinFD;
     currPCB->fileArray[0].flags = 1;
 
     // Setup STDOUT
     fileDescriptor_t stdoutFD;
+    // Point to respective file op function
     stdoutFD.fileOpsTablePtr = stdout;
+    // Update current PCB with stdout
     currPCB->fileArray[1] = stdoutFD;
     currPCB->fileArray[1].flags = 1;
 
@@ -63,6 +63,7 @@ pcb_t* initPCB() {
     emptyFD.fileOpsTablePtr = blankTable;
 
     int i = 0;
+    // Empty rest of current PCB
     for (i = 2; i < numFiles; i++) {
         currPCB->fileArray[i] = emptyFD;
         currPCB->fileArray[i].flags = 0;
@@ -114,9 +115,9 @@ int32_t halt(uint8_t status) {
   storeEBP = currPCB->pcbEBP;
   // Modify TSS according to the parent
   tss.esp0 = currPCB->pcbESP;
-
   uint32_t castStatus = (uint32_t)status;
   currProcessIndex--;
+  // IRET return
   asm volatile (
     "movl   %0, %%eax;"
     "movl   %1, %%esp;"
@@ -131,7 +132,7 @@ int32_t halt(uint8_t status) {
   );
 
 
-  return 0; //never get to this point}
+  return 0; //never get to this point
 }
 
 /*
@@ -149,6 +150,7 @@ int32_t execute(const uint8_t * command) {
     uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
     int ret;
     ret = parseCommands(command, filename, argToPass);
+    // Return error check
     if (ret == -1) {
         sti();
         return -1;
@@ -164,7 +166,7 @@ int32_t execute(const uint8_t * command) {
     read_data (dentry.inodeNum, 0, tempBuffer, 4);
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers (makes sure file is executable)
     // Check for ELF in beginning four bytes of buffer
-    if (tempBuffer[0] != DEL_CHAR || tempBuffer[1] != E_CHAR || tempBuffer[2] != L_CHAR || tempBuffer[3] != F_CHAR) {
+    if (tempBuffer[0] != del_CHAR || tempBuffer[1] != e_CHAR || tempBuffer[2] != l_CHAR || tempBuffer[3] != f_CHAR) {
         sti();
         return -1;
     }
@@ -176,9 +178,10 @@ int32_t execute(const uint8_t * command) {
     // Store ESP and EBP in pcb
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
+    // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-
+    // Check null
     if (currPCB == NULL) {
         sti();
         return -1;
@@ -338,9 +341,9 @@ int32_t close(int32_t fd) {
 
 /*
  * getArgs
- *     DESCRIPTION:
- *     INPUTS:
- *     OUTPUTS:
+ *     DESCRIPTION: No implementation
+ *     INPUTS: N/A
+ *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
@@ -349,9 +352,9 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
 
 /*
  * vidMap
- *     DESCRIPTION:
- *     INPUTS:
- *     OUTPUTS:
+ *     DESCRIPTION: No implementation
+ *     INPUTS: N/A
+ *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t vidMap(uint8_t ** screenStart) {
@@ -360,9 +363,9 @@ int32_t vidMap(uint8_t ** screenStart) {
 
 /*
  * setHandler
- *     DESCRIPTION:
- *     INPUTS:
- *     OUTPUTS:
+ *     DESCRIPTION: No implementation
+ *     INPUTS: N/A
+ *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t setHandler(int32_t sigNum, void* handlerAddress) {
@@ -371,9 +374,9 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress) {
 
 /*
  * sigReturn
- *     DESCRIPTION:
- *     INPUTS:
- *     OUTPUTS:
+ *     DESCRIPTION: No implementation
+ *     INPUTS: N/A
+ *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t sigReturn(void) {
@@ -389,8 +392,9 @@ int32_t sigReturn(void) {
  */
 pcb_t* generatePCBPointer(int currProcessIndex) {
   //8mb - 4kb*currProcessIndex
-  return (pcb_t*)(0x00800000 - 0x2000*(currProcessIndex + 1));
+  return (pcb_t*)(eightMB - eightKB*(currProcessIndex + 1));
 }
+
 
 /*
  * parseCommands

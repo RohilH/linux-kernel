@@ -124,11 +124,11 @@ void KEYBOARD_HANDLER() {
  *     RETURN VALUE: none
  */
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
-    char charToAdd = scanCodeToChar[charType][scanCodeKey];
-    if (buffIndex < BUFFSIZE && charToAdd != '\0') {
-        charBuffer[buffIndex] = charToAdd;
+    char charToAdd = scanCodeToChar[charType][scanCodeKey]; // Obtain scan code
+    if (buffIndex < BUFFSIZE && charToAdd != '\0') { // Check out of bounds error and null-terminating char
+        charBuffer[buffIndex] = charToAdd; // Add to buffer
         buffIndex++;
-        putc(charToAdd);
+        putc(charToAdd); // Add key to stream
     }
 }
 
@@ -140,9 +140,9 @@ void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
  *     RETURN VALUE: none
  */
 void backspace() {
-    if (buffIndex > 0) {
+    if (buffIndex > 0) { // Check for remaining chars in buffer
         buffIndex--;
-        charBuffer[buffIndex] = '\0';
+        charBuffer[buffIndex] = '\0'; // Add null-reminating char
         removec();
     }
 }
@@ -168,6 +168,6 @@ void enter() {
 void clearCharBuffer() {
     int i;
     for (i = 0; i < BUFFSIZE; i++)
-        charBuffer[i] = '\0';
+        charBuffer[i] = '\0'; // Set elements to null-terminating char
     buffIndex = 0;
 }

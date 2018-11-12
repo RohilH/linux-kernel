@@ -14,19 +14,21 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     int i = 0;
     char * buffer = (char*) buf;
     // printf("gets to derefencing buffer");
+    // Continuously check for enter flag until it is pressed (volatile)
     while(enterPressed != 1);
     enterPressed = 0;
     // if (nbytes > 128)
     //     return -1;
+    // Copy charBuffer into local buffer
     for (i = 0; i < nbytes && i < BUFFSIZE; i++) {
         // if (charBuffer[i] == '\n')
         //     break;
         buffer[i] = charBuffer[i];
     }
-    buffer[i] = '\0'; // null terminated string
-    char enterChar = '\n';
+    buffer[i] = '\0'; // Null terminated string
+    char enterChar = '\n'; // New line
     putc(enterChar);
-    clearCharBuffer();
+    clearCharBuffer(); // Reset terminal input line
     return i;
 }
 
@@ -42,6 +44,7 @@ int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     int i;
     char * buffer = (char*) buf;
     for (i = 0; i < nbytes; i++) {
+      // Add key to output stream
       putc(buffer[i]);
     }
     // ret = printf((char*) buffer);

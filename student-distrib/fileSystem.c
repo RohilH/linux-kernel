@@ -28,7 +28,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
   // check if filename is less than 32 bits
   // printf("Gets here\n");
 
-  if (strlen((int8_t*)fname) > 32) return -1;
+  if (strlen((int8_t*)fname) > FILENAMESIZE) return -1;
   // loops through all the dentries in the boot block
   uint32_t i;
   for (i = 0; i < bootBlockStart->dirCount; i++) {
@@ -185,6 +185,7 @@ int fileIndexForDir = 0;
 int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
     int i;
     int numOfDirectories = bootBlockStart->dirCount;
+    // Check out of bounds error
     if (fileIndexForDir >= numOfDirectories) {
         fileIndexForDir = 0;
         return 0;
@@ -193,10 +194,12 @@ int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
     int validRead = read_dentry_by_index (fileIndexForDir, &direntry);
     if (validRead == 0) {
         int8_t* filename = (int8_t*) buf;
-        for (i = 0; i < 32; i++) {
+        for (i = 0; i < FILENAMESIZE; i++) {
+            // Fill buffer with file name
             filename[i] = direntry.fileName[i];
         }
-        filename[32] = '\0';
+        // Null terminating
+        filename[FILENAMESIZE] = '\0';
         fileIndexForDir++;
         return i;
     }
