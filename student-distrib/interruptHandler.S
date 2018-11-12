@@ -5,10 +5,9 @@
 .globl rtc_asmlinkage
 .globl syscall_handler
 
-# .data
-# SAVE_EAX:
+#define ONE_INDEXED 0x0
 
-# Assmebly linkage for rtc and keyboard handlers
+# Assembly linkage for rtc handler
 rtc_asmlinkage:
     pushal
     pushfl
@@ -17,6 +16,7 @@ rtc_asmlinkage:
     popal
     iret
 
+# Assembly linkage for keyboard handler
 keyboard_asmlinkage:
     pushal
     pushfl
@@ -27,8 +27,10 @@ keyboard_asmlinkage:
 
 # Jump table to system calls
 syscall_jumptable:
-    .long 0x000B8000, halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
+    # syscalls are 1 indexed
+    .long ONE_INDEXED, halt, execute, read, write, open, close, getArgs, vidMap, setHandler, sigReturn
 
+# Handles system calls by pushing arguments and restoring stack
 syscall_handler:
     cli
     # push all registers (except eax) and flags
@@ -37,11 +39,9 @@ syscall_handler:
     pushl %ebp
     pushl %esi
     pushl %edi
-
-    # push arguments 1, 2, 3 onto stack
-    pushl %edx # 3
-    pushl %ecx # 2
-    pushl %ebx # 1
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
     pushfl
 
     # protect all of the registers from modification by the system call
@@ -63,7 +63,6 @@ syscall_handler:
     # jump to the system call number designated by eax
     sti
     call *syscall_jumptable(, %eax, 4)
-    # movl %eax, SAVE_EAX
     cli
     jmp done
 
@@ -71,9 +70,8 @@ invalid_syscall:
     movl $-1, %eax
 
 done:
+    # pop all registers and flags off stack
     addl $24, %esp
-    # pop all registers off stack
-    # pop all registers and flags
     popfl
     popl %ebx
     popl %ecx
@@ -83,8 +81,5 @@ done:
     popl %ebp
     popl %ds
     popl %es
-    # movl $SAVE_EAX, %eax
-
-    # popal
     sti
     iret
