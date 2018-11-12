@@ -153,8 +153,8 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-    uint8_t tempBuffer[4];
-    read_data (dentry.inodeNum, 0, tempBuffer, 4);
+    uint8_t tempBuffer[fourBytes];
+    read_data (dentry.inodeNum, 0, tempBuffer, fourBytes);
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers (makes sure file is executable)
     // Check for ELF in beginning four bytes of buffer
     if (tempBuffer[0] != del_CHAR || tempBuffer[1] != e_CHAR || tempBuffer[2] != l_CHAR || tempBuffer[3] != f_CHAR) {
@@ -178,7 +178,7 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
-    read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
+    read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
@@ -190,8 +190,8 @@ int32_t execute(const uint8_t * command) {
     ///////* NOTE: STEP 6: Create TSS for context switching  */
     // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - 4;
-    int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
+    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
+    int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
     // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"
