@@ -354,10 +354,10 @@ int32_t vidMap(uint8_t ** screenStart) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: -1
  */
 int32_t setHandler(int32_t sigNum, void* handlerAddress) {
-  return 0;
+  return -1;
 }
 
 /*
@@ -365,10 +365,10 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: -1
  */
 int32_t sigReturn(void) {
-  return 0;
+  return -1;
 }
 
 /*
