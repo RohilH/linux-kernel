@@ -332,20 +332,38 @@ int32_t close(int32_t fd) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: Returns 0 on success. -1 on error.
  */
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
+  // Access PCB->arguments
+  pcb_t * currPCB = generatePCBPointer(currProcessIndex);
+  // Error Checking: Valid Pointers
+  if(buf == NULL) return -1;
+  // Error Checking: Valid arguments
+  if(currPCB->bufferArgs[0] == '\0' || nBytes <= 0) return -1;
+  // Error Checking: Valid args length (Ensure length of buf < nBytes)
+  if(strlen((const int8_t *)currPCB->bufferArgs) > nBytes) return -1;
+  // Copy PCB->arguments to buffer
+  strcpy((int8_t *)buf, (const int8_t *)currPCB->bufferArgs);
   return 0;
 }
 
 /*
  * vidMap
  *     DESCRIPTION: No implementation
- *     INPUTS: N/A
+ *     INPUTS: screenstart - pointer to video memory
  *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t vidMap(uint8_t ** screenStart) {
+  // 1) Error Checking
+  // Invalid Pointers (128-132MB)
+
+  // 2) Map virtual address to video memory
+
+  // 3) *screen_start = virtual address (133MB)
+
+  // 4) Return virtual address
   return 0;
 }
 

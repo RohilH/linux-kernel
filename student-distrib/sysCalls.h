@@ -22,6 +22,8 @@
 #define eightKB 0x2000
 #define fourBytes 4
 #define execStartByte 24
+
+#define bufSize 128
 /*
  * struct of function pointers used in fileDescriptor_t
  * open - function pointer to open
@@ -61,6 +63,7 @@ typedef struct pcb_t {
     // struct pcb_t* parentPtr;
     uint32_t pcbESP;
     uint32_t pcbEBP;
+    uint8_t bufferArgs[bufSize];
     // struct pcb_t* childPtr;
 } pcb_t;
 
