@@ -9,7 +9,6 @@
  *     OUTPUTS: none
  *     RETURN VALUE: number of bytes read
  */
-<<<<<<< HEAD
 int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     // printf("gets to beginning of read");
     int i = 0;
@@ -21,29 +20,14 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     // if (nbytes > 128)
     //     return -1;
     // Copy charBuffer into local buffer
-=======
-int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
-    int i = 0;
-    char * buffer = (char*) buf;
-    while(enterPressed != 1); // wait until enter is pressed by keyboard
-    enterPressed = 0;
->>>>>>> master
     for (i = 0; i < nbytes && i < BUFFSIZE; i++) {
         buffer[i] = charBuffer[i]; // copy charBuffer into buffer
     }
-<<<<<<< HEAD
     buffer[i] = '\0'; // Null terminated string
     char enterChar = '\n'; // New line
     putc(enterChar);
     clearCharBuffer(); // Reset terminal input line
     return i;
-=======
-    buffer[i] = '\0'; // end with null terminated string
-    char enterChar = '\n'; // new line
-    putc(enterChar);
-    clearCharBuffer(); // clear char buffer
-    return i; // return bytes read
->>>>>>> master
 }
 
 /*
@@ -53,7 +37,6 @@ int32_t terminalRead (int32_t fd, void* buf, int32_t nbytes) {
  *     OUTPUTS: none
  *     RETURN VALUE: number of bytes read
  */
-<<<<<<< HEAD
 int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     int32_t ret;
     int i;
@@ -66,17 +49,6 @@ int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     // char enterChar = '\n';
     // putc(enterChar);
     return ret;
-=======
-int32_t terminalWrite (int32_t fd, const void* buf, int32_t nbytes) {
-    int i;
-    char * buffer = (char*) buf;
-    for (i = 0; i < nbytes; i++) {
-      putc(buffer[i]); // print buffer
-    }
-    char enterChar = '\n';
-    putc(enterChar); // new line
-    return i;
->>>>>>> master
 }
 
 /*

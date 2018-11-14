@@ -153,8 +153,8 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-    uint8_t tempBuffer[4];
-    read_data (dentry.inodeNum, 0, tempBuffer, 4);
+    uint8_t tempBuffer[fourBytes];
+    read_data (dentry.inodeNum, 0, tempBuffer, fourBytes);
     // 0: 0x7f; 1: 0x45; 2: 0x4c; 3: 0x46 magic numbers (makes sure file is executable)
     // Check for ELF in beginning four bytes of buffer
     if (tempBuffer[0] != del_CHAR || tempBuffer[1] != e_CHAR || tempBuffer[2] != l_CHAR || tempBuffer[3] != f_CHAR) {
@@ -178,11 +178,11 @@ int32_t execute(const uint8_t * command) {
         return -1;
     }
 
-    read_data (dentry.inodeNum, 24, tempBuffer, 4); // get bytes 24 to 27
+    read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex+1));
+    getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -190,8 +190,8 @@ int32_t execute(const uint8_t * command) {
     ///////* NOTE: STEP 6: Create TSS for context switching  */
     // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - 4;
-    int userStackPtr = VirtualStartAddress + PageSize4MB - 4;
+    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
+    int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
     // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"
@@ -229,7 +229,7 @@ int32_t execute(const uint8_t * command) {
  */
 int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     // Check for out of bounds and null erors
-    if (fd < 0 || fd > numFiles) return -1;
+    if (fd < 0 || fd >= numFiles) return -1;
     if (buf == NULL) return -1;
 
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
@@ -248,7 +248,7 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
  */
 int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     // Check for out of bounds and null erors
-    if (fd < 0 || fd > numFiles) return -1;
+    if (fd < 0 || fd >= numFiles) return -1;
     // Check for NULL buffer
     if (buf == NULL)  return -1;
     // Get pcb pointer
@@ -274,14 +274,14 @@ int32_t open(const uint8_t* fileName) {
     // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     for (i = 2; i < numFiles; i++) {
-        if ((currPCB->fileArray[i]).flags == 0) {
+        if ((currPCB->fileArray[i]).flags == 0) { // if file slot is open
             currPCB->fileArray[i].flags = 1;
             currPCB->fileArray[i].filePosition = 0;
             break;
         }
     }
-    // If PCB is full
-    if (i == 7) return -1;
+    // If PCB files are full
+    if (i == numFiles) return -1;
 
     if (dentry.fileType == 0) { // RTC
         if (rtc_open(fileName) == -1) { // failed rtc open
@@ -317,12 +317,12 @@ int32_t open(const uint8_t* fileName) {
  */
 int32_t close(int32_t fd) {
     // Check for bound error
-    if (fd < 0 || fd > numFiles) return -1;
+    if (fd < 0 || fd >= numFiles) return -1;
     // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
     if (currPCB->fileArray[fd].flags == 0) return -1;
-    // Set to in use
+    // Set to not in use
     currPCB->fileArray[fd].flags = 0;
     return currPCB->fileArray[fd].fileOpsTablePtr.close(fd);
 }

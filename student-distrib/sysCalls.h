@@ -20,6 +20,8 @@
 
 #define eightMB 0x00800000
 #define eightKB 0x2000
+#define fourBytes 4
+#define execStartByte 24
 /*
  * struct of function pointers used in fileDescriptor_t
  * open - function pointer to open

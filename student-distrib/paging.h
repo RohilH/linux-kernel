@@ -13,8 +13,9 @@
 #define kernelStartAddr     0x00400000
 #define videoMemAddr        0x000B8000
 #define videoMemIndex       0xB8
+#define PageSize8KB         0x00002000
 #define PageSize4MB         0x00400000
-
+#define PageSize8MB         0x00800000
 // Page Directory of 1024 PTEs
 uint32_t pageDirectory[1024] __attribute__((aligned(4096)));
 // Page Table of 1024 entries
