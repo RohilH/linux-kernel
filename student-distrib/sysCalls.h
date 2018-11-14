@@ -24,6 +24,8 @@
 #define execStartByte 24
 
 #define bufSize 128
+#define start_user_pg VirtualStartAddress // 128MB
+#define end_user_pg 0x08400000 // 132MB
 /*
  * struct of function pointers used in fileDescriptor_t
  * open - function pointer to open

@@ -358,7 +358,10 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
 int32_t vidMap(uint8_t ** screenStart) {
   // 1) Error Checking
   // Invalid Pointers (128-132MB)
-
+  if(screenStart == NULL) return -1;
+  if(*screenStart == NULL) return -1;
+  int startAddr = (uint32_t)screenStart;
+  if(startAddr < start_user_pg || startAddr > end_user_pg) return -1;
   // 2) Map virtual address to video memory
 
   // 3) *screen_start = virtual address (133MB)
