@@ -8,6 +8,13 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "idt.h"
+#include "keyboard.h"
+#include "rtc.h"
+#include "paging.h"
+#include "fileSystem.h"
+#include "sysCalls.h"
+
 
 #define RUN_TESTS
 
@@ -52,6 +59,10 @@ void entry(unsigned long magic, unsigned long addr) {
         int mod_count = 0;
         int i;
         module_t* mod = (module_t*)mbi->mods_addr;
+
+        // get the starting address of the boot block
+        fsInit(mod->mod_start);
+
         while (mod_count < mbi->mods_count) {
             printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
             printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
@@ -136,18 +147,18 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
-    /* Init the PIC */
-    i8259_init();
+    // printf("Enabling Interrupts\n");
+    IDT_Initializer(); // Initialize IDT table
+    i8259_init(); // Initialize devices, mem, filesystem, device ints on PIC
 
-    /* Initialize devices, memory, filesystem, enable device interrupts on the
-     * PIC, any other initialization stuff... */
+    sti();
 
-    /* Enable interrupts */
-    /* Do not enable the following until after you have set up your
-     * IDT correctly otherwise QEMU will triple fault and simple close
-     * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    KEYBOARD_INIT(); // Initialize keyboard
+    RTC_INIT(); // Initialize RTC
+    PAGING_INIT(); // Intialize paging
+    currProcessIndex = -1; // Initialize curr process index for PCB use
+
+    clear(); // Clear the screen
 
 #ifdef RUN_TESTS
     /* Run tests */
