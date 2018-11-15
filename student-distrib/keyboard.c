@@ -55,6 +55,7 @@ void KEYBOARD_INIT() {
     scanCode = 0, prevScanCode = 0;
     shift = 0, caps = 0, ctrl = 0, alt = 0, enterPressed = 0;
     buffIndex = 0;
+    commandIndex = 0;
     sti();
 }
 
@@ -80,6 +81,12 @@ void KEYBOARD_HANDLER() {
             }
             else if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
                 backspace();
+            }
+            else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
+                upArrow();
+            }
+            else if (scanCode == DOWN_ARROW_PRESSED) {
+                downArrow();
             }
             else if (caps && shift) { // Handle caps and shift
                 addCharToBuffer(scanCode, 3);
@@ -127,6 +134,9 @@ void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey]; // Obtain scan code
     if (buffIndex < BUFFSIZE && charToAdd != '\0') { // Check out of bounds error and null-terminating char
         charBuffer[buffIndex] = charToAdd; // Add to buffer
+        if(commandIndex == 0) {
+          typedBuffer[buffIndex] = charToAdd;
+        }
         buffIndex++;
         putc(charToAdd); // Add key to stream
     }
@@ -143,6 +153,7 @@ void backspace() {
     if (buffIndex > 0) { // Check for remaining chars in buffer
         buffIndex--;
         charBuffer[buffIndex] = '\0'; // Add null-reminating char
+        typedBuffer[buffIndex] = '\0';
         removec();
     }
 }
@@ -155,7 +166,110 @@ void backspace() {
  *     RETURN VALUE: none
  */
 void enter() {
+    int i;
+    int currCommand;
+    if(currStored<10) {
+      for(currCommand = COMMAND_LIMIT-1; currCommand > 0; currCommand--) { //Shift all the commands right, effectively popping off the right most
+          for(i = 0; i<BUFFSIZE; i++) { //clear what is going to be replaced
+            if(commandStorage[currCommand][i] != '\0') {
+              commandStorage[currCommand][i] = '\0';
+            }
+          }
+          for(i = 0; i<BUFFSIZE; i++) {
+            if(commandStorage[currCommand - 1][i] != '\0') { //move the buffer up an index
+              commandStorage[currCommand][i] = commandStorage[currCommand - 1][i];
+            }
+          }
+      }
+      for(i = 0; i<BUFFSIZE; i++) { //clear the first stored buffer
+        if(commandStorage[0][i] != '\0') {
+          commandStorage[0][i] = '\0';
+        }
+      }
+      for(i = 0; i<BUFFSIZE; i++) { //replace the first stored buffer with what was entered by user
+        if(charBuffer[i] != '\0') {
+          commandStorage[0][i] = charBuffer[i];
+        }
+      }
+      currStored++; //increment how many buffers are being stored
+    }
+
+    commandIndex = 0; //reset commandIndex back to 0
     enterPressed = 1;
+}
+
+/*
+ * upArrow
+ *     DESCRIPTION: Puts the previous command(s) on to the terminal and into the buffer
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
+void upArrow() {
+  int i;
+  if(commandIndex <= currStored) { //check that the current command is within the bounds of what is actually stored
+    for(i = 0; i<BUFFSIZE; i++) {
+      if(charBuffer[i] != '\0') { //clear the current charBuffer
+        charBuffer[i] = '\0';
+        removec(); //remove it from the screen
+      }
+    }
+    buffIndex = 0; //reset buffer index
+    for(i=0;i<BUFFSIZE; i++) {
+      if(commandStorage[commandIndex][i] != '\0') {
+        charBuffer[i] = commandStorage[commandIndex][i];
+        putc(charBuffer[i]);
+        buffIndex++;
+      }
+    }
+  }
+  commandIndex++;
+}
+
+/*
+ * downArrow
+ *     DESCRIPTION: Puts the previous command(s) on to the terminal and into the buffer
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
+void downArrow() {
+  if(commandIndex>=1) {
+    commandIndex--;
+    int i;
+    if(commandIndex == 0) { //case for when the user wants to return back to the command they originally typed
+      for(i = 0; i<BUFFSIZE; i++) {
+        if(charBuffer[i] != '\0') {
+          charBuffer[i] = '\0';
+          removec();
+        }
+      }
+      buffIndex = 0; //reset BuffIndex
+      for(i=0;i<BUFFSIZE; i++) {
+        if(typedBuffer[i] != '\0') {
+          charBuffer[i] = typedBuffer[i]; //use typed buffer which is unaffected by any up or down arrow presses
+          putc(charBuffer[i]); //output to terminal
+          buffIndex++;
+        }
+      }
+    }
+    else{
+      for(i = 0; i<BUFFSIZE; i++) { //remove previous command from the buffer and the terminal
+        if(charBuffer[i] != '\0') {
+          charBuffer[i] = '\0';
+          removec();
+        }
+      }
+      buffIndex = 0;
+      for(i=0;i<BUFFSIZE; i++) { //puts the command history that is one down into the buffer and onto the terminal
+        if(commandStorage[commandIndex - 1][i] != '\0') {
+          charBuffer[i] = commandStorage[commandIndex - 1][i];
+          putc(charBuffer[i]);
+          buffIndex++;
+        }
+      }
+    }
+  }
 }
 
 /*
@@ -167,7 +281,9 @@ void enter() {
  */
 void clearCharBuffer() {
     int i;
-    for (i = 0; i < BUFFSIZE; i++)
-        charBuffer[i] = '\0'; // Set elements to null-terminating char
+    for (i = 0; i < BUFFSIZE; i++) {
+      charBuffer[i] = '\0'; // Set elements to null-terminating char
+      typedBuffer[i] = '\0'; // Set elements to null-terminating char
+    }
     buffIndex = 0;
 }
