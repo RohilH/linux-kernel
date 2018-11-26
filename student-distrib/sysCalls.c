@@ -177,7 +177,7 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    strncpy(currPCB->bufferArgs, argToPass, maxFileNameSize);
+    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, maxFileNameSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
@@ -357,12 +357,12 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
  */
 int32_t vidMap(uint8_t ** screenStart) {
   // 1) Error Checking
-  // Invalid Pointers 
+  // Invalid Pointers
   if(screenStart == NULL) return -1;
   // 2) Map virtual address to video memory
   getNew4KBPage(VidmapStartAddress, videoMemAddr);
   // 3) *screenStart = virtual address (133MB)
-  *screenStart = (uint32_t*)(VidmapStartAddress);
+  *screenStart = (uint8_t*)(VidmapStartAddress);
   // 4) Return virtual address
   return VidmapStartAddress;
 }
