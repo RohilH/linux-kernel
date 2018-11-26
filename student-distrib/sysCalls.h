@@ -10,9 +10,11 @@
 #define numFiles 8
 #define maxFileNameSize 32
 #define VirtualStartAddress 0x08000000
+#define VidmapStartAddress  0x08400000
+
 #define ProgramImageAddress 0x08048000
 
-#define max_processes 8
+#define max_processes 2
 #define del_CHAR 0x7f
 #define e_CHAR 0x45
 #define l_CHAR 0x4c

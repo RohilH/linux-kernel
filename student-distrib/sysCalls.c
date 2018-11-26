@@ -33,7 +33,7 @@ pcb_t* initPCB() {
     currProcessIndex++;
     // Check if # processes exceeds max # processes
     if (currProcessIndex >= max_processes) {
-        printf("Too many processes running; cannot create new PCB.");
+        // printf("Too many processes running; cannot create new PCB.");
         currProcessIndex--;
         return NULL;
     }
@@ -100,7 +100,7 @@ int32_t halt(uint8_t status) {
   }
 
   // Restore parent paging
-  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
+  getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
   // Jump to execute return
   storeESP = currPCB->pcbESP;
   storeEBP = currPCB->pcbEBP;
@@ -164,6 +164,11 @@ int32_t execute(const uint8_t * command) {
 
     ///////* NOTE: STEP 3: Setup new PCB */
     pcb_t* currPCB = initPCB();
+    // Check null
+    if (currPCB == NULL) {
+      sti();
+      return -1;
+    }
     uint32_t storeESP;
     uint32_t storeEBP;
     // Store ESP and EBP in pcb
@@ -172,17 +177,12 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    // Check null
-    if (currPCB == NULL) {
-        sti();
-        return -1;
-    }
     strncpy(currPCB->bufferArgs, argToPass, maxFileNameSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -357,17 +357,14 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
  */
 int32_t vidMap(uint8_t ** screenStart) {
   // 1) Error Checking
-  // Invalid Pointers (128-132MB)
+  // Invalid Pointers 
   if(screenStart == NULL) return -1;
-  if(*screenStart == NULL) return -1;
-  int startAddr = (uint32_t)screenStart;
-  if(startAddr < start_user_pg || startAddr > end_user_pg) return -1;
   // 2) Map virtual address to video memory
-
-  // 3) *screen_start = virtual address (132MB)
-
+  getNew4KBPage(VidmapStartAddress, videoMemAddr);
+  // 3) *screenStart = virtual address (133MB)
+  *screenStart = (uint32_t*)(VidmapStartAddress);
   // 4) Return virtual address
-  return 0;
+  return VidmapStartAddress;
 }
 
 /*
