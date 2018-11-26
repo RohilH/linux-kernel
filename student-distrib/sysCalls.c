@@ -177,7 +177,7 @@ int32_t execute(const uint8_t * command) {
         sti();
         return -1;
     }
-
+    strncpy(currPCB->bufferArgs, argToPass, maxFileNameSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
@@ -364,7 +364,7 @@ int32_t vidMap(uint8_t ** screenStart) {
   if(startAddr < start_user_pg || startAddr > end_user_pg) return -1;
   // 2) Map virtual address to video memory
 
-  // 3) *screen_start = virtual address (133MB)
+  // 3) *screen_start = virtual address (132MB)
 
   // 4) Return virtual address
   return 0;
