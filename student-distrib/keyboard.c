@@ -207,7 +207,7 @@ void enter() {
  */
 void upArrow() {
   int i;
-  if(commandIndex <= currStored) { //check that the current command is within the bounds of what is actually stored
+  if(commandIndex < (currStored)) { //check that the current command is within the bounds of what is actually stored
     for(i = 0; i<BUFFSIZE; i++) {
       if(charBuffer[i] != '\0') { //clear the current charBuffer
         charBuffer[i] = '\0';
@@ -222,8 +222,8 @@ void upArrow() {
         buffIndex++;
       }
     }
+    commandIndex++;
   }
-  commandIndex++;
 }
 
 /*
