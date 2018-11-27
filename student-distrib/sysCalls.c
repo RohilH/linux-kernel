@@ -422,7 +422,7 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
         fileNameEnd++;
 
     // Command cannot be executed if filename length exceeds 32 chars
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) {
+    if (fileNameEnd - fileNameStart > maxFileNameSize) {
         printf("Command could not be executed: file name too long.");
         sti();
         return -1;
@@ -446,7 +446,7 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
     // Command cannot be executed
-    if (fileNameEnd - fileNameStart >= maxFileNameSize) {
+    if (fileNameEnd - fileNameStart > maxFileNameSize) {
         sti();
         return -1;
     }

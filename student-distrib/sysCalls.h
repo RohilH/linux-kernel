@@ -8,9 +8,9 @@
 #include "fileSystem.h"
 
 #define numFiles 8
-#define maxFileNameSize 32
-#define VirtualStartAddress 0x08000000
-#define VidmapStartAddress  0x08400000
+#define maxFileNameSize 33 // FileNameSize = 32 char + 1 null terminating string
+#define VirtualStartAddress 0x08000000 // 128MB
+#define VidmapStartAddress  0x08400000 // 132MB
 
 #define ProgramImageAddress 0x08048000
 
@@ -26,8 +26,6 @@
 #define execStartByte 24
 
 #define bufSize 128
-#define start_user_pg VirtualStartAddress // 128MB
-#define end_user_pg 0x08400000 // 132MB
 /*
  * struct of function pointers used in fileDescriptor_t
  * open - function pointer to open
