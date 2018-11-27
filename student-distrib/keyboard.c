@@ -168,7 +168,6 @@ void backspace() {
 void enter() {
     int i;
     int currCommand;
-    if(currStored<200) {
       for(currCommand = COMMAND_LIMIT-1; currCommand > 0; currCommand--) { //Shift all the commands right, effectively popping off the right most
           for(i = 0; i<BUFFSIZE; i++) { //clear what is going to be replaced
             if(commandStorage[currCommand][i] != '\0') {
@@ -191,9 +190,9 @@ void enter() {
           commandStorage[0][i] = charBuffer[i];
         }
       }
-      currStored++; //increment how many buffers are being stored
-    }
-
+      if(currStored != COMMAND_LIMIT) {
+        currStored++; //increment how many buffers are being
+      }
     commandIndex = 0; //reset commandIndex back to 0
     enterPressed = 1;
 }
