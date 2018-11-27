@@ -138,7 +138,7 @@ int32_t execute(const uint8_t * command) {
     cli();
     ///////* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
-    uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
+    uint8_t argToPass[bufSize]; // INVALID: MUST BE STATIC NUM
     int ret;
     ret = parseCommands(command, filename, argToPass);
     // Return error check
@@ -177,7 +177,7 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, maxFileNameSize);
+    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
@@ -421,12 +421,12 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
 
-    // Command cannot be executed if filename length exceeds 32 chars
-    if (fileNameEnd - fileNameStart > maxFileNameSize) {
-        printf("Command could not be executed: file name too long.");
-        sti();
-        return -1;
-    }
+    // // Command cannot be executed if filename length exceeds 32 chars
+    // if (fileNameEnd - fileNameStart > maxFileNameSize) {
+    //     printf("Command could not be executed: file name too long.");
+    //     sti();
+    //     return -1;
+    // }
     // uint8_t filename[maxFileNameSize]; // initialize filename
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
@@ -445,11 +445,12 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     // Get argument string
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
-    // Command cannot be executed
-    if (fileNameEnd - fileNameStart > maxFileNameSize) {
-        sti();
-        return -1;
-    }
+    // // Command cannot be executed
+    // if (fileNameEnd - fileNameStart > maxFileNameSize) {
+    //     printf("Command could not be executed: file name too long.");
+    //     sti();
+    //     return -1;
+    // }
 
     // uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
     for (i = fileNameStart; i < fileNameEnd; i++) {
