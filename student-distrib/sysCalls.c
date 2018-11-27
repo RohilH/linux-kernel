@@ -317,7 +317,7 @@ int32_t open(const uint8_t* fileName) {
  */
 int32_t close(int32_t fd) {
     // Check for bound error
-    if (fd < 0 || fd >= numFiles) return -1;
+    if (fd < 2 || fd >= numFiles) return -1;
     // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
@@ -358,7 +358,7 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
 int32_t vidMap(uint8_t ** screenStart) {
   // 1) Error Checking
   // Invalid Pointers
-  if(screenStart == NULL) return -1;
+  if(screenStart == NULL || screenStart == PageSize4MB) return -1;
   // 2) Map virtual address to video memory
   getNew4KBPage(VidmapStartAddress, videoMemAddr);
   // 3) *screenStart = virtual address (133MB)
