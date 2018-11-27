@@ -10,9 +10,11 @@
 #define numFiles 8
 #define maxFileNameSize 32
 #define VirtualStartAddress 0x08000000
+#define VidmapStartAddress  0x08400000
+
 #define ProgramImageAddress 0x08048000
 
-#define max_processes 8
+#define max_processes 2
 #define del_CHAR 0x7f
 #define e_CHAR 0x45
 #define l_CHAR 0x4c
@@ -22,6 +24,10 @@
 #define eightKB 0x2000
 #define fourBytes 4
 #define execStartByte 24
+
+#define bufSize 128
+#define start_user_pg VirtualStartAddress // 128MB
+#define end_user_pg 0x08400000 // 132MB
 /*
  * struct of function pointers used in fileDescriptor_t
  * open - function pointer to open
@@ -61,6 +67,7 @@ typedef struct pcb_t {
     // struct pcb_t* parentPtr;
     uint32_t pcbESP;
     uint32_t pcbEBP;
+    uint8_t bufferArgs[bufSize];
     // struct pcb_t* childPtr;
 } pcb_t;
 

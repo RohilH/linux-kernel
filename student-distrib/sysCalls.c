@@ -33,7 +33,7 @@ pcb_t* initPCB() {
     currProcessIndex++;
     // Check if # processes exceeds max # processes
     if (currProcessIndex >= max_processes) {
-        printf("Too many processes running; cannot create new PCB.");
+        // printf("Too many processes running; cannot create new PCB.");
         currProcessIndex--;
         return NULL;
     }
@@ -100,7 +100,7 @@ int32_t halt(uint8_t status) {
   }
 
   // Restore parent paging
-  getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
+  getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
   // Jump to execute return
   storeESP = currPCB->pcbESP;
   storeEBP = currPCB->pcbEBP;
@@ -164,6 +164,11 @@ int32_t execute(const uint8_t * command) {
 
     ///////* NOTE: STEP 3: Setup new PCB */
     pcb_t* currPCB = initPCB();
+    // Check null
+    if (currPCB == NULL) {
+      sti();
+      return -1;
+    }
     uint32_t storeESP;
     uint32_t storeEBP;
     // Store ESP and EBP in pcb
@@ -172,17 +177,12 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    // Check null
-    if (currPCB == NULL) {
-        sti();
-        return -1;
-    }
-
+    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, maxFileNameSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNewPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -317,7 +317,7 @@ int32_t open(const uint8_t* fileName) {
  */
 int32_t close(int32_t fd) {
     // Check for bound error
-    if (fd < 0 || fd >= numFiles) return -1;
+    if (fd < 2 || fd >= numFiles) return -1;
     // Get current pcb pointer
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
@@ -332,21 +332,39 @@ int32_t close(int32_t fd) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: Returns 0 on success. -1 on error.
  */
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
+  // Access PCB->arguments
+  pcb_t * currPCB = generatePCBPointer(currProcessIndex);
+  // Error Checking: Valid Pointers
+  if(buf == NULL) return -1;
+  // Error Checking: Valid arguments
+  if(currPCB->bufferArgs[0] == '\0' || nBytes <= 0) return -1;
+  // Error Checking: Valid args length (Ensure length of buf < nBytes)
+  if(strlen((const int8_t *)currPCB->bufferArgs) > nBytes) return -1;
+  // Copy PCB->arguments to buffer
+  strcpy((int8_t *)buf, (const int8_t *)currPCB->bufferArgs);
   return 0;
 }
 
 /*
  * vidMap
  *     DESCRIPTION: No implementation
- *     INPUTS: N/A
+ *     INPUTS: screenstart - pointer to video memory
  *     OUTPUTS: N/A
  *     RETURN VALUE: 0
  */
 int32_t vidMap(uint8_t ** screenStart) {
-  return 0;
+  // 1) Error Checking
+  // Invalid Pointers
+  if(screenStart == NULL || screenStart == (uint8_t**)PageSize4MB) return -1;
+  // 2) Map virtual address to video memory
+  getNew4KBPage(VidmapStartAddress, videoMemAddr);
+  // 3) *screenStart = virtual address (133MB)
+  *screenStart = (uint8_t*)(VidmapStartAddress);
+  // 4) Return virtual address
+  return VidmapStartAddress;
 }
 
 /*
@@ -354,10 +372,10 @@ int32_t vidMap(uint8_t ** screenStart) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: -1
  */
 int32_t setHandler(int32_t sigNum, void* handlerAddress) {
-  return 0;
+  return -1;
 }
 
 /*
@@ -365,10 +383,10 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress) {
  *     DESCRIPTION: No implementation
  *     INPUTS: N/A
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: -1
  */
 int32_t sigReturn(void) {
-  return 0;
+  return -1;
 }
 
 /*

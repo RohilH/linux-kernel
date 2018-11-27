@@ -123,12 +123,12 @@ int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-  printf("File Pos: %d\n", currPCB->fileArray[fd].filePosition);
+  // printf("File Pos: %d\n", currPCB->fileArray[fd].filePosition);
   uint32_t offset = currPCB->fileArray[fd].filePosition;
 
   // read file data and store in buf
   bytesRead = read_data(currPCB->fileArray[fd].inodeNum, offset, buffer, nBytes);
-  printf("Bytes read: %d\n", bytesRead);
+  // printf("Bytes read: %d\n", bytesRead);
   currPCB->fileArray[fd].filePosition += bytesRead;
   return bytesRead;
 }

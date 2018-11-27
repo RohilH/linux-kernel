@@ -21,7 +21,9 @@ uint32_t pageDirectory[1024] __attribute__((aligned(4096)));
 // Page Table of 1024 entries
 uint32_t pageTable[1024] __attribute__((aligned(4096)));
 
+uint32_t vidmapPageTable[1024] __attribute__((aligned(4096)));
 // Initialize Page
 void PAGING_INIT();
-void getNewPage(uint32_t virtualAddress, uint32_t physicalAddress);
+void getNew4MBPage(uint32_t virtualAddress, uint32_t physicalAddress);
+void getNew4KBPage(uint32_t virtualAddress, uint32_t physicalAddress);
 #endif
