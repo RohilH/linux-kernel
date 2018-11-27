@@ -8,7 +8,7 @@
 #include "fileSystem.h"
 
 #define numFiles 8
-#define maxFileNameSize 33 // FileNameSize = 32 char + 1 null terminating string
+#define maxFileNameSize 32 // 32 char
 #define VirtualStartAddress 0x08000000 // 128MB
 #define VidmapStartAddress  0x08400000 // 132MB
 
