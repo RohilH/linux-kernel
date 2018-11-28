@@ -14,7 +14,7 @@
 
 #define ProgramImageAddress 0x08048000
 
-#define max_processes 2
+#define max_processes 6
 #define del_CHAR 0x7f
 #define e_CHAR 0x45
 #define l_CHAR 0x4c
@@ -48,7 +48,7 @@ typedef struct fileOpsTable_t {
  * flags - indicates used fds
 */
 typedef struct fileDescriptor_t {
-    fileOpsTable_t fileOpsTablePtr; // jumptable pointer to open read write close
+    fileOpsTable_t * fileOpsTablePtr; // jumptable pointer to open read write close
     int32_t inodeNum;
     int32_t filePosition;
     int32_t flags;

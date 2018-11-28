@@ -43,7 +43,7 @@ pcb_t* initPCB() {
     // Setup STDIN
     fileDescriptor_t stdinFD;
     // Point to respective file op function
-    stdinFD.fileOpsTablePtr = stdin;
+    stdinFD.fileOpsTablePtr = &stdin;
     // Update current PCB with stdin
     currPCB->fileArray[0] = stdinFD;
     currPCB->fileArray[0].flags = 1;
@@ -51,14 +51,14 @@ pcb_t* initPCB() {
     // Setup STDOUT
     fileDescriptor_t stdoutFD;
     // Point to respective file op function
-    stdoutFD.fileOpsTablePtr = stdout;
+    stdoutFD.fileOpsTablePtr = &stdout;
     // Update current PCB with stdout
     currPCB->fileArray[1] = stdoutFD;
     currPCB->fileArray[1].flags = 1;
 
     // Setup Blank tables for remaining files
     fileDescriptor_t emptyFD;
-    emptyFD.fileOpsTablePtr = blankTable;
+    emptyFD.fileOpsTablePtr = &blankTable;
 
     int i = 0;
     // Empty rest of current PCB
@@ -94,9 +94,9 @@ int32_t halt(uint8_t status) {
 
   // Close relevant File descriptors
   for(i = 0; i < numFiles; i++) {
-    currPCB->fileArray[i].fileOpsTablePtr = blankTable;
+    currPCB->fileArray[i].fileOpsTablePtr = &blankTable;
     currPCB->fileArray[i].flags = 0;
-    currPCB->fileArray[i].fileOpsTablePtr.close(i);
+    currPCB->fileArray[i].fileOpsTablePtr->close(i);
   }
 
   // Restore parent paging
@@ -135,6 +135,7 @@ int32_t halt(uint8_t status) {
                      If program is executed, return 0
  */
 int32_t execute(const uint8_t * command) {
+    if(command == NULL) return -1;
     cli();
     ///////* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
@@ -235,7 +236,7 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     if (currPCB->fileArray[fd].flags == 0) // File not in use
         return -1;
-    return currPCB->fileArray[fd].fileOpsTablePtr.read(fd, buf, nBytes);
+    return currPCB->fileArray[fd].fileOpsTablePtr->read(fd, buf, nBytes);
 }
 
 /*
@@ -255,7 +256,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
     if (currPCB->fileArray[fd].flags == 0) return -1;
-    return currPCB->fileArray[fd].fileOpsTablePtr.write(fd, buf, nBytes);
+    return currPCB->fileArray[fd].fileOpsTablePtr->write(fd, buf, nBytes);
 }
 
 /*
@@ -267,6 +268,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
  *                   Else, return file index
  */
 int32_t open(const uint8_t* fileName) {
+    if(fileName == NULL) return -1;
     dentry_t dentry;
     // Check for invalid fileName
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
@@ -287,21 +289,21 @@ int32_t open(const uint8_t* fileName) {
         if (rtc_open(fileName) == -1) { // failed rtc open
             return -1;
         }
-        currPCB->fileArray[i].fileOpsTablePtr = RTCTable;
+        currPCB->fileArray[i].fileOpsTablePtr = &RTCTable;
         currPCB->fileArray[i].inodeNum = NULL;
     }
     else if (dentry.fileType == 1) { // Directory
         if (dir_open(fileName) == -1) { // failed dir open
             return -1;
         }
-        currPCB->fileArray[i].fileOpsTablePtr = dirTable;
+        currPCB->fileArray[i].fileOpsTablePtr = &dirTable;
         currPCB->fileArray[i].inodeNum = NULL;
     }
     else if (dentry.fileType == 2) { // File
         if (file_open(fileName) == -1) { // failed file open
             return -1;
         }
-        currPCB->fileArray[i].fileOpsTablePtr = fileTable;
+        currPCB->fileArray[i].fileOpsTablePtr = &fileTable;
         currPCB->fileArray[i].inodeNum = dentry.inodeNum;
     }
     return i;
@@ -324,7 +326,7 @@ int32_t close(int32_t fd) {
     if (currPCB->fileArray[fd].flags == 0) return -1;
     // Set to not in use
     currPCB->fileArray[fd].flags = 0;
-    return currPCB->fileArray[fd].fileOpsTablePtr.close(fd);
+    return currPCB->fileArray[fd].fileOpsTablePtr->close(fd);
 }
 
 /*

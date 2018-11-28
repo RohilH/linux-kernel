@@ -10,6 +10,7 @@
  *     RETURN VALUE: number of bytes read
  */
 int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
+    if(buf == NULL) return -1;
     // printf("gets to beginning of read");
     int i = 0;
     char * buffer = (char*) buf;
@@ -38,6 +39,7 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
  *     RETURN VALUE: number of bytes read
  */
 int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
+    if(buf == NULL) return -1;
     int32_t ret;
     int i;
     char * buffer = (char*) buf;
