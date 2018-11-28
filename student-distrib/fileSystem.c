@@ -27,7 +27,7 @@ void fsInit (uint32_t startAddr) {
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
   // check if filename is less than 32 bits
   // printf("Gets here\n");
-
+  if(fname == NULL || dentry == NULL) return -1;
   if (strlen((int8_t*)fname) > FILENAMESIZE) return -1;
   // loops through all the dentries in the boot block
   uint32_t i;
@@ -52,6 +52,7 @@ int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
  *     RETURN VALUE: 0 if found, -1 if invalid index
  */
 int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
+  if(dentry == NULL) return -1;
   // check if given index is with the valid range
   if (index < 0 || index > bootBlockStart->dirCount - 1) return -1;
 
@@ -75,6 +76,7 @@ int32_t read_dentry_by_index (uint32_t index, dentry_t* dentry) {
  *     RETURN VALUE: number of bytes read, -1 if invalid input
  */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length) {
+  if(buf == NULL) return -1;
   // check if given inode, offset, and length are within the valid range
   int32_t numInodes = bootBlockStart->inodeCount;
   if (inode < 0 || inode >= numInodes) return -1;
@@ -120,6 +122,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  */
 // dentry_t testD;
 int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
+  if(buf == NULL) return -1;
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
@@ -183,6 +186,7 @@ int32_t file_close (int32_t fd) {
  */
 int fileIndexForDir = 0;
 int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
+    if(buf == NULL) return -1;
     int i;
     int numOfDirectories = bootBlockStart->dirCount;
     // Check out of bounds error

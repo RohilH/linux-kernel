@@ -135,6 +135,7 @@ int32_t halt(uint8_t status) {
                      If program is executed, return 0
  */
 int32_t execute(const uint8_t * command) {
+    if(command == NULL) return -1;
     cli();
     ///////* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
@@ -267,6 +268,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
  *                   Else, return file index
  */
 int32_t open(const uint8_t* fileName) {
+    if(fileName == NULL) return -1;
     dentry_t dentry;
     // Check for invalid fileName
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
