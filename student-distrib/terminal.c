@@ -74,3 +74,17 @@ int32_t terminal_open (const uint8_t* filename) {
 int32_t terminal_close (int32_t fd) {
     return 0;
 }
+
+/*
+ * switch_terminal
+ *     DESCRIPTION: Switch to specified terminal
+ *     INPUTS: id - terminal to switch to (0-2)
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
+void switch_terminal(const int32_t id) {
+    cli();
+    printf("Switching terminal.....ruh roh");
+    // ...
+    sti();
+}
