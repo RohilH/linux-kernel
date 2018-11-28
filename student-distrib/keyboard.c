@@ -95,7 +95,7 @@ void KEYBOARD_HANDLER() {
                 switch_terminal(terminal_one);
             } else if (scanCode == F2_PRESSED && alt) {
                 switch_terminal(terminal_two);
-            } else if (scanCode == F2_PRESSED && alt) {
+            } else if (scanCode == F3_PRESSED && alt) {
                 switch_terminal(terminal_three);
             }
         }
