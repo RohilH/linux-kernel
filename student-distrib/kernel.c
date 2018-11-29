@@ -157,12 +157,12 @@ void entry(unsigned long magic, unsigned long addr) {
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging
     currProcessIndex = -1; // Initialize curr process index for PCB use
-
     clear(); // Clear the screen
+    init_mult_terms();
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    // launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 

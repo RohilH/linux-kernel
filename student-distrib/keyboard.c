@@ -89,14 +89,14 @@ void KEYBOARD_HANDLER() {
                 addCharToBuffer(scanCode, 2);
             } else if (caps) { // Handle caps only
                 addCharToBuffer(scanCode, 1);
+            } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
+                switch_terminals(terminal_one);
+            } else if (scanCode == F2_PRESSED && alt) {
+                switch_terminals(terminal_two);
+            } else if (scanCode == F3_PRESSED && alt) {
+                switch_terminals(terminal_three);
             } else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
-            } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
-                m_terminal_switch(terminal_one);
-            } else if (scanCode == F2_PRESSED && alt) {
-                m_terminal_switch(terminal_two);
-            } else if (scanCode == F3_PRESSED && alt) {
-                m_terminal_switch(terminal_three);
             }
         }
     }

@@ -10,12 +10,14 @@
 typedef struct terminal {
   int32_t id;
   int32_t screen_x, screen_y;
-  char input_buf[bufSize];
+  uint8_t launched;
+  volatile char charBuffer[bufSize];
   int32_t currentActiveProcess;
-  uint32_t videoMemAddr;
+  uint8_t * videoMemPtr;
   // ...
 } terminal_t;
 
+volatile uint8_t currTerminalIndex;
 terminal_t terminals[num_terminals];
 
 // System Calls for terminal
@@ -25,11 +27,10 @@ int32_t terminal_open (const uint8_t* filename);
 int32_t terminal_close (int32_t fd);
 
 // Multiple Terminal Support
-void m_terminal_intialize();
-void m_terminal_switch(const int32_t destination);
-void m_terminal_save(const int32_t id);
-void m_terminal_open(const int32_t id);
-uint32_t currentTerminal;
+void init_mult_terms();
+void switch_terminals(const int32_t destination);
+void save_terminal_state(const int32_t id);
+void open_terminals(const int32_t id);
 
 
 #endif
