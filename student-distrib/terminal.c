@@ -82,9 +82,38 @@ int32_t terminal_close (int32_t fd) {
  *     OUTPUTS: none
  *     RETURN VALUE: none
  */
-void switch_terminal(const int32_t id) {
-    cli();
-    printf("Switching terminal.....ruh roh");
-    // ...
-    sti();
+void m_terminal_switch(const int32_t destination) {
+    // cli();
+    // printf("Switching terminal.....ruh roh");
+    //
+    // m_terminal_save(currentTerminal);
+    // m_terminal_open(id);
+    // currentTerminal = id;
+    // // ...
+    // sti();
+}
+
+void m_terminal_save(const int32_t id) {
+
+}
+
+void m_terminal_open(const int32_t id) {
+
+}
+
+void m_terminal_initialize() {
+  // int term_num;
+  // int char_iter;
+  // for(int term_num = 0; term_num < 3; term_num++) {
+  //   char input_buf[bufSize];
+  //   terminals[term_num].id = term_num;
+  //   terminals[term_num].currentActiveProcess = -1;
+  //   terminals[term_num].screen_x = 0;
+  //   terminals[term_num].screen_y = 0;
+  //   for(char_iter = 0; char_iter < bufSize; char_iter++) {
+  //     terminals[term_num].input_buf[char_iter] = nullChar;
+  //   }
+  //   videoMemAddr
+  // }
+  // each terminal needs to be
 }
