@@ -75,20 +75,24 @@ int32_t terminal_close (int32_t fd) {
 
 /*
  * mult_terminal_launch
- *     DESCRIPTION: Switch to specified terminal
- *     INPUTS: id - terminal to switch to (0-2)
+ *     DESCRIPTION: Switchs to specified terminal
+ *     INPUTS: id
  *     OUTPUTS: none
- *     RETURN VALUE: none
+ *     RETURN VALUE: 0 or -1
  */
 int32_t mult_terminal_launch(const int32_t id) {
     cli();
+    // check if id is within max terminal limit
     if (id < 0 || id > num_terminals - 1)
         return -1;
+    // check if current terminal is the id
     if (currTerminalIndex == id)
         return 0;
 
-
+    // save the state of the current terminal
     mult_terminal_save(currTerminalIndex);
+
+    // if the terminal is already launched, restore the state
     if(terminals[id].launched == 1) {
         mult_terminal_restore(id);
         currTerminalIndex = id;
@@ -97,13 +101,16 @@ int32_t mult_terminal_launch(const int32_t id) {
     }
     // Set launched value to 1
     terminals[id].launched = 1;
+
     uint32_t storeESP;
     uint32_t storeEBP;
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     mult_terminal_restore(id);
+
     // Store ESP and EBP in pcb
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
+
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
@@ -114,8 +121,13 @@ int32_t mult_terminal_launch(const int32_t id) {
     return 0;
 }
 
-// Need to save currentActiveProcess;
-// Need to switch video paging
+/*
+ * mult_terminal_save
+ *     DESCRIPTION: Saves the state of specified terminal
+ *     INPUTS: id
+ *     OUTPUTS: none
+ *     RETURN VALUE: 0
+ */
 int32_t mult_terminal_save(const int32_t id) {
     // Save screen_x, screen_y
     terminals[id].screen_x = get_screenX();
@@ -123,24 +135,40 @@ int32_t mult_terminal_save(const int32_t id) {
     terminals[id].buffIndex = buffIndex;
 
     // Save charBuffer[bufSize];
-    memcpy((int8_t *) terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
+    memcpy((int8_t *)terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
+
     // Save video memory ptr
-    memcpy((int8_t *) terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+    memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
     return 0;
 }
 
+/*
+ * mult_terminal_restore
+ *     DESCRIPTION: Restores the state of specified terminal
+ *     INPUTS: id
+ *     OUTPUTS: none
+ *     RETURN VALUE: 0
+ */
 int32_t mult_terminal_restore(const int32_t id) {
     // Restore screen_x, screen_y
     moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
     buffIndex = terminals[id].buffIndex;
 
     // Restore charBuffer[bufSize];
-    memcpy((int8_t *)charBuffer, (int8_t *) terminals[id].charBuffer, bufSize);
+    memcpy((int8_t *)charBuffer, (int8_t *)terminals[id].charBuffer, bufSize);
+
     // Restore video memory
     memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
     return 0;
 }
 
+/*
+ * mult_terminal_init
+ *     DESCRIPTION: Initializes multiple terminal support
+ *     INPUTS: none
+ *     OUTPUTS: none
+ *     RETURN VALUE: none
+ */
 void mult_terminal_init() {
     int term_num;
     int char_iter;
