@@ -83,48 +83,73 @@ int32_t terminal_close (int32_t fd) {
  *     OUTPUTS: none
  *     RETURN VALUE: none
  */
-void switch_terminals(const int32_t destination) {
-    // cli();
-    // printf("Switching terminal.....ruh roh");
-    //
-    // m_terminal_save(currentTerminal);
-    // m_terminal_open(id);
-    // currentTerminal = id;
-    // // ...
-    // sti();
+void mult_terminal_switch(const int32_t destination) {
+  cli();
+  int char_iter;
+  /***********************
+  if the terminal launched is 0 then there are steps we need to take to launch
+  the terminal that we need not take if the terminal is already done so.
+  ***********************/
+  if(terminals[destination] -> launched == 1) {
+    mult_terminal_save(currTerminalIndex);
+    mult_terminal_open(destination);
+    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
+      charBuffer[char_iter] = terminals[destination] -> charBuffer[char_iter];
+    }
+
+    //remap video memory;
+    return;
+  }
+  else if(terminals[destination] -> launched == 0) {
+    mult_terminal_save(currTerminalIndex);
+
+    terminals[destination] -> launched = 1;
+    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
+      charBuffer[char_iter] = terminals[destination] -> charBuffer[char_iter];
+    }
+
+    uint8_t* shellCommand = (uint8_t*)"shell";
+    execute(shellCommand);
+    mult_terminal_open(destination);
+
+  }
+  return;
+  // ...
+  sti();
 }
 
-void save_terminal_state(const int32_t id) {
+void mult_terminal_save(const int32_t id) {
+  // terminals[id] -> screen_x = ;
+  // terminals[id] -> currentActiveProce
+}
+
+void mult_terminal_open(const int32_t id) {
 
 }
 
-void open_terminals(const int32_t id) {
-
-}
-
-void init_mult_terms() {
+void mult_terminal_init() {
     int term_num;
     int char_iter;
     for(term_num = 0; term_num < 3; term_num++) {
         // char input_buf[BUFFSIZE];
-        terminals[term_num].id = term_num;
-        terminals[term_num].currentActiveProcess = -1;
-        terminals[term_num].screen_x = 0;
-        terminals[term_num].screen_y = 0;
-        terminals[term_num].launched = 0;
+        terminals[term_num] -> id = term_num;
+        terminals[term_num] -> currentActiveProcess = -1;
+        terminals[term_num] -> screen_x = 0;
+        terminals[term_num] -> screen_y = 0;
+        terminals[term_num] -> launched = 0;
         for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-            terminals[term_num].charBuffer[char_iter] = nullChar;
+            terminals[term_num] -> charBuffer[char_iter] = nullChar;
         }
         getNewTerminal4KBPage(PageSize64MB, PageSize64MB + term_num * PageSize4KB, term_num);
-        terminals[term_num].videoMemPtr = (uint8_t*)(PageSize64MB + term_num * PageSize4KB);
+        terminals[term_num] -> videoMemPtr = (uint8_t*)(PageSize64MB + term_num * PageSize4KB);
         // each terminal needs to be a diff color
     }
     for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-        charBuffer[char_iter] = terminals[0].charBuffer[char_iter];
+        charBuffer[char_iter] = terminals[0] -> charBuffer[char_iter];
     }
 
     currTerminalIndex = 0;
-    terminals[currTerminalIndex].launched = 1;
+    terminals[currTerminalIndex] -> launched = 1;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
 }

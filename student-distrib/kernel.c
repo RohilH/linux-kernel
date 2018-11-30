@@ -158,7 +158,7 @@ void entry(unsigned long magic, unsigned long addr) {
     PAGING_INIT(); // Intialize paging
     currProcessIndex = -1; // Initialize curr process index for PCB use
     clear(); // Clear the screen
-    init_mult_terms();
+    mult_terminal_init();
 
 #ifdef RUN_TESTS
     /* Run tests */

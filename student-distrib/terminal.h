@@ -18,7 +18,7 @@ typedef struct terminal {
 } terminal_t;
 
 volatile uint8_t currTerminalIndex;
-terminal_t terminals[num_terminals];
+terminal_t* terminals[num_terminals];
 
 // System Calls for terminal
 int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes);
@@ -27,10 +27,10 @@ int32_t terminal_open (const uint8_t* filename);
 int32_t terminal_close (int32_t fd);
 
 // Multiple Terminal Support
-void init_mult_terms();
-void switch_terminals(const int32_t destination);
-void save_terminal_state(const int32_t id);
-void open_terminals(const int32_t id);
+void mult_terminal_init();
+void mult_terminal_switch(const int32_t destination);
+void mult_terminal_save(const int32_t id);
+void mult_terminal_open(const int32_t id);
 
 
 #endif
