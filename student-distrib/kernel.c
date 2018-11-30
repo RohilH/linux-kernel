@@ -14,7 +14,7 @@
 #include "paging.h"
 #include "fileSystem.h"
 #include "sysCalls.h"
-
+#include "pit.h"
 
 #define RUN_TESTS
 
@@ -158,6 +158,7 @@ void entry(unsigned long magic, unsigned long addr) {
     PAGING_INIT(); // Intialize paging
     currProcessIndex = -1; // Initialize curr process index for PCB use
     clear(); // Clear the screen
+    PIT_INIT();
     mult_terminal_init();
 
 #ifdef RUN_TESTS

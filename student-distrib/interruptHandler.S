@@ -1,6 +1,7 @@
 #define ASM     1
 #include "x86_desc.h"
 
+.globl pit_asmlinkage
 .globl keyboard_asmlinkage
 .globl rtc_asmlinkage
 .globl syscall_handler
@@ -21,6 +22,15 @@ keyboard_asmlinkage:
     pushal
     pushfl
     call KEYBOARD_HANDLER
+    popfl
+    popal
+    iret
+
+# Assembly linkage for pit handler
+pit_asmlinkage:
+    pushal
+    pushfl
+    call PIT_HANDLER
     popfl
     popal
     iret
