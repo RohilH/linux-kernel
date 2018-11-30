@@ -90,11 +90,14 @@ void KEYBOARD_HANDLER() {
             } else if (caps) { // Handle caps only
                 addCharToBuffer(scanCode, 1);
             } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
-                mult_terminal_switch(terminal_one);
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_one);
             } else if (scanCode == F2_PRESSED && alt) {
-                mult_terminal_switch(terminal_two);
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_two);
             } else if (scanCode == F3_PRESSED && alt) {
-                mult_terminal_switch(terminal_three);
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_three);
             } else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
             }

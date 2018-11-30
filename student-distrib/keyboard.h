@@ -4,6 +4,7 @@
 #include "types.h"
 #include "terminal.h"
 
+
 #define IRQ_LINE_KEYS     1
 #define BUFFSIZE          128
 #define COMMAND_LIMIT     10
@@ -37,6 +38,7 @@
 #define terminal_three 2
 
 extern volatile char charBuffer[BUFFSIZE];
+extern int buffIndex;
 char typedBuffer[BUFFSIZE];
 char commandStorage[COMMAND_LIMIT][BUFFSIZE];
 extern volatile int enterPressed;

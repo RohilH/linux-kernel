@@ -74,59 +74,71 @@ int32_t terminal_close (int32_t fd) {
 }
 
 /*
- * switch_terminal
+ * mult_terminal_launch
  *     DESCRIPTION: Switch to specified terminal
  *     INPUTS: id - terminal to switch to (0-2)
  *     OUTPUTS: none
  *     RETURN VALUE: none
  */
-void mult_terminal_switch(const int32_t destination) {
-    // cli();
-    // int char_iter;
-    /***********************
-    if the terminal launched is 0 then there are steps we need to take to launch
-    the terminal that we need not take if the terminal is already done so.
-    ***********************/
-    // Save state/information of terminal
+int32_t mult_terminal_launch(const int32_t id) {
+    cli();
+    if (id < 0 || id > num_terminals - 1)
+        return -1;
+    if (currTerminalIndex == id)
+        return 0;
+
+
     mult_terminal_save(currTerminalIndex);
-    // Check if terminal has been launched already
-    if(terminals[destination].launched == 1) {
-        // If so, open that terminal
-        mult_terminal_restore(destination);
-        currTerminalIndex = destination;
-    } else if(terminals[destination].launched == 0) {
-        // If not, execute shell
-        mult_terminal_restore(destination);
-        currTerminalIndex = destination;
-        uint8_t* shellCommand = (uint8_t*)"shell";
+    if(terminals[id].launched == 1) {
+        mult_terminal_restore(id);
+        currTerminalIndex = id;
         sti();
-        execute(shellCommand);
+        return 0;
     }
-    // Remap
-    // sti();
+    // Set launched value to 1
+    terminals[id].launched = 1;
+    uint32_t storeESP;
+    uint32_t storeEBP;
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    mult_terminal_restore(id);
+    // Store ESP and EBP in pcb
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP));
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
+    // Update current PCB
+    currPCB->pcbESP = storeESP;
+    currPCB->pcbEBP = storeEBP;
+    currTerminalIndex = id;
+    uint8_t* shellCommand = (uint8_t*)"shell";
+    sti();
+    execute(shellCommand);
+    return 0;
 }
 
 // Need to save currentActiveProcess;
 // Need to switch video paging
-void mult_terminal_save(const int32_t id) {
-  // Save screen_x, screen_y
-  terminals[id].screen_x = get_screenX();
-  terminals[id].screen_y = get_screenY();
-  // Save charBuffer[bufSize];
-  memcpy(terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
-  // Save video memory ptr
-  memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+int32_t mult_terminal_save(const int32_t id) {
+    // Save screen_x, screen_y
+    terminals[id].screen_x = get_screenX();
+    terminals[id].screen_y = get_screenY();
+    terminals[id].buffIndex = buffIndex;
+
+    // Save charBuffer[bufSize];
+    memcpy(terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
+    // Save video memory ptr
+    memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+    return 0;
 }
 
-void mult_terminal_restore(const int32_t id) {
-  // Set launched value to 1
-  terminals[id].launched = 1;
-  // Restore screen_x, screen_y
-  moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
-  // Restore charBuffer[bufSize];
-  memcpy((int8_t *)charBuffer, terminals[id].charBuffer, bufSize);
-  // Restore video memory
-  memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
+int32_t mult_terminal_restore(const int32_t id) {
+    // Restore screen_x, screen_y
+    moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
+    buffIndex = terminals[id].buffIndex;
+
+    // Restore charBuffer[bufSize];
+    memcpy((int8_t *)charBuffer, terminals[id].charBuffer, bufSize);
+    // Restore video memory
+    memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
+    return 0;
 }
 
 void mult_terminal_init() {
@@ -139,6 +151,7 @@ void mult_terminal_init() {
         terminals[term_num].screen_x = 0;
         terminals[term_num].screen_y = 0;
         terminals[term_num].launched = 0;
+        terminals[term_num].buffIndex = 0;
         for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
             terminals[term_num].charBuffer[char_iter] = nullChar;
         }
