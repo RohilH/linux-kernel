@@ -123,9 +123,9 @@ int32_t mult_terminal_save(const int32_t id) {
     terminals[id].buffIndex = buffIndex;
 
     // Save charBuffer[bufSize];
-    memcpy(terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
+    memcpy((int8_t *) terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
     // Save video memory ptr
-    memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+    memcpy((int8_t *) terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
     return 0;
 }
 
@@ -135,7 +135,7 @@ int32_t mult_terminal_restore(const int32_t id) {
     buffIndex = terminals[id].buffIndex;
 
     // Restore charBuffer[bufSize];
-    memcpy((int8_t *)charBuffer, terminals[id].charBuffer, bufSize);
+    memcpy((int8_t *)charBuffer, (int8_t *) terminals[id].charBuffer, bufSize);
     // Restore video memory
     memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
     return 0;
