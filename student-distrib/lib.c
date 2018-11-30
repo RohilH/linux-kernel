@@ -564,3 +564,10 @@ void test_interrupts(void) {
         video_mem[i << 1]++;
     }
 }
+
+int get_screenX() { return screen_x; }
+int get_screenY() { return screen_y; }
+void set_screen_XY(int x, int y) {
+  screen_x = x;
+  screen_y = y;
+}

@@ -1,8 +1,5 @@
 #include "terminal.h"
-#include "keyboard.h"
 #include "lib.h"
-#include "sysCalls.h"
-#include "paging.h"
 /*
  * terminalRead
  *     DESCRIPTION: reads keyboard input after enterPressed = 1 and stores in buf; clears buffer
@@ -85,46 +82,49 @@ int32_t terminal_close (int32_t fd) {
  */
 void mult_terminal_switch(const int32_t destination) {
   cli();
-  int char_iter;
+  // int char_iter;
   /***********************
   if the terminal launched is 0 then there are steps we need to take to launch
   the terminal that we need not take if the terminal is already done so.
   ***********************/
+  // Save state/information of terminal
+  mult_terminal_save(currTerminalIndex);
+  // Check if terminal has been launched already
   if(terminals[destination] -> launched == 1) {
-    mult_terminal_save(currTerminalIndex);
+    // If so, open that terminal
     mult_terminal_open(destination);
-    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-      charBuffer[char_iter] = terminals[destination] -> charBuffer[char_iter];
-    }
-
-    //remap video memory;
-    return;
-  }
-  else if(terminals[destination] -> launched == 0) {
-    mult_terminal_save(currTerminalIndex);
-
-    terminals[destination] -> launched = 1;
-    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-      charBuffer[char_iter] = terminals[destination] -> charBuffer[char_iter];
-    }
-
+  } else if(terminals[destination] -> launched == 0) {
+    // If not, execute shell
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
     mult_terminal_open(destination);
-
   }
-  return;
-  // ...
+  // Remap
+  
   sti();
 }
 
+// Need to save currentActiveProcess;
+// Need to switch video paging
 void mult_terminal_save(const int32_t id) {
-  // terminals[id] -> screen_x = ;
-  // terminals[id] -> currentActiveProce
+  // Save screen_x, screen_y
+  terminals[id] -> screen_x = get_screenX();
+  terminals[id] -> screen_y = get_screenY();
+  // Save charBuffer[bufSize];
+  memcpy(&(terminals[id]->charBuffer), (int8_t *)charBuffer, bufSize);
+  // Save video memory ptr
+  memcpy(&(terminals[id]->videoMemPtr), (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
 }
 
 void mult_terminal_open(const int32_t id) {
-
+  // Set launched value to 1
+  terminals[id] -> launched = 1;
+  // Restore screen_x, screen_y
+  set_screen_XY(terminals[id]->screen_x, terminals[id]->screen_y);
+  // Restore charBuffer[bufSize];
+  memcpy((int8_t *)charBuffer, &(terminals[id]->charBuffer), bufSize);
+  // Restore video memory
+  memcpy((int8_t *)VIDEO, &(terminals[id]->videoMemPtr), NUM_ROWS * NUM_COLS * 2);
 }
 
 void mult_terminal_init() {

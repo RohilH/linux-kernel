@@ -7,6 +7,17 @@
 
 #include "types.h"
 
+//// Start Added Code ////
+#define VIDEO       0xB8000
+#define NUM_COLS    80
+#define NUM_ROWS    25
+#define ATTRIB      0xB1
+
+int get_screenX();
+int get_screenY();
+void set_screen_XY(int x, int y);
+//// End Added Code ////
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 void moveScreenPos(int xPos, int yPos);

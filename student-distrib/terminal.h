@@ -1,7 +1,10 @@
 #ifndef _TERMINAL_H
 #define _TERMINAL_H
 
-#include "types.h"
+#include "keyboard.h"
+#include "lib.h"
+#include "sysCalls.h"
+#include "paging.h"
 
 #define num_terminals 3
 #define bufSize 128
