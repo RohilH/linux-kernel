@@ -1,6 +1,6 @@
 /* lib.c - Some basic library functions (printf, strlen, etc.)
  * vim:ts=4 noexpandtab */
-
+#include "terminal.h"
 #include "lib.h"
 
 #define VIDEO       0xB8000
@@ -176,7 +176,12 @@ void putc(uint8_t c) {
         moveScreenPos(0, screen_y + 1);
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        if (currTerminalIndex == 1)
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB2;
+        else if (currTerminalIndex == 2)
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB3;
+        else
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
     }
     // if (screen_x >= NUM_COLS) {

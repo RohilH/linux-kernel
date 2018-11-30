@@ -12,6 +12,8 @@
 #define NUM_COLS    80
 #define NUM_ROWS    25
 #define ATTRIB      0xB1
+#define ATTRIB2     0xA2
+#define ATTRIB3     0xC3
 
 int get_screenX();
 int get_screenY();

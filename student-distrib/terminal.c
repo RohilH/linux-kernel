@@ -81,27 +81,29 @@ int32_t terminal_close (int32_t fd) {
  *     RETURN VALUE: none
  */
 void mult_terminal_switch(const int32_t destination) {
-  cli();
-  // int char_iter;
-  /***********************
-  if the terminal launched is 0 then there are steps we need to take to launch
-  the terminal that we need not take if the terminal is already done so.
-  ***********************/
-  // Save state/information of terminal
-  mult_terminal_save(currTerminalIndex);
-  // Check if terminal has been launched already
-  if(terminals[destination].launched == 1) {
-    // If so, open that terminal
-    mult_terminal_open(destination);
-  } else if(terminals[destination].launched == 0) {
-    // If not, execute shell
-    uint8_t* shellCommand = (uint8_t*)"shell";
-    execute(shellCommand);
-    mult_terminal_open(destination);
-  }
-  // Remap
-
-  sti();
+    // cli();
+    // int char_iter;
+    /***********************
+    if the terminal launched is 0 then there are steps we need to take to launch
+    the terminal that we need not take if the terminal is already done so.
+    ***********************/
+    // Save state/information of terminal
+    mult_terminal_save(currTerminalIndex);
+    // Check if terminal has been launched already
+    if(terminals[destination].launched == 1) {
+        // If so, open that terminal
+        mult_terminal_restore(destination);
+        currTerminalIndex = destination;
+    } else if(terminals[destination].launched == 0) {
+        // If not, execute shell
+        mult_terminal_restore(destination);
+        currTerminalIndex = destination;
+        uint8_t* shellCommand = (uint8_t*)"shell";
+        sti();
+        execute(shellCommand);
+    }
+    // Remap
+    // sti();
 }
 
 // Need to save currentActiveProcess;
@@ -111,20 +113,20 @@ void mult_terminal_save(const int32_t id) {
   terminals[id].screen_x = get_screenX();
   terminals[id].screen_y = get_screenY();
   // Save charBuffer[bufSize];
-  memcpy(&(terminals[id].charBuffer), (int8_t *)charBuffer, bufSize);
+  memcpy(terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
   // Save video memory ptr
-  memcpy(&(terminals[id].videoMemPtr), (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+  memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
 }
 
-void mult_terminal_open(const int32_t id) {
+void mult_terminal_restore(const int32_t id) {
   // Set launched value to 1
   terminals[id].launched = 1;
   // Restore screen_x, screen_y
-  set_screen_XY(terminals[id].screen_x, terminals[id].screen_y);
+  moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
   // Restore charBuffer[bufSize];
-  memcpy((int8_t *)charBuffer, &(terminals[id].charBuffer), bufSize);
+  memcpy((int8_t *)charBuffer, terminals[id].charBuffer, bufSize);
   // Restore video memory
-  memcpy((int8_t *)VIDEO, &(terminals[id].videoMemPtr), NUM_ROWS * NUM_COLS * 2);
+  memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
 }
 
 void mult_terminal_init() {
@@ -143,6 +145,17 @@ void mult_terminal_init() {
         getNewTerminal4KBPage(PageSize64MB, PageSize64MB + term_num * PageSize4KB, term_num);
         terminals[term_num].videoMemPtr = (uint8_t*)(PageSize64MB + term_num * PageSize4KB);
         // each terminal needs to be a diff color
+        int i;
+        for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+            *(uint8_t *)(terminals[term_num].videoMemPtr + (i << 1)) = ' ';
+            if (term_num == 1)
+                *(uint8_t *)(terminals[term_num].videoMemPtr + (i << 1) + 1) = ATTRIB2;
+            else if (term_num == 2)
+                *(uint8_t *)(terminals[term_num].videoMemPtr + (i << 1) + 1) = ATTRIB3;
+            else
+                *(uint8_t *)(terminals[term_num].videoMemPtr + (i << 1) + 1) = ATTRIB;
+        }
+
     }
     for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
         charBuffer[char_iter] = terminals[0].charBuffer[char_iter];

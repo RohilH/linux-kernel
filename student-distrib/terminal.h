@@ -33,7 +33,7 @@ int32_t terminal_close (int32_t fd);
 void mult_terminal_init();
 void mult_terminal_switch(const int32_t destination);
 void mult_terminal_save(const int32_t id);
-void mult_terminal_open(const int32_t id);
+void mult_terminal_restore(const int32_t id);
 
 
 #endif
