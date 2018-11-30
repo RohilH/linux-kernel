@@ -21,7 +21,7 @@ typedef struct terminal {
 } terminal_t;
 
 volatile uint8_t currTerminalIndex;
-terminal_t* terminals[num_terminals];
+terminal_t terminals[num_terminals];
 
 // System Calls for terminal
 int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes);

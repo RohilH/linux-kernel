@@ -90,17 +90,17 @@ void mult_terminal_switch(const int32_t destination) {
   // Save state/information of terminal
   mult_terminal_save(currTerminalIndex);
   // Check if terminal has been launched already
-  if(terminals[destination] -> launched == 1) {
+  if(terminals[destination].launched == 1) {
     // If so, open that terminal
     mult_terminal_open(destination);
-  } else if(terminals[destination] -> launched == 0) {
+  } else if(terminals[destination].launched == 0) {
     // If not, execute shell
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
     mult_terminal_open(destination);
   }
   // Remap
-  
+
   sti();
 }
 
@@ -108,48 +108,48 @@ void mult_terminal_switch(const int32_t destination) {
 // Need to switch video paging
 void mult_terminal_save(const int32_t id) {
   // Save screen_x, screen_y
-  terminals[id] -> screen_x = get_screenX();
-  terminals[id] -> screen_y = get_screenY();
+  terminals[id].screen_x = get_screenX();
+  terminals[id].screen_y = get_screenY();
   // Save charBuffer[bufSize];
-  memcpy(&(terminals[id]->charBuffer), (int8_t *)charBuffer, bufSize);
+  memcpy(&(terminals[id].charBuffer), (int8_t *)charBuffer, bufSize);
   // Save video memory ptr
-  memcpy(&(terminals[id]->videoMemPtr), (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
+  memcpy(&(terminals[id].videoMemPtr), (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
 }
 
 void mult_terminal_open(const int32_t id) {
   // Set launched value to 1
-  terminals[id] -> launched = 1;
+  terminals[id].launched = 1;
   // Restore screen_x, screen_y
-  set_screen_XY(terminals[id]->screen_x, terminals[id]->screen_y);
+  set_screen_XY(terminals[id].screen_x, terminals[id].screen_y);
   // Restore charBuffer[bufSize];
-  memcpy((int8_t *)charBuffer, &(terminals[id]->charBuffer), bufSize);
+  memcpy((int8_t *)charBuffer, &(terminals[id].charBuffer), bufSize);
   // Restore video memory
-  memcpy((int8_t *)VIDEO, &(terminals[id]->videoMemPtr), NUM_ROWS * NUM_COLS * 2);
+  memcpy((int8_t *)VIDEO, &(terminals[id].videoMemPtr), NUM_ROWS * NUM_COLS * 2);
 }
 
 void mult_terminal_init() {
-    // int term_num;
-    // int char_iter;
-    // for(term_num = 0; term_num < 3; term_num++) {
-    //     // char input_buf[BUFFSIZE];
-    //     terminals[term_num] -> id = term_num;
-    //     terminals[term_num] -> currentActiveProcess = -1;
-    //     terminals[term_num] -> screen_x = 0;
-    //     terminals[term_num] -> screen_y = 0;
-    //     terminals[term_num] -> launched = 0;
-    //     for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-    //         terminals[term_num] -> charBuffer[char_iter] = nullChar;
-    //     }
-    //     getNewTerminal4KBPage(PageSize64MB, PageSize64MB + term_num * PageSize4KB, term_num);
-    //     terminals[term_num] -> videoMemPtr = (uint8_t*)(PageSize64MB + term_num * PageSize4KB);
-    //     // each terminal needs to be a diff color
-    // }
-    // for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-    //     charBuffer[char_iter] = terminals[0] -> charBuffer[char_iter];
-    // }
-    //
-    // currTerminalIndex = 0;
-    // terminals[currTerminalIndex] -> launched = 1;
-    // uint8_t* shellCommand = (uint8_t*)"shell";
-    // execute(shellCommand);
+    int term_num;
+    int char_iter;
+    for(term_num = 0; term_num < 3; term_num++) {
+        // char input_buf[BUFFSIZE];
+        terminals[term_num].id = term_num;
+        terminals[term_num].currentActiveProcess = -1;
+        terminals[term_num].screen_x = 0;
+        terminals[term_num].screen_y = 0;
+        terminals[term_num].launched = 0;
+        for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
+            terminals[term_num].charBuffer[char_iter] = nullChar;
+        }
+        getNewTerminal4KBPage(PageSize64MB, PageSize64MB + term_num * PageSize4KB, term_num);
+        terminals[term_num].videoMemPtr = (uint8_t*)(PageSize64MB + term_num * PageSize4KB);
+        // each terminal needs to be a diff color
+    }
+    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
+        charBuffer[char_iter] = terminals[0].charBuffer[char_iter];
+    }
+
+    currTerminalIndex = 0;
+    terminals[currTerminalIndex].launched = 1;
+    uint8_t* shellCommand = (uint8_t*)"shell";
+    execute(shellCommand);
 }
