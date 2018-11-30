@@ -12,7 +12,7 @@
 void PAGING_INIT() {
   // shift 12 to set address
   int i;
-  for (i = 0; i < PageSize4KB; i++) {
+  for (i = 0; i < 1024; i++) {
     pageDirectory[i] = 0;
     pageTable[i] = 0;
   }
