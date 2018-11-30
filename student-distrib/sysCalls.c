@@ -2,7 +2,6 @@
 #include "lib.h"
 #include "types.h"
 #include "fileSystem.h"
-#include "terminal.h"
 #include "paging.h"
 
 /*
@@ -39,7 +38,7 @@ pcb_t* initPCB() {
     }
     // Put PCB at top of respective kernel stack
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-
+    terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
     // Setup STDIN
     fileDescriptor_t stdinFD;
     // Point to respective file op function
