@@ -31,7 +31,8 @@ void PIT_HANDLER() {
 
   cli();
   if (terminals[1].launched == 1 || terminals[2].launched == 1) {
-      contextSwitch(getNextProcess(currTerminalIndex));
+      uint32_t idx = getNextProcess(currTerminalIndex);
+      contextSwitch(idx);
   }
   sti();
 }
@@ -46,7 +47,7 @@ void PIT_HANDLER() {
 void contextSwitch(const int32_t nextTerminalIndex) {
   ///// TODO /////
   // 1. Update pcb->terminal_id in execute()
-  // 2. Figure out this paging garbage on line 60
+  // 2. Figure out this paging garbage on line 64
 
   // Pointer to current and next pcb
   int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
@@ -62,10 +63,10 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   // Check if terminal is being displayed currently
   if (nextTerminalIndex != nextPCB->terminal_id) {
       //// Virtual vidmap stuff
-      //getNew4KBPage(??,??terminals[next_pcb->terminal_id].videoMemPtr);
+      //getNew4KBPage();
   } else {
       //// Normal video paging
-      // getNew4KBPage(??,??terminals[next_pcb->terminal_id].videoMemPtr + ___);
+      // getNew4KBPage();
   }
   // Update currentTerminalIndex
   currTerminalIndex = nextTerminalIndex;

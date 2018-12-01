@@ -177,6 +177,8 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
+    currPCB->terminal_id = currTerminalIndex;
+    
     strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
