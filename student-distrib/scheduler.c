@@ -43,19 +43,22 @@ void PIT_HANDLER() {
  *   OUTPUTS: none
  *   RETURN VALUE: none
  */
-void contextSwitch(const int32_t processNum) {
+void contextSwitch(const int32_t nextTerminalIndex) {
   ///// TODO /////
   // 1. Update pcb->terminal_id in execute()
   // 2. Figure out this paging garbage on line 60
 
   // Pointer to current and next pcb
-  pcb_t * currPCB = generatePCBPointer(terminals[currTerminalIndex].currentActiveProcess);
-  pcb_t * nextPCB = generatePCBPointer(processNum);
+  int32_t currProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
+  int32_t nextProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
+  pcb_t * currPCB = generatePCBPointer(currProcessNum);
+  pcb_t * nextPCB = generatePCBPointer(nextProcessNum);
+
   // Save esp/ebp
   asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
   asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
   // Update paging
-  getNew4MBPage(PageSize128MB, (processNum * PageSize4MB) + PageSize8MB);
+  getNew4MBPage(PageSize128MB, (nextProcessNum * PageSize4MB) + PageSize8MB);
   // Check if terminal is being displayed currently
   if (nextTerminalIndex != nextPCB->terminal_id) {
       //// Virtual vidmap stuff
@@ -68,7 +71,7 @@ void contextSwitch(const int32_t processNum) {
   currTerminalIndex = nextTerminalIndex;
   // Save ss0, esp0 in TSS
   tss.ss0 = KERNEL_DS;
-  tss.esp0 = PageSize8MB - PageSize8KB * (processNum) - fourBytes;
+  tss.esp0 = PageSize8MB - PageSize8KB * (nextProcessNum) - fourBytes;
   // Do Context Switch
   asm volatile("movl %0, %%esp" : :"r"(nextPCB->pcbESP));
   asm volatile("movl %0, %%ebp" : :"r"(nextPCB->pcbEBP));
@@ -78,13 +81,13 @@ void contextSwitch(const int32_t processNum) {
 /*
  * getNextProcess
  *   DESCRIPTION: Cycle to the next running process
- *   INPUTS: idx - currentTerminalIndex
+ *   INPUTS: curr_idx - currentTerminalIndex
  *   OUTPUTS: none
  *   RETURN VALUE: current pid
  */
-int32_t getNextProcess(int idx) {
+int32_t getNextProcess(int32_t curr_idx) {
   // Default nextTerminalIndex to curr index
-  nextTerminalIndex = idx;
+  int32_t nextTerminalIndex = curr_idx;
   // If no other terminals have a running process, it'll go back to itself
   while(terminals[nextTerminalIndex].launched == 0) {
     // Go to next terminal # and cycle if necessary
@@ -92,5 +95,5 @@ int32_t getNextProcess(int idx) {
     nextTerminalIndex %= num_terminals;
   }
   // Return next pid
-  return terminals[nextTerminalIndex].currentActiveProcess;
+  return nextTerminalIndex;
 }

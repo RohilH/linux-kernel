@@ -29,6 +29,4 @@ extern void PIT_HANDLER();
 void contextSwitch();
 int32_t getNextProcess();
 
-int32_t nextTerminalIndex;
-
 #endif /* _PIT_H */
