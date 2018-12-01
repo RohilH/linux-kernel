@@ -49,7 +49,7 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   // 2. Figure out this paging garbage on line 60
 
   // Pointer to current and next pcb
-  int32_t currProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
+  int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
   int32_t nextProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
   pcb_t * currPCB = generatePCBPointer(currProcessNum);
   pcb_t * nextPCB = generatePCBPointer(nextProcessNum);
