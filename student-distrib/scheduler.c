@@ -31,8 +31,7 @@ void PIT_HANDLER() {
 
   cli();
   if (terminals[1].launched == 1 || terminals[2].launched == 1) {
-      int32_t process = getNextProcess();
-      contextSwitch(process);
+      contextSwitch(getNextProcess(currTerminalIndex));
   }
   sti();
 }
@@ -45,17 +44,53 @@ void PIT_HANDLER() {
  *   RETURN VALUE: none
  */
 void contextSwitch(const int32_t processNum) {
+  ///// TODO /////
+  // 1. Update pcb->terminal_id in execute()
+  // 2. Figure out this paging garbage on line 60
 
+  // Pointer to current and next pcb
+  pcb_t * currPCB = generatePCBPointer(terminals[currTerminalIndex].currentActiveProcess);
+  pcb_t * nextPCB = generatePCBPointer(processNum);
+  // Save esp/ebp
+  asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
+  asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+  // Update paging
+  getNew4MBPage(PageSize128MB, (processNum * PageSize4MB) + PageSize8MB);
+  // Check if terminal is being displayed currently
+  if (nextTerminalIndex != nextPCB->terminal_id) {
+      //// Virtual vidmap stuff
+      //getNew4KBPage(??,??terminals[next_pcb->terminal_id].videoMemPtr);
+  } else {
+      //// Normal video paging
+      // getNew4KBPage(??,??terminals[next_pcb->terminal_id].videoMemPtr + ___);
+  }
+  // Update currentTerminalIndex
+  currTerminalIndex = nextTerminalIndex;
+  // Save ss0, esp0 in TSS
+  tss.ss0 = KERNEL_DS;
+  tss.esp0 = PageSize8MB - PageSize8KB * (processNum) - fourBytes;
+  // Do Context Switch
+  asm volatile("movl %0, %%esp" : :"r"(nextPCB->pcbESP));
+  asm volatile("movl %0, %%ebp" : :"r"(nextPCB->pcbEBP));
+  return;
 }
 
 /*
  * getNextProcess
- *   DESCRIPTION: Gets the next process to be executed
- *   INPUTS: none
+ *   DESCRIPTION: Cycle to the next running process
+ *   INPUTS: idx - currentTerminalIndex
  *   OUTPUTS: none
- *   RETURN VALUE: none
+ *   RETURN VALUE: current pid
  */
-int32_t getNextProcess() {
-
-    return 0;
+int32_t getNextProcess(int idx) {
+  // Default nextTerminalIndex to curr index
+  nextTerminalIndex = idx;
+  // If no other terminals have a running process, it'll go back to itself
+  while(terminals[nextTerminalIndex].launched == 0) {
+    // Go to next terminal # and cycle if necessary
+    nextTerminalIndex++;
+    nextTerminalIndex %= num_terminals;
+  }
+  // Return next pid
+  return terminals[nextTerminalIndex].currentActiveProcess;
 }

@@ -66,6 +66,7 @@ typedef struct pcb_t {
     uint32_t pcbESP;
     uint32_t pcbEBP;
     uint8_t bufferArgs[bufSize];
+    uint32_t terminal_id;
     // struct pcb_t* childPtr;
 } pcb_t;
 

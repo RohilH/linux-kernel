@@ -17,6 +17,8 @@
 #define PageSize4MB         0x00400000
 #define PageSize8MB         0x00800000
 #define PageSize64MB        0x04000000
+#define PageSize128MB        0x08000000
+
 // Page Directory of 1024 PTEs
 uint32_t pageDirectory[1024] __attribute__((aligned(4096)));
 // Page Table of 1024 entries
