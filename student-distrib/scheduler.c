@@ -61,7 +61,7 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   // Update paging
   getNew4MBPage(PageSize128MB, (nextProcessNum * PageSize4MB) + PageSize8MB);
   // Check if terminal is being displayed currently
-  if (nextTerminalIndex != nextPCB->terminal_id) {
+  if (nextTerminalIndex != nextPCB->terminal_id && nextTerminalIndex == currPCB->terminal_id) {
       //// Virtual vidmap stuff
       //getNew4KBPage();
   } else {
@@ -90,11 +90,15 @@ int32_t getNextProcess(int32_t curr_idx) {
   // Default nextTerminalIndex to curr index
   int32_t nextTerminalIndex = curr_idx;
   // If no other terminals have a running process, it'll go back to itself
-  while(terminals[nextTerminalIndex].launched == 0) {
-    // Go to next terminal # and cycle if necessary
-    nextTerminalIndex++;
-    nextTerminalIndex %= num_terminals;
+  int32_t term_iter;
+  // Go to next terminal # and cycle if necessary
+  for(term_iter = (curr_idx + 1); (curr_idx%num_terminals)<3; (term_iter++)) {
+    term_iter %= num_terminals;
+    if(terminals[term_iter].launched == 1) {
+      break;
+    }
   }
-  // Return next pid
+  nextTerminalIndex = term_iter;
+  // Return next terminal index
   return nextTerminalIndex;
 }
