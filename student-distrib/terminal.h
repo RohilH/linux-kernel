@@ -18,7 +18,6 @@ typedef struct terminal {
   int buffIndex;
   int32_t currentActiveProcess;
   uint8_t * videoMemPtr;
-  struct pcb_t* currPCB;
   // ...
 } terminal_t;
 
