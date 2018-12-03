@@ -50,30 +50,31 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   // 2. Figure out this paging garbage on line 64
 
   // Pointer to current and next pcb
-  int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
-  int32_t nextProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
-  pcb_t * currPCB = generatePCBPointer(currProcessNum);
-  pcb_t * nextPCB = generatePCBPointer(nextProcessNum);
-
-  // Save esp/ebp
-  asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-  asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
-  // Update paging
-  getNew4MBPage(PageSize128MB, (nextProcessNum * PageSize4MB) + PageSize8MB);
-  // Check if terminal is being displayed currently
-  if (nextTerminalIndex != nextPCB->terminal_id && nextTerminalIndex == currPCB->terminal_id) {
-      //// Virtual vidmap stuff
-      //getNew4KBPage();
-  } else {
-      //// Normal video paging
-      // getNew4KBPage();
-  }
-  // Update currentTerminalIndex
-  currTerminalIndex = nextTerminalIndex;
-  // Save ss0, esp0 in TSS
-  tss.ss0 = KERNEL_DS;
-  tss.esp0 = PageSize8MB - PageSize8KB * (nextProcessNum) - fourBytes;
-  // Do Context Switch
+   int32_t nextProcessNum = terminals[nextTerminalIndex].currentActiveProcess;
+   pcb_t * currPCB = terminals[currTerminalIndex].currPCB;
+   pcb_t * nextPCB = terminals[nextTerminalIndex].currPCB;
+  // //printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
+  // // Save esp/ebp
+  // //asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
+  // //asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+  // // Update paging
+  // // Check if terminal is being displayed currently
+   if (nextTerminalIndex != nextPCB->terminal_id && nextTerminalIndex == currPCB->terminal_id) {
+  //     //// Virtual vidmap stuff
+  //     //getNew4KBPage();
+   } else {
+  //     //// Normal video paging
+  //     // getNew4KBPage();
+   }
+  // // Update currentTerminalIndex
+  // currTerminalIndex = nextTerminalIndex;
+  // // Save ss0, esp0 in TSS
+   tss.ss0 = KERNEL_DS;
+   tss.esp0 = PageSize8MB - PageSize8KB * (nextProcessNum) - fourBytes;
+  //
+  currProcessIndex = nextProcessNum;
+  //
+  // // Do Context Switch
   asm volatile("movl %0, %%esp" : :"r"(nextPCB->pcbESP));
   asm volatile("movl %0, %%ebp" : :"r"(nextPCB->pcbEBP));
   return;
