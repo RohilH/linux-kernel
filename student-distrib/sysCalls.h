@@ -62,7 +62,7 @@ typedef struct fileDescriptor_t {
 */
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
-    // struct pcb_t* parentPtr;
+    int8_t prevPcbIdx;
     uint32_t pcbESP;
     uint32_t pcbEBP;
     uint8_t bufferArgs[bufSize];
@@ -71,7 +71,7 @@ typedef struct pcb_t {
 } pcb_t;
 
 
-// pcb_t pcb_instance[8];
+int8_t activeProcessArray[max_processes];
 int currProcessIndex; // Initial process index set to null
 // PCB initialization/setup
 pcb_t* initPCB();

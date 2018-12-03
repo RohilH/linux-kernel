@@ -170,8 +170,7 @@ int32_t mult_terminal_restore(const int32_t id) {
  *     RETURN VALUE: none
  */
 void mult_terminal_init() {
-    int term_num;
-    int char_iter;
+    int i, term_num, char_iter;
     for(term_num = 0; term_num < 3; term_num++) {
         // char input_buf[BUFFSIZE];
         terminals[term_num].id = term_num;
@@ -201,7 +200,13 @@ void mult_terminal_init() {
     for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
         charBuffer[char_iter] = terminals[0].charBuffer[char_iter];
     }
-
+    for (i = 0; i < max_processes; i++) {
+        if (activeProcessArray[i] == 1)
+            continue;
+        activeProcessArray[i] = 1;
+        break;
+    }
+    currProcessIndex = -1; // Initialize curr process index for PCB use
     currTerminalIndex = 0;
     terminals[currTerminalIndex].launched = 1;
     uint8_t* shellCommand = (uint8_t*)"shell";

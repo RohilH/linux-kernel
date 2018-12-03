@@ -29,15 +29,25 @@ fileOpsTable_t blankTable = {emptyReturn, emptyReturn, emptyReturn, emptyReturn}
  *     RETURN VALUE: PCB of current process
  */
 pcb_t* initPCB() {
-    currProcessIndex++;
+    int i;
+    for (i = 0; i < max_processes; i++) {
+        if (activeProcessArray[i] == 1)
+            continue;
+        activeProcessArray[i] = 1;
+        break;
+    }
     // Check if # processes exceeds max # processes
-    if (currProcessIndex >= max_processes) {
+    if (i >= max_processes) {
         // printf("Too many processes running; cannot create new PCB.");
-        currProcessIndex--;
         return NULL;
     }
+
+
     // Put PCB at top of respective kernel stack
-    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    pcb_t* currPCB = generatePCBPointer(i);
+    currPCB->prevPcbIdx = currProcessIndex;
+    currProcessIndex = i;
+
     terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
     // Setup STDIN
     fileDescriptor_t stdinFD;
@@ -59,12 +69,12 @@ pcb_t* initPCB() {
     fileDescriptor_t emptyFD;
     emptyFD.fileOpsTablePtr = &blankTable;
 
-    int i = 0;
     // Empty rest of current PCB
     for (i = 2; i < numFiles; i++) {
         currPCB->fileArray[i] = emptyFD;
         currPCB->fileArray[i].flags = 0;
     }
+
     return currPCB;
 }
 
@@ -76,50 +86,52 @@ pcb_t* initPCB() {
  *     RETURN VALUE: Parent is restored and process is terminated
  */
 int32_t halt(uint8_t status) {
-  // Restart shell if halting last process
-  if(currProcessIndex == 0) {
-    currProcessIndex--;
-    uint8_t* shellCommand = (uint8_t*)"shell";
-    execute(shellCommand);
-  }
-  cli();
+    activeProcessArray[currProcessIndex] = 0;
+    // Restart shell if halting last process
+    if(currProcessIndex == 0) {
+        currProcessIndex--;
+        uint8_t* shellCommand = (uint8_t*)"shell";
+        execute(shellCommand);
+    }
+    cli();
 
-  int i;
-  uint32_t storeESP;
-  uint32_t storeEBP;
+    int i;
+    uint32_t storeESP;
+    uint32_t storeEBP;
 
-  // Obtain current pcb_t *
-  pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    // Obtain current pcb_t *
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
 
-  // Close relevant File descriptors
-  for(i = 0; i < numFiles; i++) {
-    currPCB->fileArray[i].fileOpsTablePtr = &blankTable;
-    currPCB->fileArray[i].flags = 0;
-    currPCB->fileArray[i].fileOpsTablePtr->close(i);
-  }
+    // Close relevant File descriptors
+    for(i = 0; i < numFiles; i++) {
+        currPCB->fileArray[i].fileOpsTablePtr = &blankTable;
+        currPCB->fileArray[i].flags = 0;
+        currPCB->fileArray[i].fileOpsTablePtr->close(i);
+    }
 
-  // Restore parent paging
-  getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currProcessIndex - 1) + 1));
-  // Jump to execute return
-  storeESP = currPCB->pcbESP;
-  storeEBP = currPCB->pcbEBP;
-  // Modify TSS according to the parent
-  tss.esp0 = currPCB->pcbESP;
-  uint32_t castStatus = (uint32_t)status;
-  currProcessIndex--;
-  // IRET return
-  asm volatile (
-    "movl   %0, %%eax;"
-    "movl   %1, %%esp;"
-    "movl   %2, %%ebp;"
-    "jmp execute_end;"
-    // "leave;"
-    // "ret;"
-    :                       // no outputs
-    : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
-    : "eax" // clobbers
-    //
-  );
+
+    // Restore parent paging
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currPCB->prevPcbIdx) + 1));
+    // Jump to execute return
+    storeESP = currPCB->pcbESP;
+    storeEBP = currPCB->pcbEBP;
+    // Modify TSS according to the parent
+    tss.esp0 = currPCB->pcbESP;
+    uint32_t castStatus = (uint32_t)status;
+    currProcessIndex = currPCB->prevPcbIdx;
+    // IRET return
+    asm volatile (
+        "movl   %0, %%eax;"
+        "movl   %1, %%esp;"
+        "movl   %2, %%ebp;"
+        "jmp execute_end;"
+        // "leave;"
+        // "ret;"
+        :                       // no outputs
+        : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
+        : "eax" // clobbers
+        //
+    );
 
 
   return 0; //never get to this point
