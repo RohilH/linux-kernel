@@ -59,6 +59,7 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   // //asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
   // //asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
   // // Update paging
+  getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((nextProcessNum) + 1));
   // // Check if terminal is being displayed currently
    if (nextTerminalIndex != nextPCB->terminal_id && nextTerminalIndex == currPCB->terminal_id) {
   //     //// Virtual vidmap stuff
@@ -67,9 +68,13 @@ void contextSwitch(const int32_t nextTerminalIndex) {
   //     //// Normal video paging
   //     // getNew4KBPage();
    }
+
   // // Update currentTerminalIndex
   // currTerminalIndex = nextTerminalIndex;
   // // Save ss0, esp0 in TSS
+
+
+
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PageSize8MB - PageSize8KB * (nextProcessNum) - fourBytes;
   // //
