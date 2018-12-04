@@ -86,7 +86,6 @@ pcb_t* initPCB() {
  *     RETURN VALUE: Parent is restored and process is terminated
  */
 int32_t halt(uint8_t status) {
-    activeProcessArray[currProcessIndex] = 0;
     // Restart shell if halting last process
     if(currProcessIndex == 0) {
         currProcessIndex--;
@@ -101,7 +100,8 @@ int32_t halt(uint8_t status) {
 
     // Obtain current pcb_t *
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-
+    activeProcessArray[currProcessIndex] = 0;
+    terminals[currPCB->terminal_id].currentActiveProcess = currPCB->prevPcbIdx;
     // Close relevant File descriptors
     for(i = 0; i < numFiles; i++) {
         currPCB->fileArray[i].fileOpsTablePtr = &blankTable;

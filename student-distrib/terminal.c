@@ -94,8 +94,31 @@ int32_t mult_terminal_launch(const int32_t id) {
 
     // if the terminal is already launched, restore the state
     if(terminals[id].launched == 1) {
+         // int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
+         // int32_t nextProcessNum = terminals[id].currentActiveProcess;
         mult_terminal_restore(id);
+        pcb_t * currPCB = generatePCBPointer(terminals[currTerminalIndex].currentActiveProcess);
+        pcb_t * nextPCB = generatePCBPointer(terminals[id].currentActiveProcess);
+        // //printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
+        // // Update paging
+        getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[id].currentActiveProcess) + 1));
+
+
+        tss.ss0 = KERNEL_DS;
+        tss.esp0 = PageSize8MB - PageSize8KB * (terminals[id].currentActiveProcess) - fourBytes;
+        // //
+        currProcessIndex = terminals[id].currentActiveProcess;
+
+        //
+        // // Do Context Switch
+
         currTerminalIndex = id;
+        asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
+        asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+
+        asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
+        asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
+
         sti();
         return 0;
     }
@@ -105,8 +128,8 @@ int32_t mult_terminal_launch(const int32_t id) {
     uint32_t storeESP;
     uint32_t storeEBP;
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    mult_terminal_restore(id);
 
+    mult_terminal_restore(id);
     // Store ESP and EBP in pcb
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
@@ -201,10 +224,7 @@ void mult_terminal_init() {
         charBuffer[char_iter] = terminals[0].charBuffer[char_iter];
     }
     for (i = 0; i < max_processes; i++) {
-        if (activeProcessArray[i] == 1)
-            continue;
-        activeProcessArray[i] = 1;
-        break;
+        activeProcessArray[i] = 0;
     }
     currProcessIndex = -1; // Initialize curr process index for PCB use
     currTerminalIndex = 0;
