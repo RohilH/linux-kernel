@@ -225,7 +225,6 @@ void mult_terminal_init() {
     }
     currProcessIndex = -1; // Initialize curr process index for PCB use
     currTerminalIndex = 0;
-    terminals[currTerminalIndex].launched = 1;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
 }

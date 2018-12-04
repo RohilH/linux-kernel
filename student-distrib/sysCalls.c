@@ -42,13 +42,16 @@ pcb_t* initPCB() {
         return NULL;
     }
 
-
     // Put PCB at top of respective kernel stack
     pcb_t* currPCB = generatePCBPointer(i);
     currPCB->prevPcbIdx = currProcessIndex;
     currProcessIndex = i;
 
     terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
+    if (terminals[currTerminalIndex].launched == 0) {
+        currPCB->prevPcbIdx = currProcessIndex;
+        terminals[currTerminalIndex].launched = 1;
+    }
     // Setup STDIN
     fileDescriptor_t stdinFD;
     // Point to respective file op function
@@ -87,7 +90,11 @@ pcb_t* initPCB() {
  */
 int32_t halt(uint8_t status) {
     // Restart shell if halting last process
-    if(currProcessIndex == 0) {
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    activeProcessArray[currProcessIndex] = 0;
+
+    if(terminals[currTerminalIndex].currentActiveProcess == currPCB->prevPcbIdx) {
+        terminals[currTerminalIndex].launched = 0;
         currProcessIndex--;
         uint8_t* shellCommand = (uint8_t*)"shell";
         execute(shellCommand);
@@ -99,8 +106,6 @@ int32_t halt(uint8_t status) {
     uint32_t storeEBP;
 
     // Obtain current pcb_t *
-    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    activeProcessArray[currProcessIndex] = 0;
     terminals[currPCB->terminal_id].currentActiveProcess = currPCB->prevPcbIdx;
     // Close relevant File descriptors
     for(i = 0; i < numFiles; i++) {
