@@ -176,9 +176,9 @@ void putc(uint8_t c) {
         moveScreenPos(0, screen_y + 1);
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-        if (currTerminalDisplayed == 1)
+        if (currTerminalIndex == 1)
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB2;
-        else if (currTerminalDisplayed == 2)
+        else if (currTerminalIndex == 2)
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB3;
         else
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -211,9 +211,9 @@ void removec() {
         moveScreenPos(screen_x - 1, screen_y);
     }
     *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
-    if (currTerminalDisplayed == 1)
+    if (currTerminalIndex == 1)
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB2;
-    else if (currTerminalDisplayed == 2)
+    else if (currTerminalIndex == 2)
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB3;
     else
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -261,9 +261,9 @@ void vertScroll() {
     // clear last row
     for (x = 0; x < NUM_COLS; x++) {
         *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1)) = ' ';
-        if (currTerminalDisplayed == 1)
+        if (currTerminalIndex == 1)
             *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB2;
-        else if (currTerminalDisplayed == 2)
+        else if (currTerminalIndex == 2)
             *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB3;
         else
             *(uint8_t *)(video_mem + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB;
