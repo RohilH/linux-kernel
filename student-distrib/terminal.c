@@ -86,39 +86,18 @@ int32_t mult_terminal_launch(const int32_t id) {
     if (id < 0 || id > num_terminals - 1)
         return -1;
     // check if current terminal is the id
-    if (currTerminalIndex == id)
+    if (currTerminalDisplayed == id)
         return 0;
 
     // save the state of the current terminal
-    mult_terminal_save(currTerminalIndex);
+    mult_terminal_save(currTerminalDisplayed);
 
     // if the terminal is already launched, restore the state
     if(terminals[id].launched == 1) {
-         // int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
+         // int32_t currProcessNum = terminals[currTerminalDisplayed].currentActiveProcess;
          // int32_t nextProcessNum = terminals[id].currentActiveProcess;
         mult_terminal_restore(id);
-        pcb_t * currPCB = generatePCBPointer(terminals[currTerminalIndex].currentActiveProcess);
-        pcb_t * nextPCB = generatePCBPointer(terminals[id].currentActiveProcess);
-        // //printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
-        // // Update paging
-        getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[id].currentActiveProcess) + 1));
-
-
-        tss.ss0 = KERNEL_DS;
-        tss.esp0 = PageSize8MB - PageSize8KB * (terminals[id].currentActiveProcess) - fourBytes;
-        // //
-        currProcessIndex = terminals[id].currentActiveProcess;
-
-        //
-        // // Do Context Switch
-
-        currTerminalIndex = id;
-        asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-        asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
-
-        asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
-        asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
-
+        currTerminalDisplayed = id;
         sti();
         return 0;
     }
@@ -137,7 +116,7 @@ int32_t mult_terminal_launch(const int32_t id) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    currTerminalIndex = id;
+    currTerminalDisplayed = id;
     uint8_t* shellCommand = (uint8_t*)"shell";
     sti();
     execute(shellCommand);
@@ -227,8 +206,8 @@ void mult_terminal_init() {
         activeProcessArray[i] = 0;
     }
     currProcessIndex = -1; // Initialize curr process index for PCB use
-    currTerminalIndex = 0;
-    terminals[currTerminalIndex].launched = 1;
+    currTerminalDisplayed = 0;
+    terminals[currTerminalDisplayed].launched = 1;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
 }

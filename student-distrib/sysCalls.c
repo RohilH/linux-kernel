@@ -45,10 +45,11 @@ pcb_t* initPCB() {
 
     // Put PCB at top of respective kernel stack
     pcb_t* currPCB = generatePCBPointer(i);
-    currPCB->prevPcbIdx = currProcessIndex;
+    currPCB->prevPcbIdx = terminals[currTerminalDisplayed].currentActiveProcess;
+    currPCB->terminal_id = currTerminalDisplayed;
     currProcessIndex = i;
 
-    terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
+    terminals[currTerminalDisplayed].currentActiveProcess = currProcessIndex;
     // Setup STDIN
     fileDescriptor_t stdinFD;
     // Point to respective file op function
@@ -87,6 +88,7 @@ pcb_t* initPCB() {
  */
 int32_t halt(uint8_t status) {
     // Restart shell if halting last process
+    activeProcessArray[currProcessIndex] = 0;
     if(currProcessIndex == 0) {
         currProcessIndex--;
         uint8_t* shellCommand = (uint8_t*)"shell";
@@ -100,7 +102,6 @@ int32_t halt(uint8_t status) {
 
     // Obtain current pcb_t *
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    activeProcessArray[currProcessIndex] = 0;
     terminals[currPCB->terminal_id].currentActiveProcess = currPCB->prevPcbIdx;
     // Close relevant File descriptors
     for(i = 0; i < numFiles; i++) {
@@ -189,7 +190,6 @@ int32_t execute(const uint8_t * command) {
     // Update current PCB
     currPCB->pcbESP = storeESP;
     currPCB->pcbEBP = storeEBP;
-    currPCB->terminal_id = currTerminalIndex;
 
     strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
@@ -206,6 +206,8 @@ int32_t execute(const uint8_t * command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
     int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
+    currTerminalExecuted = currPCB->terminal_id;
+
     // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"
