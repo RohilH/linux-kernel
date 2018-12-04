@@ -21,8 +21,7 @@ typedef struct terminal {
   // ...
 } terminal_t;
 
-volatile uint8_t currTerminalDisplayed;
-volatile uint8_t currTerminalExecuted;
+volatile uint8_t currTerminalIndex;
 terminal_t terminals[num_terminals];
 
 // System Calls for terminal
