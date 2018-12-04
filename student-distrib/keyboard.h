@@ -10,6 +10,7 @@
 #define COMMAND_LIMIT     10
 #define KEY_PRESSED       0x80
 #define L_PRESSED         0x26
+#define C_PRESSED         0x2E
 #define ENTER_PRESSED     0x1C
 #define BACKSPACE_PRESSED 0x0E
 #define CAPS_PRESSED      0x3A
