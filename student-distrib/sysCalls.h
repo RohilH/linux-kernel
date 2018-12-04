@@ -57,14 +57,16 @@ typedef struct fileDescriptor_t {
 /*
  * struct of function pointers used in pcb_t
  * fileArray - array of fileDescriptor_t's
- * pcbESP - stack pointer of curr pcb
- * pcbEBP - base pointer of curr pcb
+ * parentESP - stack pointer of curr pcb
+ * parentEBP - base pointer of curr pcb
 */
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
     int8_t prevPcbIdx;
-    uint32_t pcbESP;
-    uint32_t pcbEBP;
+    uint32_t parentESP;
+    uint32_t parentEBP;
+    uint32_t currESP;
+    uint32_t currEBP;
     uint8_t bufferArgs[bufSize];
     uint32_t terminal_id;
     // struct pcb_t* childPtr;

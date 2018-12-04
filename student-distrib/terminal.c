@@ -100,8 +100,8 @@ int32_t mult_terminal_launch(const int32_t id) {
         pcb_t * nextPCB = generatePCBPointer(terminals[id].currentActiveProcess);
         currTerminalIndex = id;
 
-        asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-        asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+        asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
+        asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
 
         currProcessIndex = terminals[id].currentActiveProcess;
 
@@ -114,8 +114,8 @@ int32_t mult_terminal_launch(const int32_t id) {
         //
         mult_terminal_restore(id);
         // // Do Context Switch
-        asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
-        asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
+        asm volatile ("movl %0, %%esp" : : "r" (nextPCB->currESP));
+        asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->currEBP));
         sti();
         return 0;
     }
@@ -132,8 +132,8 @@ int32_t mult_terminal_launch(const int32_t id) {
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
 
     // Update current PCB
-    currPCB->pcbESP = storeESP;
-    currPCB->pcbEBP = storeEBP;
+    currPCB->currESP = storeESP;
+    currPCB->currEBP = storeEBP;
     currTerminalIndex = id;
     uint8_t* shellCommand = (uint8_t*)"shell";
     sti();

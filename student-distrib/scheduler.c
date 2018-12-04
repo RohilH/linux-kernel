@@ -60,11 +60,11 @@ void contextSwitch(const int32_t nextTerminalIndex) {
     // //
     // // // Do Context Switch
     //
-    //  asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-    //  asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+    //  asm volatile ("movl %%esp, %0" : "=r" (currPCB->parentESP));
+    //  asm volatile ("movl %%ebp, %0" : "=r" (currPCB->parentEBP));
     //
-    // asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
-    // asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
+    // asm volatile ("movl %0, %%esp" : : "r" (nextPCB->parentESP));
+    // asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->parentEBP));
 }
 
 /*

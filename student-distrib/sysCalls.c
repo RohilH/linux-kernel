@@ -118,10 +118,10 @@ int32_t halt(uint8_t status) {
     // Restore parent paging
     getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currPCB->prevPcbIdx) + 1));
     // Jump to execute return
-    storeESP = currPCB->pcbESP;
-    storeEBP = currPCB->pcbEBP;
+    storeESP = currPCB->parentESP;
+    storeEBP = currPCB->parentEBP;
     // Modify TSS according to the parent
-    tss.esp0 = currPCB->pcbESP;
+    tss.esp0 = currPCB->parentESP;
     uint32_t castStatus = (uint32_t)status;
     currProcessIndex = currPCB->prevPcbIdx;
     // IRET return
@@ -192,8 +192,8 @@ int32_t execute(const uint8_t * command) {
     asm volatile ("movl %%esp, %0" : "=r" (storeESP));
     asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
     // Update current PCB
-    currPCB->pcbESP = storeESP;
-    currPCB->pcbEBP = storeEBP;
+    currPCB->parentESP = storeESP;
+    currPCB->parentEBP = storeEBP;
     currPCB->terminal_id = currTerminalIndex;
 
     strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
