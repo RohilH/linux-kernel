@@ -45,27 +45,27 @@ void PIT_HANDLER() {
  *   RETURN VALUE: none
  */
 void contextSwitch(const int32_t nextTerminalIndex) {
-    pcb_t * currPCB = generatePCBPointer(terminals[currTerminalDisplayed].currentActiveProcess);
-    pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
-    // //printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
-    // // Update paging
-    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
-
-
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
-    // //
-    currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
-    currTerminalExecuted = nextTerminalIndex;
-
+    // pcb_t * currPCB = generatePCBPointer(terminals[currTerminalDisplayed].currentActiveProcess);
+    // pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
+    // printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
+    // // // // Update paging
+    // getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
     //
-    // // Do Context Switch
-
-    asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-    asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
-
-    asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
-    asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
+    //
+    // tss.ss0 = KERNEL_DS;
+    // tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
+    // // //
+    // currTerminalExecuted = nextTerminalIndex;
+    //
+    // //
+    // // // Do Context Switch
+    //
+    // asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
+    // asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+    //
+    // terminals[currTerminalExecuted].currentActiveProcess = terminals[nextTerminalIndex].currentActiveProcess;
+    // asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
+    // asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
 
 }
 

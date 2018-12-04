@@ -72,7 +72,7 @@ typedef struct pcb_t {
 
 
 int8_t activeProcessArray[max_processes];
-int currProcessIndex; // Initial process index set to null
+// int terminals[currTerminalExecuted].currentActiveProcess; // Initial process index set to null
 // PCB initialization/setup
 pcb_t* initPCB();
 // System Call: halt
@@ -96,7 +96,7 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress);
 // System Call: sigreturn
 int32_t sigReturn(void);
 // Get current pcb
-pcb_t* generatePCBPointer(int currProcessIndex);
+pcb_t* generatePCBPointer(int currentProcessIndex);
 // Parse filename command
 int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass);
 
