@@ -201,6 +201,39 @@ void putc(uint8_t c) {
     // screen_y %= NUM_ROWS;
     // updateCursor();
 }
+/* void putc(uint8_t c);
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void putcTerm(uint8_t c, int8_t terminalId) {
+    uint8_t * videoMemPtr = terminals[terminalId].videoMemPtr;
+    int8_t xPos = terminals[terminalId].screen_x;
+    int8_t yPos = terminals[terminalId].screen_y;
+
+    if(c == '\n' || c == '\r') {
+        moveScreenPosTerm(0, yPos + 1, terminalId);
+    } else {
+        *(uint8_t *)(videoMemPtr + ((NUM_COLS * yPos + xPos) << 1)) = c;
+        if (currTerminalIndex == 1)
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB2;
+        else if (currTerminalIndex == 2)
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB3;
+        else
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        xPos++;
+    }
+    // if (screen_x >= NUM_COLS) {
+    //     moveScreenPos(0, screen_y + 1);
+    // }
+    // if (screen_y >= NUM_ROWS) {
+    //     moveScreenPos(0, 0);
+    // }
+    moveScreenPosTerm(xPos, yPos, terminalId);
+
+    // screen_x %= NUM_COLS;
+    // screen_y %= NUM_ROWS;
+    // updateCursor();
+}
 
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
@@ -249,6 +282,52 @@ void moveScreenPos(int xPos, int yPos) {
     updateCursor();
 }
 
+void moveScreenPosTerm(int xPos, int yPos, int8_t terminalId) {
+    if (xPos >= NUM_COLS) {
+        terminals[terminalId].screen_x = 0;
+        yPos++;
+    }
+    else {
+        terminals[terminalId].screen_x = xPos;
+    }
+    if (yPos >= NUM_ROWS) {
+        vertScrollTerm(terminalId);
+        terminals[terminalId].screen_y = NUM_ROWS - 1;
+    }
+    else {
+        terminals[terminalId].screen_y = yPos;
+    }
+    // updateCursorTerm(terminalId);
+}
+
+/* void vertScroll();
+ * Inputs: none
+ * Return Value: void
+ * Function: Scrolls down one row */
+void vertScrollTerm(int8_t terminalId) {
+    int x, y;
+    uint8_t * videoMemPtr = terminals[terminalId].videoMemPtr;
+    // shift all rows up one
+    for (y = 0; y < (NUM_ROWS - 1); y++) {
+        for (x = 0; x < NUM_COLS; x++) {
+            *(uint8_t *)(videoMemPtr + ((NUM_COLS * y + x) << 1)) = *(uint8_t *)(videoMemPtr + ((NUM_COLS * (y + 1) + x) << 1));
+            // *(uint8_t *)(videoMemPtr + ((NUM_COLS * y + x) << 1) + 1) = *(uint8_t *)(videoMemPtr + ((NUM_COLS * (y + 1) + x) << 1) + 1);
+        }
+    }
+
+    // clear last row
+    for (x = 0; x < NUM_COLS; x++) {
+        *(uint8_t *)(videoMemPtr + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1)) = ' ';
+        // if (currTerminalIndex == 1)
+        //     *(uint8_t *)(videoMemPtr + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB2;
+        // else if (currTerminalIndex == 2)
+        //     *(uint8_t *)(videoMemPtr + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB3;
+        // else
+        //     *(uint8_t *)(videoMemPtr + ((NUM_COLS * (NUM_ROWS - 1) + x) << 1) + 1) = ATTRIB;
+    }
+}
+
+
 /* void vertScroll();
  * Inputs: none
  * Return Value: void
@@ -288,6 +367,23 @@ void updateCursor() {
     outb(0x0E, 0x3D4);
     outb((uint8_t) ((pos >> 8) & 0xFF) ,0x3D5);
 }
+
+// /* void updateCursor(int xPos, int yPos);
+//  * Inputs: x and y position to switch cursor to
+//  * Return Value: void
+//  * Function: Update cursor pointer */
+// void updateCursorTerm(int8_t terminalId) {
+//     int8_t xPos = terminals[terminalId].screen_x;
+//     int8_t yPos = terminals[terminalId].screen_y;
+//
+//     uint16_t pos = yPos * NUM_COLS + xPos;
+//
+//     outb(0x0F, 0x3D4);
+//     outb((uint8_t) (pos & 0xFF) ,0x3D5);
+//
+//     outb(0x0E, 0x3D4);
+//     outb((uint8_t) ((pos >> 8) & 0xFF) ,0x3D5);
+// }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

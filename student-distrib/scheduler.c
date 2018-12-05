@@ -27,14 +27,22 @@ void PIT_INIT() {
  *   RETURN VALUE: none
  */
 void PIT_HANDLER() {
-  send_eoi(PIT_IRQ_NUM);
+    send_eoi(PIT_IRQ_NUM);
 
-  cli();
-  if (terminals[1].launched == 1 || terminals[2].launched == 1) {
-      uint32_t idx = getNextProcess(currTerminalIndex);
-      contextSwitch(idx);
-  }
-  sti();
+    cli();
+    if (terminals[1].launched == 1 || terminals[2].launched == 1) {
+        pcb_t * currPCB = generatePCBPointer(currProcessIndex);
+        int curr_term = currPCB->terminal_id;
+        // Default nextTerminalIndex to curr index
+        while (1) {
+            curr_term = (curr_term + 1) % num_terminals;
+            if (terminals[curr_term].launched == 1)
+                break;
+        }
+        // uint32_t idx = getNextTerminal(curr_term);
+        contextSwitch(curr_term);
+    }
+    sti();
 }
 
 /*
@@ -45,26 +53,32 @@ void PIT_HANDLER() {
  *   RETURN VALUE: none
  */
 void contextSwitch(const int32_t nextTerminalIndex) {
-    // pcb_t * currPCB = generatePCBPointer(terminals[currTerminalIndex].currentActiveProcess);
-    // pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
-    // // //printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
-    // // // Update paging
-    // getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
+    pcb_t * currPCB = generatePCBPointer(currProcessIndex);
+    pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
+
+    // printf("currProcessIndex: %d, nextProcessIndex: %d \n", currProcessIndex, terminals[nextTerminalIndex].currentActiveProcess);
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
+
+    // uint8_t* screenStart;
+    // vidMap(&screenStart);
+    // if (nextTerminalIndex != currTerminalIndex) {
+    //     getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[nextTerminalIndex].videoMemPtr);
+    // }
+    // if (nextTerminalIndex != currTerminalIndex)
+
+    // Update paging
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
+    currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
+
+    asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
+    asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
+
     //
-    //
-    // tss.ss0 = KERNEL_DS;
-    // tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
-    // // //
-    // currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
-    //
-    // //
-    // // // Do Context Switch
-    //
-    //  asm volatile ("movl %%esp, %0" : "=r" (currPCB->parentESP));
-    //  asm volatile ("movl %%ebp, %0" : "=r" (currPCB->parentEBP));
-    //
-    // asm volatile ("movl %0, %%esp" : : "r" (nextPCB->parentESP));
-    // asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->parentEBP));
+    // // Do Context Switch
+    asm volatile ("movl %0, %%esp" : : "r" (nextPCB->currESP));
+    asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->currEBP));
+
 }
 
 /*
@@ -74,19 +88,19 @@ void contextSwitch(const int32_t nextTerminalIndex) {
  *   OUTPUTS: none
  *   RETURN VALUE: current pid
  */
-int32_t getNextProcess(int32_t curr_idx) {
-  // Default nextTerminalIndex to curr index
-  int32_t nextTerminalIndex = curr_idx;
-  // If no other terminals have a running process, it'll go back to itself
-  int32_t term_iter;
-  // Go to next terminal # and cycle if necessary
-  for(term_iter = (curr_idx + 1); (curr_idx%num_terminals)<3; (term_iter++)) {
-    term_iter %= num_terminals;
-    if(terminals[term_iter].launched == 1) {
-      break;
+int32_t getNextTerminal(int32_t curr_term) {
+    pcb_t * currPCB = generatePCBPointer(currProcessIndex);
+
+    // Default nextTerminalIndex to curr index
+    int32_t i = currPCB->terminal_id;
+    // If no other terminals have a running process, it'll go back to itself
+    // Go to next terminal # and cycle if necessary
+    for(i = 0; i < num_terminals; i++) {
+        i = (i + 1) % num_terminals;
+        if(terminals[i].launched == 1) {
+          break;
+        }
     }
-  }
-  nextTerminalIndex = term_iter;
-  // Return next terminal index
-  return nextTerminalIndex;
+    // Return next terminal index
+    return i;
 }

@@ -44,7 +44,7 @@ pcb_t* initPCB() {
 
     // Put PCB at top of respective kernel stack
     pcb_t* currPCB = generatePCBPointer(i);
-    currPCB->prevPcbIdx = currProcessIndex;
+    currPCB->prevPcbIdx = terminals[currTerminalIndex].currentActiveProcess;
     currProcessIndex = i;
 
     terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
@@ -201,7 +201,7 @@ int32_t execute(const uint8_t * command) {
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(terminals[currTerminalIndex].currentActiveProcess + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -209,7 +209,7 @@ int32_t execute(const uint8_t * command) {
     ///////* NOTE: STEP 6: Create TSS for context switching  */
     // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
+    tss.esp0 = 0x800000 - 0x2000 * (terminals[currTerminalIndex].currentActiveProcess) - fourBytes;
     int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
     // Fake IRET
     asm volatile (
