@@ -205,7 +205,7 @@ void putc(uint8_t c) {
  * Inputs: uint_8* c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
-void putcTerm(uint8_t c, int8_t terminalId) {
+void putcTerm(uint8_t c, uint32_t terminalId) {
     uint8_t * videoMemPtr = terminals[terminalId].videoMemPtr;
     int8_t xPos = terminals[terminalId].screen_x;
     int8_t yPos = terminals[terminalId].screen_y;
@@ -282,7 +282,7 @@ void moveScreenPos(int xPos, int yPos) {
     updateCursor();
 }
 
-void moveScreenPosTerm(int xPos, int yPos, int8_t terminalId) {
+void moveScreenPosTerm(int xPos, int yPos, uint32_t terminalId) {
     if (xPos >= NUM_COLS) {
         terminals[terminalId].screen_x = 0;
         yPos++;
@@ -304,7 +304,7 @@ void moveScreenPosTerm(int xPos, int yPos, int8_t terminalId) {
  * Inputs: none
  * Return Value: void
  * Function: Scrolls down one row */
-void vertScrollTerm(int8_t terminalId) {
+void vertScrollTerm(uint32_t terminalId) {
     int x, y;
     uint8_t * videoMemPtr = terminals[terminalId].videoMemPtr;
     // shift all rows up one
