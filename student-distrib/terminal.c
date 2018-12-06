@@ -103,66 +103,14 @@ int32_t mult_terminal_launch(const int32_t id) {
     mult_terminal_save(currTerminalIndex);
 
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-    // if the terminal is already launched, restore the state
-    if(terminals[id].launched == 1) {
-        // int32_t currProcessNum = terminals[currTerminalIndex].currentActiveProcess;
-        // int32_t nextProcessNum = terminals[id].currentActiveProcess;
-        currTerminalIndex = id;
-        mult_terminal_restore(id);
-        // pcb_t * currPCB = generatePCBPointer(currProcessIndex);
-        // pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
-        //
-        // // printf("currProcessIndex: %d, nextProcessIndex: %d \n", currProcessIndex, terminals[nextTerminalIndex].currentActiveProcess);
-        // getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
-        //
-        uint8_t* screenStart;
-        vidMap(&screenStart);
-        if (id != currTerminalIndex) {
-            getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[id].videoMemPtr);
-        }
-        // // if (nextTerminalIndex != currTerminalIndex)
-        //
-        // // Update paging
-        // tss.ss0 = KERNEL_DS;
-        // tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
-        // currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
-        //
-        // asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
-        // asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
-        //
-        // //
-        // // // Do Context Switch
-        // asm volatile ("movl %0, %%esp" : : "r" (nextPCB->currESP));
-        // asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->currEBP));
-
-        // uint8_t* screenStart;
-        // vidMap(&screenStart);
-        // if (currPCB->terminal_id != currTerminalIndex) {
-        //     getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[currPCB->terminal_id].videoMemPtr);
-        // }
-        // printf("Current active process in this terminal: %d\n", terminals[currTerminalIndex].currentActiveProcess);
-        sti();
-        return 0;
-    }
-    // Set launched value to 1
-    // terminals[id].launched = 1;
     currTerminalIndex = id;
-
-
     mult_terminal_restore(id);
-    // Store ESP and EBP in pcb
-    uint32_t storeESP;
-    uint32_t storeEBP;
-    asm volatile ("movl %%esp, %0" : "=r" (storeESP));
-    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
-    // printf("Current active process in this terminal: %d\n", terminals[currTerminalIndex].currentActiveProcess);
-
-    // Update current PCB
-    currPCB->currESP = storeESP;
-    currPCB->currEBP = storeEBP;
-    uint8_t* shellCommand = (uint8_t*)"shell";
+    uint8_t* screenStart;
+    vidMap(&screenStart);
+    if (currPCB->terminal_id != currTerminalIndex) {
+        getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[id].videoMemPtr);
+    }
     sti();
-    execute(shellCommand);
     return 0;
 }
 
