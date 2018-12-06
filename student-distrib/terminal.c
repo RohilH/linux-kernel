@@ -42,8 +42,8 @@ int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     int i;
     char * buffer = (char*) buf;
     // printf("currProcessIndex: %d\n", currProcessIndex);
-    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     for (i = 0; i < nbytes; i++) {
+        pcb_t* currPCB = generatePCBPointer(currProcessIndex);
         if (currPCB->terminal_id == currTerminalIndex) {
             putc(buffer[i]);
         }
