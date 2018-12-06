@@ -201,7 +201,7 @@ int32_t execute(const uint8_t * command) {
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(terminals[currTerminalIndex].currentActiveProcess + 1));
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -209,8 +209,9 @@ int32_t execute(const uint8_t * command) {
     ///////* NOTE: STEP 6: Create TSS for context switching  */
     // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 * (terminals[currTerminalIndex].currentActiveProcess) - fourBytes;
+    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
     int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
+    // printf("Current Process Index: %d\n", currProcessIndex);
     // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"

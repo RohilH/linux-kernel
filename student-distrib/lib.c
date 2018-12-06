@@ -310,7 +310,8 @@ void vertScrollTerm(uint32_t terminalId) {
     // shift all rows up one
     for (y = 0; y < (NUM_ROWS - 1); y++) {
         for (x = 0; x < NUM_COLS; x++) {
-            *(uint8_t *)(videoMemPtr + ((NUM_COLS * y + x) << 1)) = *(uint8_t *)(videoMemPtr + ((NUM_COLS * (y + 1) + x) << 1));
+            uint8_t tempVal = *(uint8_t *)(videoMemPtr + ((NUM_COLS * (y + 1) + x) << 1));
+            *(uint8_t *)(videoMemPtr + ((NUM_COLS * y + x) << 1)) = tempVal;
             // *(uint8_t *)(videoMemPtr + ((NUM_COLS * y + x) << 1) + 1) = *(uint8_t *)(videoMemPtr + ((NUM_COLS * (y + 1) + x) << 1) + 1);
         }
     }

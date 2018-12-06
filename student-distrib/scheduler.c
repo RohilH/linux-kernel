@@ -29,7 +29,8 @@ void PIT_INIT() {
 void PIT_HANDLER() {
     send_eoi(PIT_IRQ_NUM);
 
-    cli();
+    disable_irq(PIT_IRQ_NUM);
+    // cli();
     if (terminals[1].launched == 1 || terminals[2].launched == 1) {
         pcb_t * currPCB = generatePCBPointer(currProcessIndex);
         int curr_term = currPCB->terminal_id;
@@ -39,10 +40,13 @@ void PIT_HANDLER() {
             if (terminals[curr_term].launched == 1)
                 break;
         }
+        // printf("CurrActiveTermProc: %d ",curr_term);
         // uint32_t idx = getNextTerminal(curr_term);
+        enable_irq(PIT_IRQ_NUM);
         contextSwitch(curr_term);
     }
-    sti();
+    enable_irq(PIT_IRQ_NUM);
+    // sti();
 }
 
 /*
@@ -57,22 +61,22 @@ void contextSwitch(const int32_t nextTerminalIndex) {
     pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
 
     // printf("currProcessIndex: %d, nextProcessIndex: %d \n", currProcessIndex, terminals[nextTerminalIndex].currentActiveProcess);
-    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
 
-    // uint8_t* screenStart;
-    // vidMap(&screenStart);
-    // if (nextTerminalIndex != currTerminalIndex) {
-    //     getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[nextTerminalIndex].videoMemPtr);
-    // }
+    uint8_t* screenStart;
+    vidMap(&screenStart);
+    if (nextTerminalIndex != currTerminalIndex) {
+        getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[nextTerminalIndex].videoMemPtr);
+    }
     // if (nextTerminalIndex != currTerminalIndex)
+    asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
+    asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
 
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
+    currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
     // Update paging
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
-    currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
 
-    asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
-    asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
 
     //
     // // Do Context Switch

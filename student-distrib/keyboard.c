@@ -201,7 +201,8 @@ void enter() {
         currStored++; //increment how many buffers are being
       }
     commandIndex = 0; //reset commandIndex back to 0
-    enterPressed = 1;
+    terminals[currTerminalIndex].enterPressed = 1;
+    // enterPressed = 1;
 }
 
 /*
