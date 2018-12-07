@@ -102,8 +102,8 @@ int32_t halt(uint8_t status) {
     cli();
 
     int i;
-    // uint32_t storeESP;
-    // uint32_t storeEBP;
+    uint32_t storeESP;
+    uint32_t storeEBP;
 
     // Obtain current pcb_t *
     terminals[currPCB->terminal_id].currentActiveProcess = currPCB->prevPcbIdx;
@@ -115,7 +115,6 @@ int32_t halt(uint8_t status) {
     }
 
 
-    terminals[currTerminalExecuted].currentActiveProcess = currPCB->prevPcbIdx;
     // Restore parent paging
     getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currPCB->prevPcbIdx) + 1));
     // Jump to execute return
@@ -124,6 +123,7 @@ int32_t halt(uint8_t status) {
     // Modify TSS according to the parent
     tss.esp0 = currPCB->parentESP;
     uint32_t castStatus = (uint32_t)status;
+    currProcessIndex = currPCB->prevPcbIdx;
     // IRET return
     asm volatile (
         "movl   %0, %%eax;"
@@ -133,7 +133,7 @@ int32_t halt(uint8_t status) {
         // "leave;"
         // "ret;"
         :                       // no outputs
-        : "r" (castStatus), "r" (currPCB->pcbESP), "r" (currPCB->pcbEBP)
+        : "r" (castStatus), "r" (storeESP), "r" (storeEBP)
         : "eax" // clobbers
         //
     );
@@ -186,11 +186,11 @@ int32_t execute(const uint8_t * command) {
       sti();
       return -1;
     }
-    // uint32_t storeESP;
-    // uint32_t storeEBP;
+    uint32_t storeESP;
+    uint32_t storeEBP;
     // Store ESP and EBP in pcb
-    asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-    asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
+    asm volatile ("movl %%esp, %0" : "=r" (storeESP));
+    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
     // Update current PCB
     currPCB->parentESP = storeESP;
     currPCB->parentEBP = storeEBP;
@@ -201,7 +201,7 @@ int32_t execute(const uint8_t * command) {
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 
     ///////* NOTE: STEP 4: Setup paging */
-    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(terminals[currTerminalDisplayed].currentActiveProcess + 1));
+    getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*(currProcessIndex + 1));
 
     ///////* NOTE: STEP 5: Setup User level Program Loader */
     read_data (dentry.inodeNum, 0, (uint8_t*) ProgramImageAddress, PageSize4MB); // loads executable into user video mem
@@ -209,7 +209,7 @@ int32_t execute(const uint8_t * command) {
     ///////* NOTE: STEP 6: Create TSS for context switching  */
     // Save ss0, esp0 in TSS
     tss.ss0 = KERNEL_DS;
-    tss.esp0 = 0x800000 - 0x2000 * (terminals[currTerminalDisplayed].currentActiveProcess) - fourBytes;
+    tss.esp0 = 0x800000 - 0x2000 * (currProcessIndex) - fourBytes;
     int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
     // printf("Current Process Index: %d\n", currProcessIndex);
     // Fake IRET
@@ -252,7 +252,7 @@ int32_t read(int32_t fd, void* buf, int32_t nBytes) {
     if (fd < 0 || fd >= numFiles) return -1;
     if (buf == NULL) return -1;
 
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     if (currPCB->fileArray[fd].flags == 0) // File not in use
         return -1;
     return currPCB->fileArray[fd].fileOpsTablePtr->read(fd, buf, nBytes);
@@ -272,7 +272,7 @@ int32_t write(int32_t fd, const void* buf, int32_t nBytes) {
     // Check for NULL buffer
     if (buf == NULL)  return -1;
     // Get pcb pointer
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
     if (currPCB->fileArray[fd].flags == 0) return -1;
     return currPCB->fileArray[fd].fileOpsTablePtr->write(fd, buf, nBytes);
@@ -293,7 +293,7 @@ int32_t open(const uint8_t* fileName) {
     if (read_dentry_by_name(fileName, &dentry) == -1) return -1;
     int i;
     // Get current pcb pointer
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     for (i = 2; i < numFiles; i++) {
         if ((currPCB->fileArray[i]).flags == 0) { // if file slot is open
             currPCB->fileArray[i].flags = 1;
@@ -340,7 +340,7 @@ int32_t close(int32_t fd) {
     // Check for bound error
     if (fd < 2 || fd >= numFiles) return -1;
     // Get current pcb pointer
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     // File not in use
     if (currPCB->fileArray[fd].flags == 0) return -1;
     // Set to not in use
@@ -357,7 +357,7 @@ int32_t close(int32_t fd) {
  */
 int32_t getArgs(uint8_t * buf, int32_t nBytes) {
   // Access PCB->arguments
-  pcb_t * currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
+  pcb_t * currPCB = generatePCBPointer(currProcessIndex);
   // Error Checking: Valid Pointers
   if(buf == NULL) return -1;
   // Error Checking: Valid arguments
@@ -413,13 +413,13 @@ int32_t sigReturn(void) {
 /*
  * generatePCBPointer
  *     DESCRIPTION: Generate pointer to active pcb
- *     INPUTS: terminals[currTerminalExecuted].currentActiveProcess
+ *     INPUTS: currProcessIndex
  *     OUTPUTS: none
  *     RETURN VALUE: pcb_t pointer
  */
-pcb_t* generatePCBPointer(int currentProcessIndex) {
-  //8mb - 4kb*terminals[currTerminalExecuted].currentActiveProcess
-  return (pcb_t*)(eightMB - eightKB*(currentProcessIndex + 1));
+pcb_t* generatePCBPointer(int currProcessIndex) {
+  //8mb - 4kb*currProcessIndex
+  return (pcb_t*)(eightMB - eightKB*(currProcessIndex + 1));
 }
 
 
