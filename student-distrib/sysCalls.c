@@ -42,13 +42,16 @@ pcb_t* initPCB() {
         return NULL;
     }
 
-
     // Put PCB at top of respective kernel stack
     pcb_t* currPCB = generatePCBPointer(i);
-    currPCB->prevPcbIdx = terminals[currTerminalDisplayed].currentActiveProcess;
-    currPCB->terminal_id = currTerminalDisplayed;
-    // terminals[currTerminalExecuted].currentActiveProcess = i;
-    terminals[currTerminalDisplayed].currentActiveProcess = i;
+    currPCB->prevPcbIdx = terminals[currTerminalIndex].currentActiveProcess;
+    currProcessIndex = i;
+
+    terminals[currTerminalIndex].currentActiveProcess = currProcessIndex;
+    if (terminals[currTerminalIndex].launched == 0) {
+        currPCB->prevPcbIdx = currProcessIndex;
+        terminals[currTerminalIndex].launched = 1;
+    }
     // Setup STDIN
     fileDescriptor_t stdinFD;
     // Point to respective file op function
@@ -87,9 +90,12 @@ pcb_t* initPCB() {
  */
 int32_t halt(uint8_t status) {
     // Restart shell if halting last process
-    activeProcessArray[terminals[currTerminalExecuted].currentActiveProcess] = 0;
-    if(terminals[currTerminalExecuted].currentActiveProcess == 0) {
-        terminals[currTerminalExecuted].currentActiveProcess--;
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    activeProcessArray[currProcessIndex] = 0;
+
+    if(terminals[currTerminalIndex].currentActiveProcess == currPCB->prevPcbIdx) {
+        terminals[currTerminalIndex].launched = 0;
+        currProcessIndex--;
         uint8_t* shellCommand = (uint8_t*)"shell";
         execute(shellCommand);
     }
@@ -100,7 +106,6 @@ int32_t halt(uint8_t status) {
     // uint32_t storeEBP;
 
     // Obtain current pcb_t *
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
     terminals[currPCB->terminal_id].currentActiveProcess = currPCB->prevPcbIdx;
     // Close relevant File descriptors
     for(i = 0; i < numFiles; i++) {
@@ -114,10 +119,10 @@ int32_t halt(uint8_t status) {
     // Restore parent paging
     getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((currPCB->prevPcbIdx) + 1));
     // Jump to execute return
-    // storeESP = currPCB->pcbESP;
-    // storeEBP = currPCB->pcbEBP;
+    storeESP = currPCB->parentESP;
+    storeEBP = currPCB->parentEBP;
     // Modify TSS according to the parent
-    tss.esp0 = currPCB->pcbESP;
+    tss.esp0 = currPCB->parentESP;
     uint32_t castStatus = (uint32_t)status;
     // IRET return
     asm volatile (
@@ -187,8 +192,9 @@ int32_t execute(const uint8_t * command) {
     asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
     asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
     // Update current PCB
-    // currPCB->pcbESP = storeESP;
-    // currPCB->pcbEBP = storeEBP;
+    currPCB->parentESP = storeESP;
+    currPCB->parentEBP = storeEBP;
+    currPCB->terminal_id = currTerminalIndex;
 
     strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
@@ -205,8 +211,7 @@ int32_t execute(const uint8_t * command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = 0x800000 - 0x2000 * (terminals[currTerminalDisplayed].currentActiveProcess) - fourBytes;
     int userStackPtr = VirtualStartAddress + PageSize4MB - fourBytes;
-    currTerminalExecuted = currPCB->terminal_id;
-
+    // printf("Current Process Index: %d\n", currProcessIndex);
     // Fake IRET
     asm volatile (
       "mov   $0x2B, %%ax;"

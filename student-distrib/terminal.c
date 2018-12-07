@@ -14,8 +14,9 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     char * buffer = (char*) buf;
     // printf("gets to derefencing buffer");
     // Continuously check for enter flag until it is pressed (volatile)
-    while(enterPressed != 1);
-    enterPressed = 0;
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    while(terminals[currPCB->terminal_id].enterPressed != 1);
+    terminals[currPCB->terminal_id].enterPressed = 0;
     // if (nbytes > 128)
     //     return -1;
     // Copy charBuffer into local buffer
@@ -38,17 +39,26 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
  */
 int32_t terminal_write (int32_t fd, const void* buf, int32_t nbytes) {
     if(buf == NULL) return -1;
-    int32_t ret;
     int i;
     char * buffer = (char*) buf;
+    // printf("currProcessIndex: %d\n", currProcessIndex);
     for (i = 0; i < nbytes; i++) {
+        pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+        if (currPCB->terminal_id == currTerminalIndex) {
+            putc(buffer[i]);
+        }
+        else {
+            putcTerm(buffer[i], currPCB->terminal_id);
+        //     // *(uint8_t *)(terminals[currPCB->terminal_id].videoMemPtr + ((NUM_COLS * get_screenY() + get_screenX()) << 1)) = buffer[i];
+        }
+        // putc(buffer[i]);
+
       // Add key to output stream
-      putc(buffer[i]);
     }
     // ret = printf((char*) buffer);
     // char enterChar = '\n';
     // putc(enterChar);
-    return ret;
+    return i;
 }
 
 /*
@@ -86,62 +96,21 @@ int32_t mult_terminal_launch(const int32_t id) {
     if (id < 0 || id > num_terminals - 1)
         return -1;
     // check if current terminal is the id
-    if (currTerminalDisplayed == id)
+    if (currTerminalIndex == id)
         return 0;
 
     // save the state of the current terminal
-    mult_terminal_save(currTerminalDisplayed);
+    mult_terminal_save(currTerminalIndex);
 
-    // if the terminal is already launched, restore the state
-    if(terminals[id].launched == 1) {
-         // int32_t currProcessNum = terminals[currTerminalDisplayed].currentActiveProcess;
-         // int32_t nextProcessNum = terminals[id].currentActiveProcess;
-        mult_terminal_restore(id);
-        pcb_t * currPCB = generatePCBPointer(terminals[currTerminalDisplayed].currentActiveProcess);
-        pcb_t * nextPCB = generatePCBPointer(terminals[id].currentActiveProcess);
-        // printf("curr: %u, next: %u \n", currPCB -> terminal_id, nextPCB->terminal_id);
-        // // Update paging
-        getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[id].currentActiveProcess) + 1));
-
-
-        tss.ss0 = KERNEL_DS;
-        tss.esp0 = PageSize8MB - PageSize8KB * (terminals[id].currentActiveProcess) - fourBytes;
-        // //
-        currTerminalExecuted = id;
-
-        //
-        // // Do Context Switch
-
-        asm volatile ("movl %%esp, %0" : "=r" (currPCB->pcbESP));
-        asm volatile ("movl %%ebp, %0" : "=r" (currPCB->pcbEBP));
-
-        terminals[currTerminalExecuted].currentActiveProcess = terminals[id].currentActiveProcess;
-        asm volatile ("movl %0, %%esp" : : "r" (nextPCB->pcbESP));
-        asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->pcbEBP));
-        currTerminalDisplayed = id;
-
-        sti();
-        return 0;
-    }
-    // Set launched value to 1
-    terminals[id].launched = 1;
-
-    uint32_t storeESP;
-    uint32_t storeEBP;
-    pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
-
+    pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    currTerminalIndex = id;
     mult_terminal_restore(id);
-    // Store ESP and EBP in pcb
-    asm volatile ("movl %%esp, %0" : "=r" (storeESP));
-    asm volatile ("movl %%ebp, %0" : "=r" (storeEBP));
-
-    // Update current PCB
-    currPCB->pcbESP = storeESP;
-    currPCB->pcbEBP = storeEBP;
-    currTerminalDisplayed = id;
-    uint8_t* shellCommand = (uint8_t*)"shell";
+    uint8_t* screenStart;
+    vidMap(&screenStart);
+    if (currPCB->terminal_id != currTerminalIndex) {
+        getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[id].videoMemPtr);
+    }
     sti();
-    execute(shellCommand);
     return 0;
 }
 
@@ -203,6 +172,7 @@ void mult_terminal_init() {
         terminals[term_num].screen_y = 0;
         terminals[term_num].launched = 0;
         terminals[term_num].buffIndex = 0;
+        terminals[term_num].enterPressed = 0;
         for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
             terminals[term_num].charBuffer[char_iter] = nullChar;
         }
@@ -227,10 +197,8 @@ void mult_terminal_init() {
     for (i = 0; i < max_processes; i++) {
         activeProcessArray[i] = 0;
     }
-    currTerminalDisplayed = 0;
-    currTerminalExecuted = currTerminalDisplayed;
-    terminals[currTerminalExecuted].currentActiveProcess = -1; // Initialize curr process index for PCB use
-    terminals[currTerminalDisplayed].launched = 1;
+    currProcessIndex = -1; // Initialize curr process index for PCB use
+    currTerminalIndex = 0;
     uint8_t* shellCommand = (uint8_t*)"shell";
     execute(shellCommand);
 }
