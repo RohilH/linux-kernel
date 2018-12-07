@@ -71,14 +71,14 @@ void KEYBOARD_HANDLER() {
 
     scanCode = inb(0x60); // Obtain key scan code
     if (scanCode != 0 && scanCode < KEY_PRESSED) { // Check validity
-        if (prevScanCode != scanCode) { // Check spamming
+        if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
+            backspace();
+        } else if (prevScanCode != scanCode) { // Check spamming
             if (ctrl && (scanCode == L_PRESSED)) { // Handle clear screen
                 clear();
                 clearCharBuffer();
             } else if (scanCode == ENTER_PRESSED) { // Handle enter
                 enter();
-            } else if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
-                backspace();
             } else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
                 //upArrow();
             } else if (scanCode == DOWN_ARROW_PRESSED) {
