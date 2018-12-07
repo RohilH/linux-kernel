@@ -177,6 +177,7 @@ int32_t puts(int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
+    cli();
     if(c == '\n' || c == '\r') {
         moveScreenPos(0, screen_y + 1);
     } else {
@@ -200,6 +201,7 @@ void putc(uint8_t c) {
     // screen_x %= NUM_COLS;
     // screen_y %= NUM_ROWS;
     // updateCursor();
+    sti();
 }
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
@@ -207,20 +209,18 @@ void putc(uint8_t c) {
  *  Function: Output a character to the console */
 void putcTerm(uint8_t c, uint32_t terminalId) {
     uint8_t * videoMemPtr = terminals[terminalId].videoMemPtr;
-    int8_t xPos = terminals[terminalId].screen_x;
-    int8_t yPos = terminals[terminalId].screen_y;
 
     if(c == '\n' || c == '\r') {
-        moveScreenPosTerm(0, yPos + 1, terminalId);
+        moveScreenPosTerm(0, terminals[terminalId].screen_y + 1, terminalId);
     } else {
-        *(uint8_t *)(videoMemPtr + ((NUM_COLS * yPos + xPos) << 1)) = c;
+        *(uint8_t *)(videoMemPtr + ((NUM_COLS * terminals[terminalId].screen_y + terminals[terminalId].screen_x) << 1)) = c;
         if (currTerminalIndex == 1)
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB2;
         else if (currTerminalIndex == 2)
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB3;
         else
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
-        xPos++;
+        terminals[terminalId].screen_x++;
     }
     // if (screen_x >= NUM_COLS) {
     //     moveScreenPos(0, screen_y + 1);
@@ -228,7 +228,7 @@ void putcTerm(uint8_t c, uint32_t terminalId) {
     // if (screen_y >= NUM_ROWS) {
     //     moveScreenPos(0, 0);
     // }
-    moveScreenPosTerm(xPos, yPos, terminalId);
+    moveScreenPosTerm(terminals[terminalId].screen_x, terminals[terminalId].screen_y, terminalId);
 
     // screen_x %= NUM_COLS;
     // screen_y %= NUM_ROWS;
