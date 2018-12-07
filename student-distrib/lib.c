@@ -177,6 +177,7 @@ int32_t puts(int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
+    cli();
     if(c == '\n' || c == '\r') {
         moveScreenPos(0, screen_y + 1);
     } else {
@@ -200,6 +201,7 @@ void putc(uint8_t c) {
     // screen_x %= NUM_COLS;
     // screen_y %= NUM_ROWS;
     // updateCursor();
+    sti();
 }
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
