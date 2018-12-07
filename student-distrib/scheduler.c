@@ -77,7 +77,7 @@ void contextSwitch(const int32_t nextTerminalIndex) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
 
-
+    currTerminalScheduler = nextTerminalIndex;
     //
     // // Do Context Switch
     asm volatile ("movl %0, %%esp" : : "r" (nextPCB->currESP));

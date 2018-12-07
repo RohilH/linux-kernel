@@ -26,6 +26,8 @@
 extern void PIT_INIT();
 extern void PIT_HANDLER();
 
+volatile int32_t currTerminalScheduler;
+
 void contextSwitch();
 int32_t getNextTerminal(int curr_term);
 

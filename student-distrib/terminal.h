@@ -5,6 +5,8 @@
 #include "lib.h"
 #include "sysCalls.h"
 #include "paging.h"
+#include "rtc.h"
+#include "i8259.h"
 
 #define num_terminals 3
 #define bufSize 128
@@ -19,6 +21,9 @@ typedef struct terminal {
   volatile int enterPressed;
   int32_t currentActiveProcess;
   uint8_t * videoMemPtr;
+  int32_t programFrequencyRTC;
+  volatile int32_t rtcInterruptFlag;
+
   // ...
 } terminal_t;
 

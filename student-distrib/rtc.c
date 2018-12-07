@@ -1,6 +1,7 @@
 #include "rtc.h"
 #include "i8259.h"
 #include "lib.h"
+#include "terminal.h"
 
 volatile int interruptFlag;
 
@@ -13,6 +14,13 @@ volatile int interruptFlag;
  */
 void RTC_INIT() {
   // SRC: https://wiki.osdev.org/RTC
+  currTerminalScheduler = 0;
+  terminals[0].rtcInterruptFlag = FREQ_512 / FREQ_512;
+  terminals[1].rtcInterruptFlag = FREQ_512 / FREQ_512;
+  terminals[2].rtcInterruptFlag = FREQ_512 / FREQ_512;
+  terminals[0].programFrequencyRTC = FREQ_512;
+  terminals[1].programFrequencyRTC = FREQ_512;
+  terminals[2].programFrequencyRTC = FREQ_512;
 
   outb(REG_B, IO_PORT1);                // Idx --> Reg B / NMI_HANDLER
   char prev = inb(IO_PORT2);            // Obtain Reg A val
@@ -25,6 +33,11 @@ void RTC_INIT() {
   prev = inb(IO_PORT2);                 // Obtain Reg A val
   outb(REG_A, IO_PORT1);                // Reset idx
   outb((prev & 0xF0) | rate, IO_PORT2);
+
+  rtc_changeFreq(FREQ_512);
+
+
+
 }
 
 /*
@@ -36,10 +49,13 @@ void RTC_INIT() {
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nBytes) {
   disable_irq(KEYBOARD_IRQ); //disable keyboard interrupts
-  interruptFlag = LOW_IF; //set interrupt flag to 0
-  while(interruptFlag == LOW_IF) { //loop breaks out when interrupt is triggered
+  //interruptFlag = LOW_IF;
+  terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / terminals[currTerminalScheduler].programFrequencyRTC;
+  while(terminals[currTerminalScheduler].rtcInterruptFlag > 0) { //loop breaks out when interrupt is triggered
     // Spin until interrupt is raised
+    //printf("%u", terminals[currTerminalScheduler].rtcInterruptFlag);
   }
+  //printf("here\n");
   enable_irq(KEYBOARD_IRQ); //reenable keyboard interrupts
   return SUCCESS;  // return success
 }
@@ -55,10 +71,15 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nBytes) {
   if(nBytes != BYTE_CHECK) { // ensure nbytes is 4
     return FAILURE; // if not four bytes return -1
   }
-  int x = rtc_changeFreq(*(int32_t*)buf); // change the new frequency based on the input frequency
-  if ( x != SUCCESS ) { //check for  success of changing frequency
-    return FAILURE; // return failure if it didn't work
-  }
+  // printf("\nOld FREQ: %u, terminal: %u\n", terminals[currTerminalScheduler].programFrequencyRTC, currTerminalScheduler);
+      terminals[currTerminalScheduler].programFrequencyRTC = *(int32_t*)buf;
+  //terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_1024/(*(int32_t*)buf);
+  //int x = rtc_changeFreq(*(int32_t*)buf); // change the new frequency based on the input frequency
+  // printf("\nNew FREQ: %u, terminal: %u\n", terminals[currTerminalScheduler].programFrequencyRTC, currTerminalScheduler);
+  //if ( x != SUCCESS ) { //check for  success of changing frequency
+  //
+  //    return FAILURE; // return failure if it didn't work
+  //}
   return nBytes; //return the number of bytes
 }
 
@@ -70,8 +91,9 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nBytes) {
  *     RETURN VALUE: 0 or -1
  */
 int32_t rtc_open(const uint8_t* fileName) {
-  return rtc_changeFreq(FREQ_2); //set the frquency back to 2,
+    terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / FREQ_2;  //set the frquency back to 2,
   //  return the success or failure based on frequency change
+    return 0;
 }
 
 /*
@@ -82,8 +104,9 @@ int32_t rtc_open(const uint8_t* fileName) {
  *     RETURN VALUE: 0 or -1
  */
 int32_t rtc_close(int32_t fd) {
-  return rtc_changeFreq(FREQ_2); //set the frquency back to 2,
+    terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / FREQ_2;  //set the frquency back to 2,
   //  return the success or failure based on frequency change
+    return 0;
 }
 
 /*
@@ -154,6 +177,9 @@ void RTC_HANDLER() {
   cli(); // mask interrupts
   outb(REG_C, IO_PORT1); // handle register c contents to ensure that we'll get new interrupts
   inb(IO_PORT2);
-  interruptFlag = HIGH_IF; // Set interrupt flag to high
+  terminals[0].rtcInterruptFlag--; // Set interrupt flag to high
+  terminals[1].rtcInterruptFlag--; // Set interrupt flag to high
+  terminals[2].rtcInterruptFlag--; // Set interrupt flag to high
+
   sti(); //unmask interrupts
 }
