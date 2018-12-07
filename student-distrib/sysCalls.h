@@ -57,21 +57,24 @@ typedef struct fileDescriptor_t {
 /*
  * struct of function pointers used in pcb_t
  * fileArray - array of fileDescriptor_t's
- * pcbESP - stack pointer of curr pcb
- * pcbEBP - base pointer of curr pcb
+ * parentESP - stack pointer of curr pcb
+ * parentEBP - base pointer of curr pcb
 */
 typedef struct pcb_t {
     fileDescriptor_t fileArray[8]; // jumptable pointer to open read write close
-    // struct pcb_t* parentPtr;
-    uint32_t pcbESP;
-    uint32_t pcbEBP;
+    int8_t prevPcbIdx;
+    uint32_t parentESP;
+    uint32_t parentEBP;
+    uint32_t currESP;
+    uint32_t currEBP;
     uint8_t bufferArgs[bufSize];
+    uint32_t terminal_id;
     // struct pcb_t* childPtr;
 } pcb_t;
 
 
-// pcb_t pcb_instance[8];
-int currProcessIndex; // Initial process index set to null
+int8_t activeProcessArray[max_processes];
+// int terminals[currTerminalExecuted].currentActiveProcess; // Initial process index set to null
 // PCB initialization/setup
 pcb_t* initPCB();
 // System Call: halt
@@ -95,7 +98,7 @@ int32_t setHandler(int32_t sigNum, void* handlerAddress);
 // System Call: sigreturn
 int32_t sigReturn(void);
 // Get current pcb
-pcb_t* generatePCBPointer(int currProcessIndex);
+pcb_t* generatePCBPointer(int currentProcessIndex);
 // Parse filename command
 int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * argToPass);
 

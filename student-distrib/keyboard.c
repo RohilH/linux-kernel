@@ -71,43 +71,46 @@ void KEYBOARD_HANDLER() {
 
     scanCode = inb(0x60); // Obtain key scan code
     if (scanCode != 0 && scanCode < KEY_PRESSED) { // Check validity
-        if (prevScanCode != scanCode) { // Check spamming
+        if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
+            backspace();
+        } else if (prevScanCode != scanCode) { // Check spamming
             if (ctrl && (scanCode == L_PRESSED)) { // Handle clear screen
                 clear();
                 clearCharBuffer();
-            }
-            else if (scanCode == ENTER_PRESSED) { // Handle enter
+            } else if (scanCode == ENTER_PRESSED) { // Handle enter
                 enter();
-            }
-            else if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
-                backspace();
-            }
-            else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
+            } else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
                 //upArrow();
-            }
-            else if (scanCode == DOWN_ARROW_PRESSED) {
+            } else if (scanCode == DOWN_ARROW_PRESSED) {
                 //downArrow();
-            }
-            else if (caps && shift) { // Handle caps and shift
+            } else if (caps && shift) { // Handle caps and shift
                 addCharToBuffer(scanCode, 3);
-            }
-            else if (shift) { // Handle shift only
+            } else if (shift) { // Handle shift only
                 addCharToBuffer(scanCode, 2);
-            }
-            else if (caps) { // Handle caps only
+            } else if (caps) { // Handle caps only
                 addCharToBuffer(scanCode, 1);
-            }
-            else if (scanCode < 0x3B){ // Handle valid keypress
+            } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_one);
+            } else if (scanCode == F2_PRESSED && alt) {
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_two);
+            } else if (scanCode == F3_PRESSED && alt) {
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                mult_terminal_launch(terminal_three);
+            } else if (scanCode == C_PRESSED && ctrl) {
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                halt(0);
+            } else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
             }
         }
     }
     // Handle alternating caps logic
-    if (prevScanCode == CAPS_PRESSED && scanCode == CAPS_RELEASED) {
-        // caps = (caps == 0) ? 1 : 0;
-        if (caps == 0) caps = 1;
-        else caps = 0;
+    if (scanCode == CAPS_RELEASED) {
+        caps = (caps == 0) ? 1 : 0;
     }
+
     // Handle shift logic
     if (scanCode == LSHIFT_PRESSED || scanCode == RSHIFT_PRESSED) shift = 1;
     if (scanCode == LSHIFT_RELEASED || scanCode == RSHIFT_RELEASED) shift = 0;
@@ -115,6 +118,10 @@ void KEYBOARD_HANDLER() {
     // Handle CTRL logic
     if (scanCode == CRTL_PRESSED) ctrl = 1;
     if (scanCode == CRTL_RELEASED) ctrl = 0;
+
+    // Handle ALT logic
+    if (scanCode == ALT_PRESSED) alt = 1;
+    if (scanCode == ALT_RELEASED) alt = 0;
 
     prevScanCode = scanCode; // Update previous scan code
 
@@ -194,7 +201,8 @@ void enter() {
         currStored++; //increment how many buffers are being
       }
     commandIndex = 0; //reset commandIndex back to 0
-    enterPressed = 1;
+    terminals[currTerminalIndex].enterPressed = 1;
+    // enterPressed = 1;
 }
 
 /*

@@ -7,12 +7,29 @@
 
 #include "types.h"
 
+//// Start Added Code ////
+#define VIDEO       0xB8000
+#define NUM_COLS    80
+#define NUM_ROWS    25
+#define ATTRIB      0xB1
+#define ATTRIB2     0xA2
+#define ATTRIB3     0xC3
+
+int get_screenX();
+int get_screenY();
+void set_screen_XY(int x, int y);
+//// End Added Code ////
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
+void putcTerm(uint8_t c, uint32_t terminalId);
 void moveScreenPos(int xPos, int yPos);
+void moveScreenPosTerm(int xPos, int yPos, uint32_t terminalId);
 void updateCursor();
+void updateCursorTerm(uint32_t terminalId);
 void removec();
 void vertScroll();
+void vertScrollTerm(uint32_t terminalId);
 int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);

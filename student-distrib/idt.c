@@ -62,7 +62,8 @@ void IDT_Initializer() {
     idt[x].reserved4    = 0;
     idt[x].seg_selector = KERNEL_CS;
   }
-
+  // Set PIT handler
+  SET_IDT_ENTRY(idt[PIT_ADDR], pit_asmlinkage);
   // Set Keyboard handler
   SET_IDT_ENTRY(idt[KEY_ADDR], keyboard_asmlinkage);
   // Set RTC handler

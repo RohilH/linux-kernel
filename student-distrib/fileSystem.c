@@ -1,7 +1,7 @@
 #include "fileSystem.h"
 #include "lib.h"
 #include "sysCalls.h"
-
+#include "terminal.h"
 bootBlock_t* bootBlockStart;
 
 
@@ -125,7 +125,7 @@ int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   if(buf == NULL) return -1;
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
-  pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+  pcb_t* currPCB = generatePCBPointer(terminals[currTerminalExecuted].currentActiveProcess);
   // printf("File Pos: %d\n", currPCB->fileArray[fd].filePosition);
   uint32_t offset = currPCB->fileArray[fd].filePosition;
 

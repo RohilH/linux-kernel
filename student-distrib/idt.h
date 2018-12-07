@@ -29,6 +29,7 @@ void SIMD_FLOATING_POINT_EXCEPTION_HANDLER();
 void IDT_Initializer();
 
 #define NUM_EXCEPTIONS      32 // 32 Intel defined exceptions
+#define PIT_ADDR            32 // 0x20 (IRQ0)
 #define KEY_ADDR            33 // 0x21 (IRQ1)
 #define RTC_ADDR            40 // 0x28 (IRQ8)
 #define SYSCALL_ADDR       128 // 0x80
