@@ -16,13 +16,13 @@ typedef struct terminal {
   uint8_t launched;
   volatile char charBuffer[bufSize];
   int buffIndex;
-  volatile int enterPressed;
   int32_t currentActiveProcess;
   uint8_t * videoMemPtr;
   // ...
 } terminal_t;
 
-volatile uint8_t currTerminalIndex;
+volatile uint8_t currTerminalDisplayed;
+volatile uint8_t currTerminalExecuted;
 terminal_t terminals[num_terminals];
 
 // System Calls for terminal
