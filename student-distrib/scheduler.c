@@ -18,6 +18,8 @@ void PIT_INIT() {
   outb(PIT_MODE_SQR_WAV, PIT_CMD_REGISTER); //mode 3 square wave
   outb(lowerEightFreq, PIT_CHANNEL_0);
   outb(higherEightFreq, PIT_CHANNEL_0);
+
+
   // Enable line 0
   enable_irq(PIT_IRQ_NUM);
 }
@@ -142,28 +144,4 @@ void contextSwitch(const int32_t nextTerminalIndex) {
     asm volatile ("movl %0, %%esp" : : "r" (nextPCB->currESP));
     asm volatile ("movl %0, %%ebp" : : "r" (nextPCB->currEBP));
 
-}
-
-/*
- * getNextProcess
- *   DESCRIPTION: Cycle to the next running process
- *   INPUTS: curr_idx - currentTerminalIndex
- *   OUTPUTS: none
- *   RETURN VALUE: current pid
- */
-int32_t getNextTerminal(int32_t curr_term) {
-    pcb_t * currPCB = generatePCBPointer(currProcessIndex);
-
-    // Default nextTerminalIndex to curr index
-    int32_t i = currPCB->terminal_id;
-    // If no other terminals have a running process, it'll go back to itself
-    // Go to next terminal # and cycle if necessary
-    for(i = 0; i < num_terminals; i++) {
-        i = (i + 1) % num_terminals;
-        if(terminals[i].launched == 1) {
-          break;
-        }
-    }
-    // Return next terminal index
-    return i;
 }

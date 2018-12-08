@@ -158,7 +158,6 @@ void entry(unsigned long magic, unsigned long addr) {
     PAGING_INIT(); // Intialize paging
     clear(); // Clear the screen
     PIT_INIT();
-    // mult_terminal_init();
 
 #ifdef RUN_TESTS
     /* Run tests */
