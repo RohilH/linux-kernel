@@ -19,8 +19,8 @@
 #define RSHIFT_PRESSED    0x36
 #define LSHIFT_RELEASED   0xAA
 #define RSHIFT_RELEASED   0xB6
-#define CRTL_PRESSED      0x1D
-#define CRTL_RELEASED     0x9D
+#define CTRL_PRESSED      0x1D
+#define CTRL_RELEASED     0x9D
 #define UP_ARROW_PRESSED  0x48
 #define UP_ARROW_RELEASED 0xC8
 #define DOWN_ARROW_PRESSED  0x50

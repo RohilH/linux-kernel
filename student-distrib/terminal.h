@@ -41,6 +41,6 @@ void mult_terminal_init();
 int32_t mult_terminal_launch(const int32_t id);
 int32_t mult_terminal_save(const int32_t id);
 int32_t mult_terminal_restore(const int32_t id);
-
+void launch_terminal(uint32_t id);
 
 #endif

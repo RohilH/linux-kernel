@@ -116,8 +116,8 @@ void KEYBOARD_HANDLER() {
     if (scanCode == LSHIFT_RELEASED || scanCode == RSHIFT_RELEASED) shift = 0;
 
     // Handle CTRL logic
-    if (scanCode == CRTL_PRESSED) ctrl = 1;
-    if (scanCode == CRTL_RELEASED) ctrl = 0;
+    if (scanCode == CTRL_PRESSED) ctrl = 1;
+    if (scanCode == CTRL_RELEASED) ctrl = 0;
 
     // Handle ALT logic
     if (scanCode == ALT_PRESSED) alt = 1;
