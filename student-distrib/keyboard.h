@@ -31,8 +31,8 @@
 // #define F1_RELEASED
 // #define F2_RELEASED
 // #define F3_RELEASED
-#define ALT_PRESSED	      0x38
-#define ALT_RELEASED		  0xB8
+#define ALT_PRESSED	        0x38
+#define ALT_RELEASED		0xB8
 
 #define terminal_one 0
 #define terminal_two 1
@@ -41,9 +41,9 @@
 extern volatile char charBuffer[BUFFSIZE];
 extern int buffIndex;
 char typedBuffer[BUFFSIZE];
-char commandStorage[COMMAND_LIMIT][BUFFSIZE];
+char commandStorage[COMMAND_LIMIT][BUFFSIZE][3];
 extern volatile int enterPressed;
-int commandIndex;
+int commandIndex[3];
 int currStored;
 // see function descriptions in keyboard.c
 extern void KEYBOARD_INIT();
