@@ -221,7 +221,7 @@ void launch_terminal(uint32_t id) {
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
   // If the terminal is already launched, restore the state
   currTerminalIndex = id;
-  terminals[id].launched = 1;
+  // terminals[id].launched = 1;
   // Restore state of terminal we're launching (default values)
   mult_terminal_restore(id);
   // Store ESP and EBP in pcb

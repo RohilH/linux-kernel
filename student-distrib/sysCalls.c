@@ -93,8 +93,8 @@ int32_t halt(uint8_t status) {
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     activeProcessArray[currProcessIndex] = 0;
 
-    if(terminals[currTerminalIndex].currentActiveProcess == currPCB->prevPcbIdx) {
-        terminals[currTerminalIndex].launched = 0;
+    if(currProcessIndex == currPCB->prevPcbIdx) {
+        terminals[currPCB->terminal_id].launched = 0;
         currProcessIndex--;
         uint8_t* shellCommand = (uint8_t*)"shell";
         execute(shellCommand);

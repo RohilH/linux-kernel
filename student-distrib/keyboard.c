@@ -80,9 +80,9 @@ void KEYBOARD_HANDLER() {
             } else if (scanCode == ENTER_PRESSED) { // Handle enter
                 enter();
             } else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
-                //upArrow();
+                upArrow();
             } else if (scanCode == DOWN_ARROW_PRESSED) {
-                //downArrow();
+                downArrow();
             } else if (caps && shift) { // Handle caps and shift
                 addCharToBuffer(scanCode, 3);
             } else if (shift) { // Handle shift only
