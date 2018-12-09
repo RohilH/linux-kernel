@@ -8,7 +8,7 @@ volatile int shift, caps, ctrl, alt, enterPressed; // Key flags
 
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
 
-volatile char charBuffer[BUFFSIZE];
+volatile char charBuffer[BUF_SIZE];
 int buffIndex;
                                     // 60 keys for 4 different situations listed above each array
                                     // Neither caps lock or shift pressed
@@ -91,13 +91,13 @@ void KEYBOARD_HANDLER() {
                 addCharToBuffer(scanCode, 1);
             } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                mult_terminal_launch(terminal_one);
+                mult_terminal_launch(TERMINAL_ONE);
             } else if (scanCode == F2_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                mult_terminal_launch(terminal_two);
+                mult_terminal_launch(TERMINAL_TWO);
             } else if (scanCode == F3_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                mult_terminal_launch(terminal_three);
+                mult_terminal_launch(TERMINAL_THREE);
             } else if (scanCode == C_PRESSED && ctrl) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 c_flag = currTerminalIndex;
@@ -139,7 +139,7 @@ void KEYBOARD_HANDLER() {
  */
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey]; // Obtain scan code
-    if (buffIndex < BUFFSIZE && charToAdd != '\0') { // Check out of bounds error and null-terminating char
+    if (buffIndex < BUF_SIZE && charToAdd != '\0') { // Check out of bounds error and null-terminating char
         charBuffer[buffIndex] = charToAdd; // Add to buffer
         if(commandIndex == 0) {
           typedBuffer[buffIndex] = charToAdd;
@@ -176,23 +176,23 @@ void enter() {
     int i;
     int currCommand;
       for(currCommand = COMMAND_LIMIT-1; currCommand > 0; currCommand--) { //Shift all the commands right, effectively popping off the right most
-          for(i = 0; i<BUFFSIZE; i++) { //clear what is going to be replaced
+          for(i = 0; i<BUF_SIZE; i++) { //clear what is going to be replaced
             if(commandStorage[currCommand][i][currTerminalIndex] != '\0') {
               commandStorage[currCommand][i][currTerminalIndex] = '\0';
             }
           }
-          for(i = 0; i<BUFFSIZE; i++) {
+          for(i = 0; i<BUF_SIZE; i++) {
             if(commandStorage[currCommand - 1][i][currTerminalIndex] != '\0') { //move the buffer up an index
               commandStorage[currCommand][i][currTerminalIndex] = commandStorage[currCommand - 1][i][currTerminalIndex];
             }
           }
       }
-      for(i = 0; i<BUFFSIZE; i++) { //clear the first stored buffer
+      for(i = 0; i<BUF_SIZE; i++) { //clear the first stored buffer
         if(commandStorage[0][i][currTerminalIndex] != '\0') {
           commandStorage[0][i][currTerminalIndex] = '\0';
         }
       }
-      for(i = 0; i<BUFFSIZE; i++) { //replace the first stored buffer with what was entered by user
+      for(i = 0; i<BUF_SIZE; i++) { //replace the first stored buffer with what was entered by user
         if(charBuffer[i] != '\0') {
           commandStorage[0][i][currTerminalIndex] = charBuffer[i];
         }
@@ -215,14 +215,14 @@ void enter() {
 void upArrow() {
   int i;
   if(commandIndex[currTerminalIndex] < (currStored)) { //check that the current command is within the bounds of what is actually stored
-    for(i = 0; i<BUFFSIZE; i++) {
+    for(i = 0; i<BUF_SIZE; i++) {
       if(charBuffer[i] != '\0') { //clear the current charBuffer
         charBuffer[i] = '\0';
         removec(); //remove it from the screen
       }
     }
     buffIndex = 0; //reset buffer index
-    for(i=0;i<BUFFSIZE; i++) {
+    for(i=0;i<BUF_SIZE; i++) {
       if(commandStorage[commandIndex[currTerminalIndex]][i][currTerminalIndex] != '\0') {
         charBuffer[i] = commandStorage[commandIndex[currTerminalIndex]][i][currTerminalIndex];
         putc(charBuffer[i]);
@@ -245,14 +245,14 @@ void downArrow() {
     commandIndex[currTerminalIndex]--;
     int i;
     if(commandIndex[currTerminalIndex] == 0) { //case for when the user wants to return back to the command they originally typed
-      for(i = 0; i<BUFFSIZE; i++) {
+      for(i = 0; i<BUF_SIZE; i++) {
         if(charBuffer[i] != '\0') {
           charBuffer[i] = '\0';
           removec();
         }
       }
       buffIndex = 0; //reset BuffIndex
-      for(i=0;i<BUFFSIZE; i++) {
+      for(i=0;i<BUF_SIZE; i++) {
         if(typedBuffer[i] != '\0') {
           charBuffer[i] = typedBuffer[i]; //use typed buffer which is unaffected by any up or down arrow presses
           putc(charBuffer[i]); //output to terminal
@@ -261,14 +261,14 @@ void downArrow() {
       }
     }
     else{
-      for(i = 0; i<BUFFSIZE; i++) { //remove previous command from the buffer and the terminal
+      for(i = 0; i<BUF_SIZE; i++) { //remove previous command from the buffer and the terminal
         if(charBuffer[i] != '\0') {
           charBuffer[i] = '\0';
           removec();
         }
       }
       buffIndex = 0;
-      for(i=0;i<BUFFSIZE; i++) { //puts the command history that is one down into the buffer and onto the terminal
+      for(i=0;i<BUF_SIZE; i++) { //puts the command history that is one down into the buffer and onto the terminal
         if(commandStorage[commandIndex[currTerminalIndex] - 1][i][currTerminalIndex] != '\0') {
           charBuffer[i] = commandStorage[commandIndex[currTerminalIndex] - 1][i][currTerminalIndex];
           putc(charBuffer[i]);
@@ -288,7 +288,7 @@ void downArrow() {
  */
 void clearCharBuffer() {
     int i;
-    for (i = 0; i < BUFFSIZE; i++) {
+    for (i = 0; i < BUF_SIZE; i++) {
       charBuffer[i] = '\0'; // Set elements to null-terminating char
       typedBuffer[i] = '\0'; // Set elements to null-terminating char
     }

@@ -15,6 +15,7 @@ void PIT_INIT() {
   // Initialize variables for 3-terminal init
   shellsStarted = 0;
   firstShellStarted = 0;
+  c_flag = 4;
   // Produce Mode 3 square wave rather than pulse in Mode 2
   outb(PIT_MODE_SQR_WAV, PIT_CMD_REGISTER); //mode 3 square wave
   outb(lowerEightFreq, PIT_CHANNEL_0);
@@ -32,6 +33,11 @@ void PIT_INIT() {
  */
 void PIT_HANDLER() {
     send_eoi(PIT_IRQ_NUM);
+    if (c_flag == currTerminalIndex) {
+        currProcessIndex = terminals[currTerminalIndex].currentActiveProcess;
+        c_flag = 4;
+        halt(0);
+    }
     // Context switch if all three terminals are already launched
     if (terminals[0].launched == 1 && terminals[1].launched == 1 && terminals[2].launched == 1) {
         if (shellsStarted == 0) {
@@ -41,7 +47,7 @@ void PIT_HANDLER() {
         pcb_t * currPCB = generatePCBPointer(currProcessIndex);
         int curr_term = currPCB->terminal_id;
         // Increment curr_term to contextSwitch into
-        curr_term = (curr_term + 1) % num_terminals;
+        curr_term = (curr_term + 1) % NUM_TERMINALS;
         enable_irq(PIT_IRQ_NUM);
         contextSwitch(curr_term);
         return;

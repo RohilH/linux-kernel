@@ -123,6 +123,8 @@ int32_t halt(uint8_t status) {
     // Modify TSS according to the parent
     tss.esp0 = currPCB->parentESP;
     uint32_t castStatus = (uint32_t)status;
+    if (castStatus == 255)
+        castStatus++;
     currProcessIndex = currPCB->prevPcbIdx;
     // IRET return
     asm volatile (
@@ -155,7 +157,7 @@ int32_t execute(const uint8_t * command) {
     cli();
     ///////* NOTE: STEP 1: Parse command for file name and argument */
     uint8_t filename[maxFileNameSize]; // initialize filename
-    uint8_t argToPass[bufSize]; // INVALID: MUST BE STATIC NUM
+    uint8_t argToPass[BUF_SIZE]; // INVALID: MUST BE STATIC NUM
     int ret;
     ret = parseCommands(command, filename, argToPass);
     // Return error check
@@ -196,7 +198,7 @@ int32_t execute(const uint8_t * command) {
     currPCB->parentEBP = storeEBP;
     currPCB->terminal_id = currTerminalIndex;
 
-    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, bufSize);
+    strncpy((int8_t*)currPCB->bufferArgs, (int8_t*)argToPass, BUF_SIZE);
     read_data (dentry.inodeNum, execStartByte, tempBuffer, fourBytes); // get bytes 24 to 27
     uint32_t entryPoint = *((uint32_t*) tempBuffer);
 

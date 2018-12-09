@@ -8,15 +8,15 @@
 #include "rtc.h"
 #include "i8259.h"
 
-#define num_terminals 3
-#define bufSize 128
-#define nullChar '\0'
+#define NUM_TERMINALS 3
+#define BUF_SIZE 128
+#define NULL_CHAR '\0'
 
 typedef struct terminal {
   int32_t id;
   int32_t screen_x, screen_y;
   uint8_t launched;
-  volatile char charBuffer[bufSize];
+  volatile char charBuffer[BUF_SIZE];
   int buffIndex;
   volatile int enterPressed;
   int32_t currentActiveProcess;
@@ -27,8 +27,10 @@ typedef struct terminal {
   // ...
 } terminal_t;
 
+volatile uint8_t c_flag;
+
 volatile uint8_t currTerminalIndex;
-terminal_t terminals[num_terminals];
+terminal_t terminals[NUM_TERMINALS];
 
 // System Calls for terminal
 int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes);

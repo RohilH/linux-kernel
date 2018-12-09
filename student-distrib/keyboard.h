@@ -4,9 +4,9 @@
 #include "types.h"
 #include "terminal.h"
 
-
+#define NUM_TERMINALS     3
 #define IRQ_LINE_KEYS     1
-#define BUFFSIZE          128
+#define BUF_SIZE          128
 #define COMMAND_LIMIT     10
 #define KEY_PRESSED       0x80
 #define L_PRESSED         0x26
@@ -34,16 +34,16 @@
 #define ALT_PRESSED	        0x38
 #define ALT_RELEASED		0xB8
 
-#define terminal_one 0
-#define terminal_two 1
-#define terminal_three 2
+#define TERMINAL_ONE 0
+#define TERMINAL_TWO 1
+#define TERMINAL_THREE 2
 
-extern volatile char charBuffer[BUFFSIZE];
+extern volatile char charBuffer[BUF_SIZE];
 extern int buffIndex;
-char typedBuffer[BUFFSIZE];
-char commandStorage[COMMAND_LIMIT][BUFFSIZE][3];
+char typedBuffer[BUF_SIZE];
+char commandStorage[COMMAND_LIMIT][BUF_SIZE][NUM_TERMINALS];
 extern volatile int enterPressed;
-int commandIndex[3];
+int commandIndex[NUM_TERMINALS];
 int currStored;
 // see function descriptions in keyboard.c
 extern void KEYBOARD_INIT();

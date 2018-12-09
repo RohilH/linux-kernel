@@ -19,7 +19,7 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     // if (nbytes > 128)
     //     return -1;
     // Copy charBuffer into local buffer
-    for (i = 0; i < nbytes && i < BUFFSIZE; i++) {
+    for (i = 0; i < nbytes && i < BUF_SIZE; i++) {
         buffer[i] = charBuffer[i]; // copy charBuffer into buffer
     }
     buffer[i] = '\0'; // Null terminated string
@@ -84,7 +84,7 @@ int32_t terminal_close (int32_t fd) {
 int32_t mult_terminal_launch(const int32_t id) {
     cli();
     // Check if id is within max terminal limit
-    if (id < 0 || id > num_terminals - 1)
+    if (id < 0 || id > NUM_TERMINALS - 1)
         return -1;
     // Check if current terminal is the id
     if (currTerminalIndex == id)
@@ -122,8 +122,8 @@ int32_t mult_terminal_save(const int32_t id) {
     terminals[id].screen_y = get_screenY();
     terminals[id].buffIndex = buffIndex;
 
-    // Save charBuffer[bufSize];
-    memcpy((int8_t *)terminals[id].charBuffer, (int8_t *)charBuffer, bufSize);
+    // Save charBuffer[BUF_SIZE];
+    memcpy((int8_t *)terminals[id].charBuffer, (int8_t *)charBuffer, BUF_SIZE);
 
     // Save video memory ptr
     memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
@@ -142,8 +142,8 @@ int32_t mult_terminal_restore(const int32_t id) {
     moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
     buffIndex = terminals[id].buffIndex;
 
-    // Restore charBuffer[bufSize];
-    memcpy((int8_t *)charBuffer, (int8_t *)terminals[id].charBuffer, bufSize);
+    // Restore charBuffer[BUF_SIZE];
+    memcpy((int8_t *)charBuffer, (int8_t *)terminals[id].charBuffer, BUF_SIZE);
 
     // Restore video memory
     memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
@@ -160,7 +160,7 @@ int32_t mult_terminal_restore(const int32_t id) {
 void mult_terminal_init() {
     int i, term_num, char_iter;
     for(term_num = 0; term_num < 3; term_num++) {
-        // char input_buf[BUFFSIZE];
+        // char input_buf[BUF_SIZE];
         // Default values for terminal struct properties
         terminals[term_num].id = term_num;
         terminals[term_num].currentActiveProcess = -1;
@@ -169,8 +169,8 @@ void mult_terminal_init() {
         terminals[term_num].launched = 0;
         terminals[term_num].buffIndex = 0;
         terminals[term_num].enterPressed = 0;
-        for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
-            terminals[term_num].charBuffer[char_iter] = nullChar;
+        for(char_iter = 0; char_iter < BUF_SIZE; char_iter++) {
+            terminals[term_num].charBuffer[char_iter] = NULL_CHAR;
         }
         // Change each terminal address
         getNewTerminal4KBPage(PageSize64MB, PageSize64MB + term_num * PageSize4KB, term_num);
@@ -192,7 +192,7 @@ void mult_terminal_init() {
     // Default to first terminal
     currTerminalIndex = 0;
     // Default the global charBuffer to the first terminal's charBuffer
-    for(char_iter = 0; char_iter < BUFFSIZE; char_iter++) {
+    for(char_iter = 0; char_iter < BUF_SIZE; char_iter++) {
         charBuffer[char_iter] = terminals[currTerminalIndex].charBuffer[char_iter];
     }
     // No process running at initialization

@@ -77,77 +77,77 @@ void IDT_Initializer() {
 // Exception Handlers
 void DIVISION_ERROR_HANDLER() {
   printf("DIVISION_ERROR Occured\n");
-  halt(0);
+  halt(255);
 }
 void RESERVED_HANDLER() {
   printf("RESERVED Occured\n");
-  halt(0);
+  halt(255);
 }
 void NMI_HANDLER() {
   printf("NMI Occured\n");
-  halt(0);
+  halt(255);
 }
 void BREAK_POINT_HANDLER() {
   printf("BREAK_POINT Occured\n");
-  halt(0);
+  halt(255);
 }
 void OVERFLOW_HANDLER() {
   printf("OVERFLOW Occured\n");
-  halt(0);
+  halt(255);
 }
 void BOUNDS_HANDLER() {
   printf("BOUNDS Occured\n");
-  halt(0);
+  halt(255);
 }
 void INVALID_OPCODE_HANDLER() {
   printf("INVALID_OPCODE Occured\n");
-  halt(0);
+  halt(255);
 }
 void DEVICE_NOT_AVAILABLE_HANDLER() {
   printf("DEVICE_NOT_AVAILABLE Occured\n");
-  halt(0);
+  halt(255);
 }
 void DOUBLE_FAULT_HANDLER() {
   printf("DOUBLE_FAULT Occured\n");
-  halt(0);
+  halt(255);
 }
 void COPROCESSOR_SEGMENT_OVERRUN_HANDLER() {
   printf("COPROCESSOR_SEGMENT_OVERRUN Occured\n");
-  halt(0);
+  halt(255);
 }
 void INVALID_TSS_HANDLER() {
   printf("INVALID_TSS Occured\n");
-  halt(0);
+  halt(255);
 }
 void SEGMENT_NOT_PRESENT_HANDLER() {
   printf("SEGMENT_NOT_PRESENT Occured\n");
-  halt(0);
+  halt(255);
 }
 void STACK_SEGMENT_FAULT_HANDLER() {
   printf("STACK_SEGMENT_FAULT Occured\n");
-  halt(0);
+  halt(255);
 }
 void GENERAL_PROTECTION_HANDLER() {
   printf("GENERAL_PROTECTION Occured\n");
-  halt(0);
+  halt(255);
 }
 void PAGE_FAULT_HANDLER() {
   printf("PAGE_FAULT Occured\n");
-  halt(0);
+  halt(255);
 }
 void MATH_FPU_FAULT_HANDLER() {
   printf("MATH_FAULT Occured\n");
-  halt(0);
+  halt(255);
 }
 void ALIGNMENT_CHECK_HANDLER() {
   printf("ALIGNMENT_CHECK Occured\n");
-  halt(0);
+  halt(255);
 }
 void MACHINE_CHECK_HANDLER() {
   printf("MACHINE_CHECK Occured\n");
-  halt(0);
+  halt(255);
 }
 void SIMD_FLOATING_POINT_EXCEPTION_HANDLER() {
   printf("SIMD_FLOATING_POINT_EXCEPTION Occured\n");
-  halt(0);
+  halt(255);
 }
