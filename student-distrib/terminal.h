@@ -13,7 +13,6 @@
 #define NULL_CHAR '\0'
 
 typedef struct terminal {
-  int32_t id;
   int32_t screen_x, screen_y;
   uint8_t launched;
   volatile char charBuffer[BUF_SIZE];

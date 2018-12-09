@@ -162,7 +162,6 @@ void mult_terminal_init() {
     for(term_num = 0; term_num < 3; term_num++) {
         // char input_buf[BUF_SIZE];
         // Default values for terminal struct properties
-        terminals[term_num].id = term_num;
         terminals[term_num].currentActiveProcess = -1;
         terminals[term_num].screen_x = 0;
         terminals[term_num].screen_y = 0;

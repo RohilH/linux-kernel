@@ -88,17 +88,20 @@ void contextSwitch(const int32_t nextTerminalIndex) {
     pcb_t * currPCB = generatePCBPointer(currProcessIndex);
     pcb_t * nextPCB = generatePCBPointer(terminals[nextTerminalIndex].currentActiveProcess);
 
+    // save fish status through vidmap so that terminals can run individual fish
     uint8_t* screenStart;
     vidMap(&screenStart);
     if (currTerminalIndex != nextTerminalIndex) {
         getNew4KBPage((uint32_t)screenStart, (uint32_t)terminals[nextTerminalIndex].videoMemPtr);
     }
-    // Save EBP
+    // Save EBP / ESP for context switch
     asm volatile ("movl %%esp, %0" : "=r" (currPCB->currESP));
     asm volatile ("movl %%ebp, %0" : "=r" (currPCB->currEBP));
+
     // Map new page
     getNew4MBPage(VirtualStartAddress, kernelStartAddr + PageSize4MB*((terminals[nextTerminalIndex].currentActiveProcess) + 1));
     currProcessIndex = terminals[nextTerminalIndex].currentActiveProcess;
+
     // Update paging
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PageSize8MB - PageSize8KB * (terminals[nextTerminalIndex].currentActiveProcess) - fourBytes;
