@@ -1,26 +1,26 @@
 Bug Log
 
 Checkpoint 1
-IDT:
+IDT: 10/18/18
 Problem: OS Crashes immediately on boot, even after IDT and GDT have been initialized. This should not be happening.
 Solution: Issue with the Reserved bits when setting up the IDT Entry. Issue has been resolved.
 
 Problem: Had issue where it would not compile; gave error about incorrect %%eax.
 Solution: Issue resolved by git cloning as specified at beginning of MP
 
-RTC:
+RTC: 10/19/18
 Problem: RTC Interrupts only being sent once, it doesn’t cycle through and show all the characters.
 Solution: Issue with the EOI signal not being sent. Issue had nothing to do with the RTC Setup, was purely a result of the PIC not being set up.
 
-PIC:
+PIC: 10/19/18
 Problem: Slave PIC setup incorrectly. Currently we’re not actually sending EOI properly for devices attached to the slave pic, only master interrupts are properly registering the EOI signal.
 Solution: Issue has been resolved, we needed to have a separate case for sending the EOI for the slave PIC.
 
-Paging:
+Paging: 10/20/18
 No issues found; works correctly
 
 Checkpoint 2
-File System:
+File System: 10/26/18
 Problem: verylargetextwithverylongname.txt was working when doing cat, but only verylargetextwithverylongname.tx should
 Solution: Filename requires a check to make sure it is less than 32 bits
 
@@ -31,14 +31,14 @@ Problem: Returning the wrong number of bytesRead in read_data because of misunde
 Solution: Changed the for loop to go from offset to offset+length bytes and fixed issue
 
 Checkpoint 3
-Execute:
+Execute: 11/9/18
 Problem: Did not check if command was a valid parameter
 Solution: Added a NULL check to fix the issue
 
 Problem: Simple compile errors
 Solution: Fixed compiler errors by adding extra checks and making sure that we could compile correctly
 
-Halt:
+Halt: 11/9/18
 Problem: Currently the ESP and EBP that we are storing into the PCB structs, is not the correct value, and this causes us to return to some garbage location and page.
 Solution: Issue has been resolved, by moving the inline assembly within execute(), so that we are getting the ESP and EBP of the parent process.
           Also we redesigned our PCB struct to no longer store pointers to parent/child PCB structs. This design is not needed with the CurrProcessIndex.
@@ -47,27 +47,27 @@ Problem: Halt was not returning correctly
 Solution: Issue resolved: realized that system calls were 1-indexed instead of 0-indexed. Added empty 0x0 to make 1-indexed
 
 Checkpoint 4
-Vidmap:
+Vidmap: 11/25/18
 Problem: Page faulting
 Solution: Issue resolved by fixing location to place screenstart
 
-GetArgs:
+GetArgs: 11/25/18
 Problem: verylargetextwithverylongname.txt was not working when doing cat
 Solution: Issue resolved by fixing file name length check in sysCalls.c
 
 Checkpoint 5
-Multiple Terminals:
+Multiple Terminals: 12/4/18
 Problem: Decided to launch all 3 terminals at the start instead of one by one because it was easier to keep track of the current active process
 Solution: Launched the terminals inside the PIT handler at the start
 
-Scheduling:
+Scheduling: 12/6/18
 Problem: When running “hello” the process finishes execution in whatever the previous terminal was.
 Solution: This issue has been resolved and was caused by not properly keeping track of the active process in each terminal.
 
 Problem: When running “pingpong” in one terminal and “counter” in another terminal, “counter” prints its output diagonally
 Solution: Fixed the issue by removing storage variables in alternate putCterm function
 
-RTC Virtualization:
+RTC Virtualization: 12/7/18
 Problem: RTC Virtualization only runs at maximum frequency
 Solution: Not properly counting the number of RTC Interrupts raised. Issue resolved.
 
