@@ -16,8 +16,6 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
     while(terminals[currPCB->terminal_id].enterPressed != 1);
     terminals[currPCB->terminal_id].enterPressed = 0;
-    // if (nbytes > 128)
-    //     return -1;
     // Copy charBuffer into local buffer
     for (i = 0; i < nbytes && i < BUF_SIZE; i++) {
         buffer[i] = charBuffer[i]; // copy charBuffer into buffer
@@ -117,14 +115,15 @@ int32_t mult_terminal_launch(const int32_t id) {
  *     RETURN VALUE: 0
  */
 int32_t mult_terminal_save(const int32_t id) {
+    // Check if id is within max terminal limit
+    if (id < 0 || id > NUM_TERMINALS - 1)
+        return -1;
     // Save screen_x, screen_y
     terminals[id].screen_x = get_screenX();
     terminals[id].screen_y = get_screenY();
     terminals[id].buffIndex = buffIndex;
-
     // Save charBuffer[BUF_SIZE];
     memcpy((int8_t *)terminals[id].charBuffer, (int8_t *)charBuffer, BUF_SIZE);
-
     // Save video memory ptr
     memcpy(terminals[id].videoMemPtr, (int8_t *)VIDEO, NUM_ROWS * NUM_COLS * 2);
     return 0;
@@ -138,13 +137,14 @@ int32_t mult_terminal_save(const int32_t id) {
  *     RETURN VALUE: 0
  */
 int32_t mult_terminal_restore(const int32_t id) {
+    // Check if id is within max terminal limit
+    if (id < 0 || id > NUM_TERMINALS - 1)
+        return -1;
     // Restore screen_x, screen_y
     moveScreenPos(terminals[id].screen_x, terminals[id].screen_y);
     buffIndex = terminals[id].buffIndex;
-
     // Restore charBuffer[BUF_SIZE];
     memcpy((int8_t *)charBuffer, (int8_t *)terminals[id].charBuffer, BUF_SIZE);
-
     // Restore video memory
     memcpy((int8_t *)VIDEO, terminals[id].videoMemPtr, NUM_ROWS * NUM_COLS * 2);
     return 0;
@@ -220,7 +220,6 @@ void launch_terminal(uint32_t id) {
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
   // If the terminal is already launched, restore the state
   currTerminalIndex = id;
-  // terminals[id].launched = 1;
   // Restore state of terminal we're launching (default values)
   mult_terminal_restore(id);
   // Store ESP and EBP in pcb

@@ -22,8 +22,6 @@ typedef struct terminal {
   uint8_t * videoMemPtr;
   int32_t programFrequencyRTC;
   volatile int32_t rtcInterruptFlag;
-
-  // ...
 } terminal_t;
 
 volatile uint8_t c_flag;

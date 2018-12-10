@@ -26,7 +26,6 @@ void fsInit (uint32_t startAddr) {
  */
 int32_t read_dentry_by_name (const uint8_t* fname, dentry_t* dentry) {
   // check if filename is less than 32 bits
-  // printf("Gets here\n");
   if(fname == NULL || dentry == NULL) return -1;
   if (strlen((int8_t*)fname) > FILENAMESIZE) return -1;
   // loops through all the dentries in the boot block
@@ -126,12 +125,10 @@ int32_t file_read (int32_t fd, void* buf, int32_t nBytes) {
   int bytesRead;
   uint8_t* buffer = (uint8_t*) buf;
   pcb_t* currPCB = generatePCBPointer(currProcessIndex);
-  // printf("File Pos: %d\n", currPCB->fileArray[fd].filePosition);
   uint32_t offset = currPCB->fileArray[fd].filePosition;
 
   // read file data and store in buf
   bytesRead = read_data(currPCB->fileArray[fd].inodeNum, offset, buffer, nBytes);
-  // printf("Bytes read: %d\n", bytesRead);
   currPCB->fileArray[fd].filePosition += bytesRead;
   return bytesRead;
 }
@@ -155,13 +152,6 @@ int32_t file_write (int32_t fd, const void* buf, int32_t nBytes) {
  *     RETURN VALUE: 0 if file found, -1 otherwise
  */
 int32_t file_open (const uint8_t* fileName) {
-    // int i;
-    // // opens file and stores dentry in global var (for now; will change for syscalls)
-    // i = read_dentry_by_name(fileName, &testD);
-    // if (i == -1) {
-    //     printf("No file by that name");
-    //     return -1;
-    // }
     return 0;
 }
 
@@ -208,24 +198,6 @@ int32_t dir_read (int32_t fd, void* buf, int32_t nBytes) {
         return i;
     }
     return -1;
-
-  // int i, j;
-  // int8_t filename[33]; // file variable to deal w large file names
-  // // loops through files in directory and prints values
-  // for (i = 0; i < numOfDirectories; i++) {
-  //   dentry_t direntry;
-  //
-  //   read_dentry_by_index (i, &direntry);
-  //
-  //   for (j = 0; j < 32; j++)
-  //     filename[j] = direntry.fileName[j];
-  //   filename[32] = '\0';
-  //   inode_t* inodeBlockStart = (inode_t*)(bootBlockStart + 1 + direntry.inodeNum);
-  //   // Prints file info
-  //   printf("File Name:  %s, File Type: %d, Bytes Read: %d\n", filename, direntry.fileType, inodeBlockStart->length);
-  //
-  // }
-  // return 0;
 }
 
 

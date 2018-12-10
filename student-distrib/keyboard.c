@@ -100,7 +100,7 @@ void KEYBOARD_HANDLER() {
                 mult_terminal_launch(TERMINAL_THREE);
             } else if (scanCode == C_PRESSED && ctrl) {
                 // send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                // c_flag = currTerminalIndex;
+                // c_flag = 1;
             } else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
             }
@@ -198,11 +198,10 @@ void enter() {
         }
       }
       if(currStored != COMMAND_LIMIT) {
-        currStored++; //increment how many buffers are being
+        currStored++; //increment how many buffers are being used
       }
     commandIndex[currTerminalIndex] = 0; //reset commandIndex back to 0
     terminals[currTerminalIndex].enterPressed = 1;
-    // enterPressed = 1;
 }
 
 /*

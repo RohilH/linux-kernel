@@ -14,6 +14,7 @@ volatile int interruptFlag;
  */
 void RTC_INIT() {
   // SRC: https://wiki.osdev.org/RTC
+  // RTC Virtualization
   currTerminalScheduler = 0;
   terminals[0].rtcInterruptFlag = FREQ_512 / FREQ_512;
   terminals[1].rtcInterruptFlag = FREQ_512 / FREQ_512;
@@ -22,6 +23,7 @@ void RTC_INIT() {
   terminals[1].programFrequencyRTC = FREQ_512;
   terminals[2].programFrequencyRTC = FREQ_512;
 
+  // RTC init
   outb(REG_B, IO_PORT1);                // Idx --> Reg B / NMI_HANDLER
   char prev = inb(IO_PORT2);            // Obtain Reg A val
   outb(REG_B, IO_PORT1);                // Reset idx
@@ -34,10 +36,8 @@ void RTC_INIT() {
   outb(REG_A, IO_PORT1);                // Reset idx
   outb((prev & 0xF0) | rate, IO_PORT2);
 
+  // Change frequency
   rtc_changeFreq(FREQ_512);
-
-
-
 }
 
 /*
@@ -49,13 +49,11 @@ void RTC_INIT() {
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nBytes) {
   disable_irq(KEYBOARD_IRQ); //disable keyboard interrupts
-  //interruptFlag = LOW_IF;
   terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / terminals[currTerminalScheduler].programFrequencyRTC;
-  while(terminals[currTerminalScheduler].rtcInterruptFlag > 0) { //loop breaks out when interrupt is triggered
+  //loop breaks out when interrupt is triggered
+  while(terminals[currTerminalScheduler].rtcInterruptFlag > 0); {
     // Spin until interrupt is raised
-    //printf("%u", terminals[currTerminalScheduler].rtcInterruptFlag);
   }
-  //printf("here\n");
   enable_irq(KEYBOARD_IRQ); //reenable keyboard interrupts
   return SUCCESS;  // return success
 }
@@ -68,18 +66,12 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nBytes) {
  *     RETURN VALUE: 4 or -1
  */
 int32_t rtc_write(int32_t fd, const void* buf, int32_t nBytes) {
-  if(nBytes != BYTE_CHECK) { // ensure nbytes is 4
-    return FAILURE; // if not four bytes return -1
+  // ensure nbytes is 4
+  if(nBytes != BYTE_CHECK) {
+    // if not four bytes return -1
+    return FAILURE;
   }
-  // printf("\nOld FREQ: %u, terminal: %u\n", terminals[currTerminalScheduler].programFrequencyRTC, currTerminalScheduler);
-      terminals[currTerminalScheduler].programFrequencyRTC = *(int32_t*)buf;
-  //terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_1024/(*(int32_t*)buf);
-  //int x = rtc_changeFreq(*(int32_t*)buf); // change the new frequency based on the input frequency
-  // printf("\nNew FREQ: %u, terminal: %u\n", terminals[currTerminalScheduler].programFrequencyRTC, currTerminalScheduler);
-  //if ( x != SUCCESS ) { //check for  success of changing frequency
-  //
-  //    return FAILURE; // return failure if it didn't work
-  //}
+  terminals[currTerminalScheduler].programFrequencyRTC = *(int32_t*)buf;
   return nBytes; //return the number of bytes
 }
 
@@ -91,8 +83,8 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nBytes) {
  *     RETURN VALUE: 0 or -1
  */
 int32_t rtc_open(const uint8_t* fileName) {
-    terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / FREQ_2;  //set the frquency back to 2,
-  //  return the success or failure based on frequency change
+    terminals[currTerminalScheduler].rtcInterruptFlag = FREQ_512 / FREQ_2;  //set the frquency back to 2
+    // return the success or failure based on frequency change
     return 0;
 }
 

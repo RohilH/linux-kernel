@@ -147,7 +147,6 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
-    // printf("Enabling Interrupts\n");
     IDT_Initializer(); // Initialize IDT table
     i8259_init(); // Initialize devices, mem, filesystem, device ints on PIC
 

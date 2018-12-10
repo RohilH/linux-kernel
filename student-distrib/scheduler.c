@@ -15,7 +15,7 @@ void PIT_INIT() {
   // Initialize variables for 3-terminal init
   shellsStarted = 0;
   firstShellStarted = 0;
-  c_flag = 4;
+  // c_flag = 0;
   // Produce Mode 3 square wave rather than pulse in Mode 2
   outb(PIT_MODE_SQR_WAV, PIT_CMD_REGISTER); //mode 3 square wave
   outb(lowerEightFreq, PIT_CHANNEL_0);
@@ -33,13 +33,14 @@ void PIT_INIT() {
  */
 void PIT_HANDLER() {
     send_eoi(PIT_IRQ_NUM);
-    if (c_flag == currTerminalIndex) {
-        currProcessIndex = terminals[currTerminalIndex].currentActiveProcess;
-        c_flag = 4;
-        halt(0);
-    }
+    // if (c_flag == 1) {
+    //     currProcessIndex = terminals[currTerminalIndex].currentActiveProcess;
+    //     c_flag = 0;
+    //     halt(0);
+    // }
     // Context switch if all three terminals are already launched
     if (terminals[0].launched == 1 && terminals[1].launched == 1 && terminals[2].launched == 1) {
+        // Check if first terminal has been launched
         if (shellsStarted == 0) {
             shellsStarted = 1;
             mult_terminal_launch(0);
@@ -59,6 +60,7 @@ void PIT_HANDLER() {
           mult_terminal_init();
       }
       disable_irq(PIT_IRQ_NUM);
+      // Launch remaining two terminals
       if (terminals[1].launched == 0) {
           launch_terminal(1);
           enable_irq(PIT_IRQ_NUM);
@@ -79,7 +81,7 @@ void PIT_HANDLER() {
 /*
  * contextSwitch
  *   DESCRIPTION: Does a context switch to the process specified
- *   INPUTS: processNum
+ *   INPUTS: nextTerminalIndex
  *   OUTPUTS: none
  *   RETURN VALUE: none
  */

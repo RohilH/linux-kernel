@@ -28,9 +28,6 @@
 #define F1_PRESSED		    0x3B
 #define F2_PRESSED		    0x3C
 #define F3_PRESSED		    0x3D
-// #define F1_RELEASED
-// #define F2_RELEASED
-// #define F3_RELEASED
 #define ALT_PRESSED	        0x38
 #define ALT_RELEASED		0xB8
 

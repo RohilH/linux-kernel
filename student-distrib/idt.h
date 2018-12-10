@@ -33,5 +33,5 @@ void IDT_Initializer();
 #define KEY_ADDR            33 // 0x21 (IRQ1)
 #define RTC_ADDR            40 // 0x28 (IRQ8)
 #define SYSCALL_ADDR       128 // 0x80
-
+#define EXCEPTION_HALT_NUM 255
 #endif /* _IDT_H */

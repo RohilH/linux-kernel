@@ -72,9 +72,10 @@ typedef struct pcb_t {
     // struct pcb_t* childPtr;
 } pcb_t;
 
-
+// Array with all processes
 int8_t activeProcessArray[max_processes];
-int currProcessIndex; // Initial process index set to null
+// Initial process index set to null
+int currProcessIndex;
 // PCB initialization/setup
 pcb_t* initPCB();
 // System Call: halt

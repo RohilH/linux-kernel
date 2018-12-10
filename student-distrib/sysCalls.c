@@ -123,7 +123,7 @@ int32_t halt(uint8_t status) {
     // Modify TSS according to the parent
     tss.esp0 = currPCB->parentESP;
     uint32_t castStatus = (uint32_t)status;
-    if (castStatus == 255)
+    if (castStatus == 255) // halt exception number
         castStatus++;
     currProcessIndex = currPCB->prevPcbIdx;
     // IRET return
@@ -352,7 +352,7 @@ int32_t close(int32_t fd) {
 
 /*
  * getArgs
- *     DESCRIPTION: No implementation
+ *     DESCRIPTION: Reads the program’s command line arguments into a user-level buffer
  *     INPUTS: N/A
  *     OUTPUTS: N/A
  *     RETURN VALUE: Returns 0 on success. -1 on error.
@@ -373,10 +373,10 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
 
 /*
  * vidMap
- *     DESCRIPTION: No implementation
+ *     DESCRIPTION: Maps the text-mode video memory into user space at a pre-set virtual address
  *     INPUTS: screenstart - pointer to video memory
  *     OUTPUTS: N/A
- *     RETURN VALUE: 0
+ *     RETURN VALUE: VidmapStartAddress
  */
 int32_t vidMap(uint8_t ** screenStart) {
   // 1) Error Checking
@@ -444,20 +444,13 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
 
-    // // Command cannot be executed if filename length exceeds 32 chars
-    // if (fileNameEnd - fileNameStart > maxFileNameSize) {
-    //     printf("Command could not be executed: file name too long.");
-    //     sti();
-    //     return -1;
-    // }
     // uint8_t filename[maxFileNameSize]; // initialize filename
     for (i = fileNameStart; i < fileNameEnd; i++) {
         filename[i - fileNameStart] = command[i];
     }
     // Null terminated string
     filename[fileNameEnd - fileNameStart] = '\0';
-
-
+    
     fileNameEnd++;
     // Move to beginning of next word
     fileNameStart = fileNameEnd;
@@ -468,13 +461,6 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     // Get argument string
     while (command[fileNameEnd] != ' ' && command[fileNameEnd] != '\0')
         fileNameEnd++;
-    // // Command cannot be executed
-    // if (fileNameEnd - fileNameStart > maxFileNameSize) {
-    //     printf("Command could not be executed: file name too long.");
-    //     sti();
-    //     return -1;
-    // }
-
     // uint8_t argToPass[maxFileNameSize]; // INVALID: MUST BE STATIC NUM
     for (i = fileNameStart; i < fileNameEnd; i++) {
         argToPass[i - fileNameStart] = command[i];
