@@ -98,9 +98,11 @@ void KEYBOARD_HANDLER() {
             } else if (scanCode == F3_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 mult_terminal_launch(TERMINAL_THREE);
-            } else if (scanCode == C_PRESSED && ctrl) {
-                // send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                // c_flag = 1;
+            } else if (scanCode == C_PRESSED && ctrl && c_flag == 0) {
+                send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                sti();
+                c_flag = 1;
+                return;
             } else if (scanCode < 0x3B){ // Handle valid keypress
                 addCharToBuffer(scanCode, 0);
             }

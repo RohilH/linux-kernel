@@ -33,11 +33,12 @@ void PIT_INIT() {
  */
 void PIT_HANDLER() {
     send_eoi(PIT_IRQ_NUM);
-    // if (c_flag == 1) {
-    //     currProcessIndex = terminals[currTerminalIndex].currentActiveProcess;
-    //     c_flag = 0;
-    //     halt(0);
-    // }
+    if (c_flag == 1) {
+        currProcessIndex = terminals[currTerminalIndex].currentActiveProcess;
+        c_flag = 0;
+        send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+        halt(0);
+    }
     // Context switch if all three terminals are already launched
     if (terminals[0].launched == 1 && terminals[1].launched == 1 && terminals[2].launched == 1) {
         // Check if first terminal has been launched
@@ -45,8 +46,6 @@ void PIT_HANDLER() {
             shellsStarted = 1;
             mult_terminal_launch(0);
         }
-        // pcb_t * currPCB = generatePCBPointer(currProcessIndex);
-        // int curr_term = currPCB->terminal_id;
         // Increment curr_term to contextSwitch into
         curr_term = (curr_term + 1) % NUM_TERMINALS;
         enable_irq(PIT_IRQ_NUM);

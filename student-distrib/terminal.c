@@ -14,6 +14,7 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     char * buffer = (char*) buf;
     // Continuously check for enter flag until it is pressed (volatile)
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    enable_irq(1);
     while(terminals[currPCB->terminal_id].enterPressed != 1);
     terminals[currPCB->terminal_id].enterPressed = 0;
     // Copy charBuffer into local buffer
