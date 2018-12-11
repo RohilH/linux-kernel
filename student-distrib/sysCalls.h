@@ -69,6 +69,7 @@ typedef struct pcb_t {
     uint32_t currEBP;
     uint8_t bufferArgs[BUF_SIZE];
     uint32_t terminal_id;
+    int8_t isShell;
     // struct pcb_t* childPtr;
 } pcb_t;
 

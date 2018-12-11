@@ -126,6 +126,8 @@ int32_t halt(uint8_t status) {
     if (castStatus == 255) // halt exception number
         castStatus++;
     currProcessIndex = currPCB->prevPcbIdx;
+    terminals[currTerminalIndex].runningShell = 0;
+
     // IRET return
     asm volatile (
         "movl   %0, %%eax;"
@@ -179,6 +181,13 @@ int32_t execute(const uint8_t * command) {
     if (tempBuffer[0] != del_CHAR || tempBuffer[1] != e_CHAR || tempBuffer[2] != l_CHAR || tempBuffer[3] != f_CHAR) {
         sti();
         return -1;
+    }
+
+    if (strncmp((int8_t*) filename, (int8_t*) "shell", 5) == 0) {
+        terminals[currTerminalIndex].runningShell = 1;
+    }
+    else {
+            terminals[currTerminalIndex].runningShell = 0;
     }
 
     ///////* NOTE: STEP 3: Setup new PCB */
@@ -450,7 +459,7 @@ int32_t parseCommands(const uint8_t * command, uint8_t * filename, uint8_t * arg
     }
     // Null terminated string
     filename[fileNameEnd - fileNameStart] = '\0';
-    
+
     fileNameEnd++;
     // Move to beginning of next word
     fileNameStart = fileNameEnd;

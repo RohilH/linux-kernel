@@ -168,6 +168,7 @@ void mult_terminal_init() {
         terminals[term_num].launched = 0;
         terminals[term_num].buffIndex = 0;
         terminals[term_num].enterPressed = 0;
+        terminals[term_num].runningShell = 0;
         for(char_iter = 0; char_iter < BUF_SIZE; char_iter++) {
             terminals[term_num].charBuffer[char_iter] = NULL_CHAR;
         }
