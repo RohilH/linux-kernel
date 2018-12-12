@@ -11,6 +11,16 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+
+
+void rainbowMode() {
+    rainbowtermcounter++;
+    if (rainbowtermcounter >= 16)
+        rainbowtermcounter = 0;
+    ATTRIB = (ATTRIB & 0xF0) + rainbowtermcounter;
+    ATTRIB2 = (ATTRIB2 & 0xF0) + rainbowtermcounter;
+    ATTRIB3 = (ATTRIB3 & 0xF0) + rainbowtermcounter;
+}
 /* void clear(void);
  * Inputs: void
  * Return Value: none
@@ -177,6 +187,8 @@ int32_t puts(int8_t* s) {
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
     cli();
+    if (rainbowFlag == 1)
+        rainbowMode();
     if(c == '\n' || c == '\r') {
         moveScreenPos(0, screen_y + 1);
     } else {

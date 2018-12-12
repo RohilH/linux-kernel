@@ -151,7 +151,10 @@ void entry(unsigned long magic, unsigned long addr) {
     i8259_init(); // Initialize devices, mem, filesystem, device ints on PIC
 
     sti();
-
+    ATTRIB = 0xB1;
+    ATTRIB2 = 0xAC;
+    ATTRIB3 = 0xCB;
+    rainbowFlag = 0;
     KEYBOARD_INIT(); // Initialize keyboard
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging

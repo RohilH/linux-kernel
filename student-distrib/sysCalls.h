@@ -8,7 +8,7 @@
 #include "fileSystem.h"
 
 #define numFiles 8
-#define maxFileNameSize 32 // 32 char
+#define maxFileNameSize 130 // 32 char
 #define VirtualStartAddress 0x08000000 // 128MB
 #define VidmapStartAddress  0x08400000 // 132MB
 
@@ -69,6 +69,7 @@ typedef struct pcb_t {
     uint32_t currEBP;
     uint8_t bufferArgs[BUF_SIZE];
     uint32_t terminal_id;
+    int8_t isShell;
     // struct pcb_t* childPtr;
 } pcb_t;
 

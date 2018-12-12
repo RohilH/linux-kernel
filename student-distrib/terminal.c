@@ -14,6 +14,7 @@ int32_t terminal_read (int32_t fd, void* buf, int32_t nbytes) {
     char * buffer = (char*) buf;
     // Continuously check for enter flag until it is pressed (volatile)
     pcb_t* currPCB = generatePCBPointer(currProcessIndex);
+    enable_irq(1);
     while(terminals[currPCB->terminal_id].enterPressed != 1);
     terminals[currPCB->terminal_id].enterPressed = 0;
     // Copy charBuffer into local buffer
@@ -168,6 +169,7 @@ void mult_terminal_init() {
         terminals[term_num].launched = 0;
         terminals[term_num].buffIndex = 0;
         terminals[term_num].enterPressed = 0;
+        terminals[term_num].runningShell = 0;
         for(char_iter = 0; char_iter < BUF_SIZE; char_iter++) {
             terminals[term_num].charBuffer[char_iter] = NULL_CHAR;
         }

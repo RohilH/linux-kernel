@@ -21,6 +21,7 @@ typedef struct terminal {
   int32_t currentActiveProcess;
   uint8_t * videoMemPtr;
   int32_t programFrequencyRTC;
+  int8_t runningShell;
   volatile int32_t rtcInterruptFlag;
 } terminal_t;
 
