@@ -22,6 +22,96 @@
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
 
+/*void printStartScreen */
+/* Prints the start menu screen to the terminal in the desired colors */
+void printStartScreen() {
+    ATTRIB  = 0x0C;
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("        ____      ____      __\n");
+    printf("        |_  _|    |_  _|    [  |\n");
+    printf("          \\ \\  /\\  / /.---.  | |  .---.   .--.   _ .--..--.  .---.\n");
+    printf("           \\ \\/  \\/ // /__\\\\ | | / /'`\\]/ .'`\\ \\\[ `.-. .-. |/ /__\\\\\n");
+    printf("            \\  /\\  / | \\__., | | | \\__. | \\__. | | | | | | || \\__.,\n");
+    printf("             \\/  \\/   '.__.'[___]'.___.' '.__.' [___||__||__]'.__.'\n");
+
+    ATTRIB  = 0x0C;
+    printf("         _________         ");
+
+    ATTRIB  = 0x03;
+    printf("______                   ");
+
+    ATTRIB  = 0x0F;
+    printf(" ___     ______\n");
+    ATTRIB  = 0x0C;
+
+    printf("        |  _   _  |       ");
+
+    ATTRIB  = 0x03;
+    printf("|_   _ `.                ");
+
+    ATTRIB  = 0x0F;
+    printf(";.'   `. .' ____ \\\n");
+    ATTRIB  = 0x0C;
+
+    printf("        |_/ | | \\_|.--.     ");
+
+    ATTRIB  = 0x03;
+    printf("| | `. \\ ,--.   .--./)");
+
+    ATTRIB  = 0x0F;
+    printf("/  .-.  \\| (___ \\_|\n");
+    ATTRIB  = 0x0C;
+
+    printf("            | |  / .'`\\ \\   ");
+
+    ATTRIB  = 0x03;
+    printf("| |  | |`'_\\ : / /'`\\;");
+
+    ATTRIB  = 0x0F;
+    printf("| |   | | _.____`.\n");
+    ATTRIB  = 0x0C;
+
+    printf("           _| |_ | \\__. |  ");
+
+    ATTRIB  = 0x03;
+    printf("_| |_.' /// | |,\\ \\._//");
+
+    ATTRIB  = 0x0F;
+    printf("\\  `-'  /| \\____) |\n");
+    ATTRIB  = 0x0C;
+
+    printf("          |_____| '.__.'  ");
+
+    ATTRIB  = 0x03;
+    printf("|______.' \\\'-;__/.',__`  ");
+
+    ATTRIB  = 0x0F;
+    printf("`.___.'  \\______.'\n");
+    ATTRIB  = 0x0C;
+
+    ATTRIB  = 0x03;
+    printf("                                          ( ( __))\n");
+    ATTRIB  = 0x0C;
+
+    printf("\n\n");
+    printf("                          press ");
+    ATTRIB  = 0x0F;
+    printf("enter");
+    ATTRIB  = 0x03;
+    printf(" to continue\n");
+    startScreenFlag = 0;
+    while(startScreenFlag == 0) {} //spin until key is pressed
+    clear();
+    ATTRIB = 0xB1;
+    ATTRIB2 = 0xAC;
+    ATTRIB3 = 0xCB;
+    clear();
+}
+
+
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void entry(unsigned long magic, unsigned long addr) {
@@ -151,14 +241,13 @@ void entry(unsigned long magic, unsigned long addr) {
     i8259_init(); // Initialize devices, mem, filesystem, device ints on PIC
 
     sti();
-    ATTRIB = 0xB1;
-    ATTRIB2 = 0xAC;
-    ATTRIB3 = 0xCB;
+
     rainbowFlag = 0;
     KEYBOARD_INIT(); // Initialize keyboard
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging
     clear(); // Clear the screen
+    printStartScreen();
     PIT_INIT();
 
 #ifdef RUN_TESTS

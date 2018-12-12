@@ -79,6 +79,7 @@ void KEYBOARD_HANDLER() {
                 clearCharBuffer();
             } else if (scanCode == ENTER_PRESSED) { // Handle enter
                 enter();
+                startScreenFlag = 1;
             } else if (scanCode == UP_ARROW_PRESSED) { // Handle up-arrow for commands
                 upArrow();
             } else if (scanCode == DOWN_ARROW_PRESSED) {
@@ -89,21 +90,21 @@ void KEYBOARD_HANDLER() {
                 addCharToBuffer(scanCode, 2);
             } else if (caps) { // Handle caps only
                 addCharToBuffer(scanCode, 1);
-            } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
+            } else if (scanCode == F1_PRESSED && alt && startScreenFlag) { // Handle ALT + Fn
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 beep(0xFF);
                 // stopBeep();
                 // beep(0xCF);
                 // stopBeep();
                 mult_terminal_launch(TERMINAL_ONE);
-            } else if (scanCode == F2_PRESSED && alt) {
+            } else if (scanCode == F2_PRESSED && alt && startScreenFlag) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 beep(0xFF);
                 // stopBeep();
                 // beep(0xCF);
                 // stopBeep();
                 mult_terminal_launch(TERMINAL_TWO);
-            } else if (scanCode == F3_PRESSED && alt) {
+            } else if (scanCode == F3_PRESSED && alt && startScreenFlag) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 beep(0xFF);
                 // stopBeep();
@@ -173,7 +174,7 @@ void stopBeep() {
  */
 void addCharToBuffer(uint32_t scanCodeKey, uint8_t charType) {
     char charToAdd = scanCodeToChar[charType][scanCodeKey]; // Obtain scan code
-    if (buffIndex < BUF_SIZE && charToAdd != '\0') { // Check out of bounds error and null-terminating char
+    if (buffIndex < BUF_SIZE && charToAdd != '\0' && startScreenFlag) { // Check out of bounds error and null-terminating char
         charBuffer[buffIndex] = charToAdd; // Add to buffer
         if(commandIndex == 0) {
           typedBuffer[buffIndex] = charToAdd;

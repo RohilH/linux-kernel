@@ -54,7 +54,7 @@ void PIT_HANDLER() {
     // Otherwise, initialize all terminals
     } else {
       // Initialize all terminal address/properties
-      if (firstShellStarted == 0) {
+      if (firstShellStarted == 0 && startScreenFlag == 1) {
           firstShellStarted = 1;
           mult_terminal_init();
       }

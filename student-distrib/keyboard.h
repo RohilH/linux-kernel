@@ -39,6 +39,7 @@
 extern volatile char charBuffer[BUF_SIZE];
 extern int buffIndex;
 int rainbowFlag;
+int startScreenFlag;
 char typedBuffer[BUF_SIZE];
 char commandStorage[COMMAND_LIMIT][BUF_SIZE][NUM_TERMINALS];
 extern volatile int enterPressed;
