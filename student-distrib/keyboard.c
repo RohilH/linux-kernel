@@ -68,8 +68,8 @@ void KEYBOARD_INIT() {
  */
 void KEYBOARD_HANDLER() {
     cli();
-
-    scanCode = inb(0x60); // Obtain key scan code
+    // turn sound off
+    stopBeep();
     if (scanCode != 0 && scanCode < KEY_PRESSED) { // Check validity
         if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
             backspace();
@@ -91,12 +91,15 @@ void KEYBOARD_HANDLER() {
                 addCharToBuffer(scanCode, 1);
             } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                beep();
                 mult_terminal_launch(TERMINAL_ONE);
             } else if (scanCode == F2_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                beep();
                 mult_terminal_launch(TERMINAL_TWO);
             } else if (scanCode == F3_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
+                beep();
                 mult_terminal_launch(TERMINAL_THREE);
             } else if (scanCode == C_PRESSED && ctrl && c_flag == 0) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
@@ -132,6 +135,18 @@ void KEYBOARD_HANDLER() {
     sti();
 }
 
+void beep() {
+    outb(0xb6, 0x43);
+    outb(0xFF, 0x42);
+    outb(0xFF << 8, 0x42);
+    uint8_t tmp = inb(0x61);
+    outb(tmp + 3, 0x61);
+}
+void stopBeep() {
+    uint8_t tmp = inb(0x61) & 0xFC;
+    outb(tmp, 0x61);
+    scanCode = inb(0x60); // Obtain key scan code
+}
 /*
  * addCharToBuffer
  *     DESCRIPTION: Handles printing character to screen
