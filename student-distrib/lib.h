@@ -10,10 +10,13 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0xB1
-#define ATTRIB2     0xAC
-#define ATTRIB3     0xCB
-
+// #define ATTRIB      0xB1
+// #define ATTRIB2     0xAC
+// #define ATTRIB3     0xCB
+int8_t ATTRIB; // = 0xB1
+int8_t ATTRIB2; //     0xAC
+int8_t ATTRIB3; //    0xCB
+int8_t rainbowtermcounter;
 int get_screenX();
 int get_screenY();
 

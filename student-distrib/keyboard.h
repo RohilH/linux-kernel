@@ -11,6 +11,7 @@
 #define KEY_PRESSED       0x80
 #define L_PRESSED         0x26
 #define C_PRESSED         0x2E
+#define R_PRESSED         0x13
 #define ENTER_PRESSED     0x1C
 #define BACKSPACE_PRESSED 0x0E
 #define CAPS_PRESSED      0x3A
@@ -37,6 +38,7 @@
 
 extern volatile char charBuffer[BUF_SIZE];
 extern int buffIndex;
+int rainbowFlag;
 char typedBuffer[BUF_SIZE];
 char commandStorage[COMMAND_LIMIT][BUF_SIZE][NUM_TERMINALS];
 extern volatile int enterPressed;

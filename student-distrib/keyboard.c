@@ -5,7 +5,6 @@
 uint32_t scanCode; // Current key being pressed
 uint32_t prevScanCode; // Previous key pressed
 volatile int shift, caps, ctrl, alt, enterPressed; // Key flags
-
 /* https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Set_1 */
 
 volatile char charBuffer[BUF_SIZE];
@@ -69,6 +68,7 @@ void KEYBOARD_INIT() {
 void KEYBOARD_HANDLER() {
     cli();
     // turn sound off
+    scanCode = inb(0x60); // Obtain key scan code
     stopBeep();
     if (scanCode != 0 && scanCode < KEY_PRESSED) { // Check validity
         if (scanCode == BACKSPACE_PRESSED) { // Handle backspace
@@ -91,16 +91,30 @@ void KEYBOARD_HANDLER() {
                 addCharToBuffer(scanCode, 1);
             } else if (scanCode == F1_PRESSED && alt) { // Handle ALT + Fn
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                beep();
+                beep(0xFF);
+                // stopBeep();
+                // beep(0xCF);
+                // stopBeep();
                 mult_terminal_launch(TERMINAL_ONE);
             } else if (scanCode == F2_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                beep();
+                beep(0xFF);
+                // stopBeep();
+                // beep(0xCF);
+                // stopBeep();
                 mult_terminal_launch(TERMINAL_TWO);
             } else if (scanCode == F3_PRESSED && alt) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
-                beep();
+                beep(0xFF);
+                // stopBeep();
+                // beep(0xCF);
+                // stopBeep();
                 mult_terminal_launch(TERMINAL_THREE);
+            } else if (scanCode == R_PRESSED && ctrl) {
+                rainbowFlag = !rainbowFlag;
+                ATTRIB = 0xB1;
+                ATTRIB2 = 0xAC;
+                ATTRIB3 = 0xCB;
             } else if (scanCode == C_PRESSED && ctrl && c_flag == 0) {
                 send_eoi(IRQ_LINE_KEYS); // Send end of interrupt to IRQ line 1
                 sti();
@@ -135,17 +149,20 @@ void KEYBOARD_HANDLER() {
     sti();
 }
 
-void beep() {
+void beep(int freq) {
     outb(0xb6, 0x43);
-    outb(0xFF, 0x42);
-    outb(0xFF << 8, 0x42);
+    outb(freq, 0x42);
+    outb(freq << 8, 0x42);
     uint8_t tmp = inb(0x61);
     outb(tmp + 3, 0x61);
 }
 void stopBeep() {
+    int i = 0;
+    while (i < 100000) {
+        i++;
+    }
     uint8_t tmp = inb(0x61) & 0xFC;
     outb(tmp, 0x61);
-    scanCode = inb(0x60); // Obtain key scan code
 }
 /*
  * addCharToBuffer
