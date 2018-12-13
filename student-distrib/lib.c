@@ -17,6 +17,8 @@ void rainbowMode() {
     rainbowtermcounter++;
     if (rainbowtermcounter >= 16)
         rainbowtermcounter = 0;
+    if (rainbowtermcounter >= 10 && rainbowtermcounter <= 12)
+        rainbowtermcounter = 13;
     ATTRIB = (ATTRIB & 0xF0) + rainbowtermcounter;
     ATTRIB2 = (ATTRIB2 & 0xF0) + rainbowtermcounter;
     ATTRIB3 = (ATTRIB3 & 0xF0) + rainbowtermcounter;

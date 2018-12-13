@@ -126,7 +126,13 @@ int32_t halt(uint8_t status) {
     if (castStatus == 255) // halt exception number
         castStatus++;
     currProcessIndex = currPCB->prevPcbIdx;
-    terminals[currTerminalIndex].runningShell = 0;
+    pcb_t* prevPCB = generatePCBPointer(currPCB->prevPcbIdx);
+    if (prevPCB->isShell == 1) {
+        terminals[currTerminalIndex].runningShell = 1;
+    }
+    else {
+        terminals[currTerminalIndex].runningShell = 0;        
+    }
 
     // IRET return
     asm volatile (
@@ -187,7 +193,7 @@ int32_t execute(const uint8_t * command) {
         terminals[currTerminalIndex].runningShell = 1;
     }
     else {
-            terminals[currTerminalIndex].runningShell = 0;
+        terminals[currTerminalIndex].runningShell = 0;
     }
 
     ///////* NOTE: STEP 3: Setup new PCB */
@@ -197,6 +203,10 @@ int32_t execute(const uint8_t * command) {
       sti();
       return -1;
     }
+    if (terminals[currTerminalIndex].runningShell == 1)
+        currPCB->isShell = 1;
+    else
+        currPCB->isShell = 0;
     uint32_t storeESP;
     uint32_t storeEBP;
     // Store ESP and EBP in pcb

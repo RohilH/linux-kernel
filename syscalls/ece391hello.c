@@ -18,7 +18,7 @@ int main ()
     buf[cnt] = '\0';
     ece391_fdputs (1, (uint8_t*)"Hello, ");
     ece391_fdputs (1, buf);
+    ece391_fdputs (1, (uint8_t*) "\n");
 
     return 0;
 }
-
