@@ -131,7 +131,7 @@ int32_t halt(uint8_t status) {
         terminals[currTerminalIndex].runningShell = 1;
     }
     else {
-        terminals[currTerminalIndex].runningShell = 0;        
+        terminals[currTerminalIndex].runningShell = 0;
     }
 
     // IRET return
@@ -385,6 +385,22 @@ int32_t getArgs(uint8_t * buf, int32_t nBytes) {
   if(currPCB->bufferArgs[0] == '\0' || nBytes <= 0) return -1;
   // Error Checking: Valid args length (Ensure length of buf < nBytes)
   if(strlen((const int8_t *)currPCB->bufferArgs) > nBytes) return -1;
+
+  if (strncmp((const int8_t*) currPCB->bufferArgs, (int8_t*) "spiderman.txt", 14) == 0) {
+      spiderMode = !spiderMode;
+      if (spiderMode == 1) {
+          ATTRIB = 0xC0;
+          ATTRIB2 = 0xC0;
+          ATTRIB3 = 0xC0;
+          clear();
+      }
+      else {
+          ATTRIB = 0xB1;
+          ATTRIB2 = 0xAC;
+          ATTRIB3 = 0xCB;
+          clear();
+      }
+  }
   // Copy PCB->arguments to buffer
   strcpy((int8_t *)buf, (const int8_t *)currPCB->bufferArgs);
   return 0;

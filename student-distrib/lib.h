@@ -17,6 +17,7 @@ int8_t ATTRIB; // = 0xB1
 int8_t ATTRIB2; //     0xAC
 int8_t ATTRIB3; //    0xCB
 int8_t rainbowtermcounter;
+int8_t spiderMode;
 int get_screenX();
 int get_screenY();
 

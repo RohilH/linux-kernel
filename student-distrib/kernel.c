@@ -243,6 +243,7 @@ void entry(unsigned long magic, unsigned long addr) {
     sti();
 
     rainbowFlag = 0;
+    spiderMode = 0;
     KEYBOARD_INIT(); // Initialize keyboard
     RTC_INIT(); // Initialize RTC
     PAGING_INIT(); // Intialize paging

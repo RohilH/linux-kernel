@@ -82,13 +82,17 @@ int main ()
     int32_t cnt;
     uint8_t buf[BUFSIZE];
 
-    ece391_fdputs (1, (uint8_t*)"Opening Calculator... \n");
+    ece391_fdputs (1, (uint8_t*)"Opening DagOS Calculator... \n");
     while (1) {
         ece391_fdputs (1, (uint8_t*)"Input expression>> ");
 
         if (-1 == (cnt = ece391_read (0, buf, BUFSIZE-1))) {
             ece391_fdputs (1, (uint8_t*)"Can't read name from keyboard.\n");
             return 3;
+        }
+        if (buf[0] == 'q') {
+            ece391_fdputs (1, (uint8_t*)"Thank you for using DagOS calculator.\n");
+            return 0;
         }
         int i = 0, invalidFlag = 0;
         for (i = 0; i < cnt; i++) {
