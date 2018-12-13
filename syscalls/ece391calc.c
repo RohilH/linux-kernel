@@ -4,122 +4,78 @@
 #include "ece391syscall.h"
 
 #define BUFSIZE 1024
-int compute(int lhs, int rhs, char oper) {
-  if (oper == '+') {
-    return lhs + rhs;
-  }
-  if (oper == '-') {
-    return lhs - rhs;
-  }
-  if (oper == '*') {
-    return lhs * rhs;
-  }
-  if (oper == '/') {
-    return lhs / rhs;
-  }
-  return 0;
-}
 
-int calculate(char* s) {
-    int n = 0;
-    char opers[2];  // operators
-    int args[2];    // arguments
-    int p = 0;      // points to the current opers
-    /* initialization */
-    opers[0] = '+';
-    args[0] = 0;
-    char c;
-    int i = 0;
-    /* scan this string */
-    while(c = s[i++], c != 0) {
-        if (c == ' ') {
-            continue;
-        }
-        /* we meet operator */
-        if (c == '+' || c == '-' || c == '*' || c == '/') {
-            /* if previous operator has first privilege */
-            if (opers[p] == '*' || opers[p] == '/') {
-                n = compute(args[p], n, opers[p]);
-                --p;
-            }
-            /* reduce above */
-            if (c == '+' || c == '-') {
-                args[p] = compute(args[p], n, opers[p]);
-                opers[p] = c;
-            }
-            else {
-                args[p + 1] = n;
-                opers[p + 1] = c;
-                ++p;
-            }
-            n = 0;
+void sumSubtract(long * argsStack, long * operStack, int * top1, int * top2) {
+    long val = 0;
+    while(*top2 != -1 && operStack[*top2] != '(') {
+        if (operStack[*top2] == '+') {
+            val += argsStack[*top1];
         }
         else {
-            n = n * 10 + c - '0';
+            val -= argsStack[*top1];
+        }
+        (*top1)--;
+        (*top2)--;
+    }
+    argsStack[(*top1)] += val;
+    if ((*top2) != -1)
+        (*top2)--;
+}
+void multDiv(long * argsStack, long * operStack, int * top1, int * top2) {
+    long val = 0;
+    if ((*top2) == -1)
+        return;
+    if (operStack[*top2] == '*') {
+        val = argsStack[(*top1)];
+        (*top1)--;
+        argsStack[(*top1)] *= val;
+        (*top2)--;
+        return;
+    }
+    if (operStack[*top2] == '/') {
+        val = argsStack[(*top1)];
+        (*top1)--;
+        argsStack[(*top1)] /= val;
+        (*top2)--;
+        return;
+    }
+}
+int calculate(char* s) {
+    int i, len, top1, top2, j;
+    long argsStack[100], operStack[100], temp1;
+    top1 = -1;
+    top2 = -1;
+
+    len = ece391_strlen(s);
+    for(i = 0; i < len; i++) {
+        if (s[i] == ' ') {
+            continue;
+        }
+        if(s[i] >= '0' && s[i] <= '9') {
+            temp1 = 0;
+            for(j = i; s[j] >= '0' && s[j] <= '9'; j++) {
+                temp1 = temp1 * 10 + s[j] - '0';
+            }
+            top1++;
+            argsStack[top1] = temp1;
+            i = j - 1;
+            multDiv(argsStack, operStack, &top1, &top2);
+        }
+        else if(s[i] == ')') {
+            sumSubtract(argsStack, operStack, &top1, &top2);
+            multDiv(argsStack, operStack, &top1, &top2);
+        }
+        else {
+            top2++;
+            operStack[top2] = s[i];
         }
     }
-    if (opers[p] == '*' || opers[p] == '/') {
-        n = compute(args[p], n, opers[p]);
-    }
-    return compute(args[0], n, opers[0]);
+    sumSubtract(argsStack, operStack, &top1, &top2);
+    if (top1 == -1)
+        return 0;
+
+    return argsStack[top1];
 }
-// int calculate(char* s) {
-//     int i,len,top,j;
-//     long stack[100],temp1,temp2,res;
-//     const long op1 = (long )2147483 + 1,op2 = op1 + 1,op3 = op2 + 1, op4 = op3 + 1, op5 = op4 + 1;
-//     res = top = 0;
-//     len = ece391_strlen(s);
-//     for(i = 0; i < len; i++) {
-//         if(s[i] == '(') {
-//             stack[top++] = op3;
-//         }
-//         else if(s[i] == '*') {
-//             stack[top++] = op4;
-//         }
-//         else if(s[i] == '/') {
-//             stack[top++] = op5;
-//         }
-//         else if(s[i] == '+') {
-//             stack[top++] = op2;
-//         }
-//         else if(s[i] == '-') {
-//             stack[top++] = op1;
-//         }
-//         else if(s[i] >= '0' && s[i] <= '9') {
-//             temp1 = 0;
-//             for(j = i; s[j] >= '0' && s[j] <= '9'; j++) {
-//                 temp1 = temp1 * 10 + s[j] - '0';
-//             }
-//             stack[top++] = temp1;
-//             i = j - 1;
-//         }
-//         else if(s[i] == ')') {
-//             temp1 = 0;
-//             temp2 = 0;
-//             top--;
-//             while(stack[top] != op3) {
-//                 if(stack[top] < op1) {
-//                     temp1 = stack[top];
-//                 }
-//                 else {
-//                     if(stack[top] == op1) temp2 -= temp1;
-//                     else if(stack[top] == op2) temp2 += temp1;
-//                     else if(stack[top] == op4) temp2 *= temp1;
-//                     else if(stack[top] == op5) temp2 = temp2/ temp1;
-//                 }
-//                 top--;
-//             }
-//             stack[top++] = temp2 + temp1;
-//         }
-//     }
-//     int flag = 1;
-//     for(i = 0; i < top; i++) {
-//         if(stack[i] == op2) flag = 1;
-//         else if(stack[i] == op1) flag = -1;
-//         else res += flag * stack[i];
-//     }
-//     return res;
-// }
 
 int main ()
 {
